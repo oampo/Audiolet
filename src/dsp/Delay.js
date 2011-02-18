@@ -7,8 +7,9 @@ var Delay = new Class({
     initialize: function(audiolet, maximumDelayTime, delayTime) {
         AudioletNode.prototype.initialize.apply(this, [audiolet, 2, 1]);
         this.maximumDelayTime = maximumDelayTime;
-        this.delayTime = new AudioParameter(this, 1, delayTime || 1);
-        this.buffer = new Float32Array(maximumDelayTime);
+        this.delayTime = new AudioletParameter(this, 1, delayTime || 1);
+        this.buffer = new Float32Array(maximumDelayTime *
+                                       this.audiolet.sampleRate);
         this.readWriteIndex = 0;
     },
 
