@@ -13,6 +13,6 @@ var Triangle = new Class({
 Triangle.TABLE = [];
 for (var i = 0; i < 8192; i++) {
     // Smelly, but looks right...
-    Triangle.TABLE.push(Math.abs(((i - 2048) / 8192) % 1 * 2 - 1) * 2 - 1);
+    Triangle.TABLE.push(Math.abs(((((i - 2048) / 8192) % 1) + 1) % 1* 2 - 1) * 2 - 1);
 }
 
