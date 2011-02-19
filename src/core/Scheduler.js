@@ -50,16 +50,16 @@ var Scheduler = new Class({
         event.durationPattern = durationPattern;
         event.callback = callback;
         // TODO: Quantizing start time
-        event.time = this.audiolet.device.getTime();
+        event.time = this.audiolet.device.getWriteTime();
         this.queue.push(event);
     },
 
     remove: function() {
     },
 
-    tick: function(length) {
+    tick: function(length, timestamp) {
         // The time at the beginning of the block
-        var startTime = this.audiolet.device.writePosition/2;
+        var startTime = this.audiolet.device.getWriteTime();
 
         // Update the clock so it is correct for the first samples
         this.updateClock(startTime);
@@ -78,7 +78,9 @@ var Scheduler = new Class({
             // Generate samples to take us to the event
             var timeToEvent = event.time - lastEventTime;
             if (timeToEvent > 0) {
-                this.tickParents(timeToEvent);
+                var offset = lastEventTime - startTime;
+                this.tickParents(timeToEvent,
+                                 timestamp + offset);
 
                 // Get the summed input
                 var inputBuffers = this.createInputBuffers(timeToEvent);
@@ -91,7 +93,6 @@ var Scheduler = new Class({
                 // Copy it to the right part of the output
                 // Use the generate function so it looks and quacks like an
                 // AudioletNode
-                var offset = lastEventTime - startTime;
                 this.generate(inputBuffers, outputBuffers, offset);
             }
 
@@ -108,7 +109,8 @@ var Scheduler = new Class({
         // Generate enough samples to complete the block
         var remainingTime = startTime + length - lastEventTime;
         if (remainingTime) {
-            this.tickParents(remainingTime);
+            this.tickParents(remainingTime,
+                             timestamp + lastEventTime - startTime);
             var inputBuffers = this.createInputBuffers(remainingTime);
 
             // Make sure we have an output buffer

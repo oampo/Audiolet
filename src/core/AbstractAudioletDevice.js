@@ -16,7 +16,11 @@ var AbstractAudioletDevice = new Class({
         this.buffer = inputBuffers[0];
     },
 
-    getTime: function() {
+    getPlaybackTime: function() {
+        return 0;
+    },
+
+    getWriteTime: function() {
         return 0;
     }
 });

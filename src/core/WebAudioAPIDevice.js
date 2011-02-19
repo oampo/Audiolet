@@ -16,6 +16,7 @@ var WebAudioAPIDevice = new Class({
                                                            1);
 
         this.node.onprocessaudio = this.tick;
+        this.writePosition = 0;
     },
 
     tick: function(event) {
@@ -27,10 +28,15 @@ var WebAudioAPIDevice = new Class({
             var channel = buffer.getChannelData(i);
             channel.set(this.buffer.getChannelData(i));
         }
+        this.writePosition += samplesNeeded;
     },
 
-    getTime: function() {
+    getPlaybackTime: function() {
         return this.context.currentTime * this.sampleRate;
+    },
+
+    getWriteTime: function() {
+        return this.writePosition;
     }
 });
 

@@ -16,7 +16,11 @@ var DummyDevice = new Class({
         this.writePosition += this.bufferSize;
     },
 
-    getTime: function() {
+    getPlaybackTime: function() {
+        return this.writePosition - this.bufferSize;
+    },
+
+    getWriteTime: function() {
         return this.writePosition;
     }
 });

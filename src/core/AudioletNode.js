@@ -19,6 +19,8 @@ var AudioletNode = new Class({
         if (generate) {
             this.generate = generate;
         }
+
+        this.timestamp = null;
     },
 
     connect: function(node, output, input) {
@@ -43,21 +45,24 @@ var AudioletNode = new Class({
         outputPin.disconnect(inputPin);
     },
 
-    tick: function(length) {
-        this.tickParents(length);
+    tick: function(length, timestamp) {
+        if (timestamp != this.timestamp) {
+            this.tickParents(length, timestamp);
 
-        var inputBuffers = this.createInputBuffers(length);
-        var outputBuffers = this.createOutputBuffers(length);
-        this.generate(inputBuffers, outputBuffers);
+            var inputBuffers = this.createInputBuffers(length);
+            var outputBuffers = this.createOutputBuffers(length);
+            this.generate(inputBuffers, outputBuffers);
+            this.timestamp = timestamp;
+        }
     },
 
-    tickParents: function(length) {
+    tickParents: function(length, timestamp) {
         var numberOfInputs = this.numberOfInputs;
         for (var i = 0; i < numberOfInputs; i++) {
             var input = this.inputs[i];
             var numberOfStreams = input.connectedFrom.length;
             for (var j = 0; j < numberOfStreams; j++) {
-                input.connectedFrom[j].node.tick(length);
+                input.connectedFrom[j].node.tick(length, timestamp);
             }
         }
     },
