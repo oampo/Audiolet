@@ -12,7 +12,8 @@ var DummyDevice = new Class({
     },
 
     tick: function() {
-        AudioletNode.prototype.tick.apply(this, [this.bufferSize]);
+        AudioletNode.prototype.tick.apply(this, [this.bufferSize,
+                                                 this.writePosition]);
         this.writePosition += this.bufferSize;
     },
 
