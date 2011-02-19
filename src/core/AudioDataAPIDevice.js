@@ -12,10 +12,14 @@ var AudioDataAPIDevice = new Class({
 
         this.output.mozSetup(this.numberOfChannels, this.sampleRate);
         
-        this.tick.periodical(1000 * this.bufferSize / this.sampleRate, this);
+        this.started = new Date().valueOf();
+        this.autoLatency = true;
+        this.bufferSize = this.sampleRate * 0.02;
+        this.interval = this.tick.periodical(10, this);
     },
 
     tick: function() {
+        var outputPosition = this.output.mozCurrentSampleOffset();
         // Check if some data was not written in previous attempts
         var numSamplesWritten;
         if (this.overflow) {
@@ -30,23 +34,24 @@ var AudioDataAPIDevice = new Class({
             this.overflow = null;
         }
 
-        var outputPosition = this.output.mozCurrentSampleOffset();
-        if (outputPosition == 0) {
-            // Until the output starts ticking we ignore any samples written
-            this.writePosition = 0;
-        }
         var samplesNeeded = outputPosition +
                             (this.bufferSize * this.numberOfChannels) -
                             this.writePosition;
-        // Seems to help stability - lob some extra samples in if the internal
-        // buffer will become almost completely empty before we tick again
-        if (samplesNeeded <= 0 && samplesNeeded >= -128) {
-            samplesNeeded = this.bufferSize;
+
+        if (this.autoLatency) {
+            var delta = (new Date().valueOf() - this.started) / 1000;
+            this.bufferSize = this.sampleRate * delta;
+            if (outputPosition) {
+                this.autoLatency = false;
+            }
         }
-        if (samplesNeeded > 0) {
+
+        if (samplesNeeded >= this.numberOfChannels) {
+            // Samples needed per channel
+            samplesNeeded = Math.floor(samplesNeeded / this.numberOfChannels);
             // Request some sound data from the callback function.
-            AudioletNode.prototype.tick.apply(this, [samplesNeeded /
-                                                     this.numberOfChannels]);
+            AudioletNode.prototype.tick.apply(this, [samplesNeeded,
+                                                     this.getWriteTime()]);
             this.buffer.interleave();
             var buffer = this.buffer.data;
 
@@ -60,8 +65,12 @@ var AudioDataAPIDevice = new Class({
         }
     },
 
-    getTime: function() {
+    getPlaybackTime: function() {
         return this.output.mozCurrentSampleOffset() / this.numberOfChannels;
+    },
+
+    getWriteTime: function() {
+        return this.writePosition / this.numberOfChannels;
     }
 });
 
