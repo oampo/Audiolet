@@ -14,16 +14,17 @@ window.addEvent("domready", function() {
             this.filter = new LowPassFilter(audiolet, 1000);
             
             // Filter LFO
-            this.filterLFO = new Saw(audiolet, 8);
+            this.filterLFO = new Sine(audiolet, 8);
             this.filterMA = new MulAdd(audiolet, 900, 1000);
 
             // Gain envelope
             this.gain = new Gain(audiolet);
-            this.env = new ADSR(audiolet, 1, 4, 5, 0.0001, null,
-                function() {
-                    this.remove();
-                }.bind(this)
-            );
+            this.env = new ADSR(audiolet,
+                                1, // Gate
+                                1.5, // Attack
+                                0.2, // Decay
+                                0.9, // Sustain
+                                2); // Release
 
             // Main signal path
             this.saw.connect(this.filter);
@@ -39,19 +40,24 @@ window.addEvent("domready", function() {
             this.filterMA.connect(this.filter, 0, 1);
 
             // Envelope
-            //this.env.connect(this.gain, 0, 1);
+            this.env.connect(this.gain, 0, 1);
         }
     });
     
     var audiolet = new Audiolet(44100, 2, Math.pow(2, 13));
     var synth = new Synth(audiolet);
 
-    var frequencyPattern = new PSequence([55, 98, 73, 98], Infinity);
+    var frequencyPattern = new PSequence([55, 55, 98, 98, 73, 73, 98, 98],
+                                         Infinity);
     var filterLFOPattern = new PChoose([2, 4, 6, 8], Infinity);
-    audiolet.scheduler.play([frequencyPattern, filterLFOPattern], 4,
-        function(frequency, filterLFOFrequency) {
+    var gatePattern = new PSequence([1, 0], Infinity);
+
+    var patterns = [frequencyPattern, filterLFOPattern, gatePattern];
+    audiolet.scheduler.play(patterns, 2,
+        function(frequency, filterLFOFrequency, gate) {
             this.frequencyMA.add.setValue(frequency);
             this.filterLFO.frequency.setValue(filterLFOFrequency);
+            this.env.gate.setValue(gate);
         }.bind(synth)
     );  
 
