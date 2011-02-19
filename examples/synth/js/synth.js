@@ -55,9 +55,6 @@ window.addEvent("domready", function() {
         }.bind(synth)
     );  
 
-    // TODO: Add up/downmixer to the output so we don't need this
-    var pan = new Pan(audiolet);
-    synth.connect(pan);
-    pan.connect(audiolet.output);
+    synth.connect(audiolet.output);
 });
 

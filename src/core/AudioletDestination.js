@@ -9,8 +9,10 @@ var AudioletDestination = new Class({
 
         this.device = new AudioletDevice(audiolet);
         this.scheduler = new Scheduler(audiolet);
+        this.upMixer = new UpMixer(audiolet, audiolet.numberOfChannels);
 
         this.inputs[0].connect(this.scheduler);
-        this.scheduler.connect(this.device);
+        this.scheduler.connect(this.upMixer);
+        this.upMixer.connect(this.device);
     }
 });
