@@ -19,6 +19,8 @@ var AudioletNode = new Class({
         if (generate) {
             this.generate = generate;
         }
+
+        this.timestamp = null;
     },
 
     connect: function(node, output, input) {
@@ -43,21 +45,24 @@ var AudioletNode = new Class({
         outputPin.disconnect(inputPin);
     },
 
-    tick: function(length) {
-        this.tickParents(length);
+    tick: function(length, timestamp) {
+        if (timestamp != this.timestamp) {
+            this.tickParents(length, timestamp);
 
-        var inputBuffers = this.createInputBuffers(length);
-        var outputBuffers = this.createOutputBuffers(length);
-        this.generate(inputBuffers, outputBuffers);
+            var inputBuffers = this.createInputBuffers(length);
+            var outputBuffers = this.createOutputBuffers(length);
+            this.generate(inputBuffers, outputBuffers);
+            this.timestamp = timestamp;
+        }
     },
 
-    tickParents: function(length) {
+    tickParents: function(length, timestamp) {
         var numberOfInputs = this.numberOfInputs;
         for (var i = 0; i < numberOfInputs; i++) {
             var input = this.inputs[i];
             var numberOfStreams = input.connectedFrom.length;
             for (var j = 0; j < numberOfStreams; j++) {
-                input.connectedFrom[j].node.tick(length);
+                input.connectedFrom[j].node.tick(length, timestamp);
             }
         }
     },
@@ -105,12 +110,15 @@ var AudioletNode = new Class({
                     }
                 }
 
-                input.buffer = inputBuffer;
                 inputBuffers.push(inputBuffer);
             }
             else {
-                // If we don't have any connections give a null
-                inputBuffers.push(null);
+                // If we don't have any connections give a single channel empty
+                // buffer of the correct length
+                var inputBuffer = input.buffer;
+                inputBuffer.resize(1, length);
+                inputBuffer.isEmpty = true;
+                inputBuffers.push(inputBuffer);
             }
         }
         return (inputBuffers);
@@ -174,7 +182,11 @@ var AbstractAudioletDevice = new Class({
         this.buffer = inputBuffers[0];
     },
 
-    getTime: function() {
+    getPlaybackTime: function() {
+        return 0;
+    },
+
+    getWriteTime: function() {
         return 0;
     }
 });
@@ -194,10 +206,14 @@ var AudioDataAPIDevice = new Class({
 
         this.output.mozSetup(this.numberOfChannels, this.sampleRate);
         
-        this.tick.periodical(1000 * this.bufferSize / this.sampleRate, this);
+        this.started = new Date().valueOf();
+        this.autoLatency = true;
+        this.bufferSize = this.sampleRate * 0.02;
+        this.interval = this.tick.periodical(10, this);
     },
 
     tick: function() {
+        var outputPosition = this.output.mozCurrentSampleOffset();
         // Check if some data was not written in previous attempts
         var numSamplesWritten;
         if (this.overflow) {
@@ -212,23 +228,24 @@ var AudioDataAPIDevice = new Class({
             this.overflow = null;
         }
 
-        var outputPosition = this.output.mozCurrentSampleOffset();
-        if (outputPosition == 0) {
-            // Until the output starts ticking we ignore any samples written
-            this.writePosition = 0;
-        }
         var samplesNeeded = outputPosition +
                             (this.bufferSize * this.numberOfChannels) -
                             this.writePosition;
-        // Seems to help stability - lob some extra samples in if the internal
-        // buffer will become almost completely empty before we tick again
-        if (samplesNeeded <= 0 && samplesNeeded >= -128) {
-            samplesNeeded = this.bufferSize;
+
+        if (this.autoLatency) {
+            var delta = (new Date().valueOf() - this.started) / 1000;
+            this.bufferSize = this.sampleRate * delta;
+            if (outputPosition) {
+                this.autoLatency = false;
+            }
         }
-        if (samplesNeeded > 0) {
+
+        if (samplesNeeded >= this.numberOfChannels) {
+            // Samples needed per channel
+            samplesNeeded = Math.floor(samplesNeeded / this.numberOfChannels);
             // Request some sound data from the callback function.
-            AudioletNode.prototype.tick.apply(this, [samplesNeeded /
-                                                     this.numberOfChannels]);
+            AudioletNode.prototype.tick.apply(this, [samplesNeeded,
+                                                     this.getWriteTime()]);
             this.buffer.interleave();
             var buffer = this.buffer.data;
 
@@ -242,8 +259,12 @@ var AudioDataAPIDevice = new Class({
         }
     },
 
-    getTime: function() {
+    getPlaybackTime: function() {
         return this.output.mozCurrentSampleOffset() / this.numberOfChannels;
+    },
+
+    getWriteTime: function() {
+        return this.writePosition / this.numberOfChannels;
     }
 });
 
@@ -258,6 +279,8 @@ var AudioletBuffer = new Class({
 
         this.data = new Float32Array(numberOfChannels * length);
         this.unsliced_data = this.data;
+
+        this.isEmpty = false;
     },
 
     getChannelData: function(channel) {
@@ -357,9 +380,11 @@ var AudioletDestination = new Class({
 
         this.device = new AudioletDevice(audiolet);
         this.scheduler = new Scheduler(audiolet);
+        this.upMixer = new UpMixer(audiolet, audiolet.numberOfChannels);
 
         this.inputs[0].connect(this.scheduler);
-        this.scheduler.connect(this.device);
+        this.scheduler.connect(this.upMixer);
+        this.upMixer.connect(this.device);
     }
 });
 
@@ -512,11 +537,16 @@ var DummyDevice = new Class({
     },
 
     tick: function() {
-        AudioletNode.prototype.tick.apply(this, [this.bufferSize]);
+        AudioletNode.prototype.tick.apply(this, [this.bufferSize,
+                                                 this.writePosition]);
         this.writePosition += this.bufferSize;
     },
 
-    getTime: function() {
+    getPlaybackTime: function() {
+        return this.writePosition - this.bufferSize;
+    },
+
+    getWriteTime: function() {
         return this.writePosition;
     }
 });
@@ -658,19 +688,37 @@ var Scheduler = new Class({
         });
 
         this.time = 0;
-        this.beats = 0;
+        this.beat = 0;
+        this.beatInBar = 0;
         this.bar = 0;
         this.seconds = 0;
         this.beatsPerBar = 0;
 
         this.lastBeatTime = 0;
         this.beatLength = 60 / this.bpm * this.audiolet.sampleRate;
+
+        var emptyBuffer = new AudioletBuffer(1, 1);
     },
 
     addRelative: function(beats, callback) {
+        var event = {};
+        event.callback = callback;
+        event.time = this.time + beats * this.beatLength;
+        this.queue.push(event);
+        return event;
     },
 
     addAbsolute: function(beat, callback) {
+        if (beat < this.beat ||
+            beat == this.beat && this.time > this.lastBeatTime) {
+            // Nah
+            return null;
+        }
+        var event = {};
+        event.callback = callback;
+        event.time = this.lastBeatTime + (beat - this.beat) * this.beatLength;
+        this.queue.push(event);
+        return event;
     },
 
     play: function(patterns, durationPattern, callback) {
@@ -679,16 +727,16 @@ var Scheduler = new Class({
         event.durationPattern = durationPattern;
         event.callback = callback;
         // TODO: Quantizing start time
-        event.time = this.audiolet.device.getTime();
+        event.time = this.audiolet.device.getWriteTime();
         this.queue.push(event);
     },
 
     remove: function() {
     },
 
-    tick: function(length) {
+    tick: function(length, timestamp) {
         // The time at the beginning of the block
-        var startTime = this.audiolet.device.writePosition/2;
+        var startTime = this.audiolet.device.getWriteTime();
 
         // Update the clock so it is correct for the first samples
         this.updateClock(startTime);
@@ -707,7 +755,9 @@ var Scheduler = new Class({
             // Generate samples to take us to the event
             var timeToEvent = event.time - lastEventTime;
             if (timeToEvent > 0) {
-                this.tickParents(timeToEvent);
+                var offset = lastEventTime - startTime;
+                this.tickParents(timeToEvent,
+                                 timestamp + offset);
 
                 // Get the summed input
                 var inputBuffers = this.createInputBuffers(timeToEvent);
@@ -720,7 +770,6 @@ var Scheduler = new Class({
                 // Copy it to the right part of the output
                 // Use the generate function so it looks and quacks like an
                 // AudioletNode
-                var offset = lastEventTime - startTime;
                 this.generate(inputBuffers, outputBuffers, offset);
             }
 
@@ -737,7 +786,8 @@ var Scheduler = new Class({
         // Generate enough samples to complete the block
         var remainingTime = startTime + length - lastEventTime;
         if (remainingTime) {
-            this.tickParents(remainingTime);
+            this.tickParents(remainingTime,
+                             timestamp + lastEventTime - startTime);
             var inputBuffers = this.createInputBuffers(remainingTime);
 
             // Make sure we have an output buffer
@@ -755,9 +805,10 @@ var Scheduler = new Class({
         this.seconds = this.time * this.audiolet.sampleRate;
         if (this.time >= this.lastBeatTime + this.beatLength) {
             this.beat += 1;
-            if (this.beat == this.beatsPerBar) {
-                this.beat = 0;
+            this.beatInBar += 1;
+            if (this.beatInBar == this.beatsPerBar) {
                 this.bar += 1;
+                this.beatInBar = 0;
             }
             this.lastBeatTime += this.beatLength;
         }
@@ -796,7 +847,18 @@ var Scheduler = new Class({
         var inputBuffer = inputBuffers[0];
         var outputBuffer = outputBuffers[0];
         for (var i = 0; i < inputBuffer.numberOfChannels; i++) {
-            var inputChannel = inputBuffer.getChannelData(i);
+            var inputChannel;
+            if (inputBuffer.isEmpty) {
+                // Substitute the supposedly empty buffer with an actually
+                // empty buffer.  This means that we don't have to  zero
+                // buffers in other nodes
+                emptyBuffer.resize(inputBuffer.numberOfChannels,
+                                   inputBuffer.length);
+                inputChannel = emptyBuffer.getChannelData(0);
+            }
+            else {
+                inputChannel = inputBuffer.getChannelData(i);
+            }
             var outputChannel = outputBuffer.getChannelData(i);
             outputChannel.set(inputChannel, offset);
         }
@@ -845,6 +907,7 @@ var WebAudioAPIDevice = new Class({
                                                            1);
 
         this.node.onprocessaudio = this.tick;
+        this.writePosition = 0;
     },
 
     tick: function(event) {
@@ -856,10 +919,15 @@ var WebAudioAPIDevice = new Class({
             var channel = buffer.getChannelData(i);
             channel.set(this.buffer.getChannelData(i));
         }
+        this.writePosition += samplesNeeded;
     },
 
-    getTime: function() {
+    getPlaybackTime: function() {
         return this.context.currentTime * this.sampleRate;
+    },
+
+    getWriteTime: function() {
+        return this.writePosition;
     }
 });
 
@@ -1016,6 +1084,11 @@ var BiquadFilter = new Class({
     generate: function(inputBuffers, outputBuffers) {
         var inputBuffer = inputBuffers[0];
         var outputBuffer = outputBuffers[0];
+
+        if (inputBuffer.isEmpty) {
+            outputBuffer.isEmpty = true;
+            return;
+        }
 
         var inputChannels = [];
         var outputChannels = [];
@@ -1177,14 +1250,20 @@ var Delay = new Class({
     initialize: function(audiolet, maximumDelayTime, delayTime) {
         AudioletNode.prototype.initialize.apply(this, [audiolet, 2, 1]);
         this.maximumDelayTime = maximumDelayTime;
-        this.delayTime = new AudioParameter(this, 1, delayTime || 1);
-        this.buffer = new Float32Array(maximumDelayTime);
+        this.delayTime = new AudioletParameter(this, 1, delayTime || 1);
+        this.buffer = new Float32Array(maximumDelayTime *
+                                       this.audiolet.sampleRate);
         this.readWriteIndex = 0;
     },
 
     generate: function(inputBuffers, outputBuffers) {
         var inputBuffer = inputBuffers[0];
         var outputBuffer = outputBuffers[0];
+
+        if (inputBuffer.isEmpty) {
+            outputBuffer.isEmpty = true;
+            return;
+        }
 
         // Local processing variables
         var delayTimeParameter = this.delayTime;
@@ -1212,15 +1291,20 @@ var Delay = new Class({
 
 var Gain = new Class({
     Extends: AudioletNode,
-    initialize: function(audiolet) {
+    initialize: function(audiolet, gain) {
         AudioletNode.prototype.initialize.apply(this, [audiolet, 2, 1]);
         this.outputs[0].link(this.inputs[0]);
-        this.gain = new AudioletParameter(this, 1, 1);
+        this.gain = new AudioletParameter(this, 1, gain || 1);
     },
 
     generate: function(inputBuffers, outputBuffers) {
         var inputBuffer = inputBuffers[0];
         var outputBuffer = outputBuffers[0];
+
+        if (inputBuffer.isEmpty) {
+            outputBuffer.isEmpty = true;
+            return;
+        }
 
         // Local processing variables
         var gain = this.gain;
@@ -1344,6 +1428,12 @@ var Pan = new Class({
     generate: function(inputBuffers, outputBuffers) {
         var inputBuffer = inputBuffers[0];
         var outputBuffer = outputBuffers[0];
+
+        if (inputBuffer.isEmpty) {
+            outputBuffer.isEmpty = true;
+            return;
+        }
+
         var inputChannel = inputBuffer.getChannelData(0);
         var leftOutputChannel = outputBuffer.getChannelData(0);
         var rightOutputChannel = outputBuffer.getChannelData(1);
@@ -1361,6 +1451,94 @@ var Pan = new Class({
         }
     }
 });
+
+/**
+ * @depends Envelope.js
+ */
+var Percussive = new Class({
+    Extends: Envelope,
+    initialize: function(audiolet, gate, attack, decay, sustain, release,
+                         onComplete) {
+        Envelope.prototype.initialize.apply(this, [audiolet, gate, 3,
+                                                   onComplete]);
+        this.canTrigger = true;
+        this.stage = null;
+        this.level = 0;
+
+        this.attack = new AudioletParameter(this, 1, attack || 0.01);
+        this.release = new AudioletParameter(this, 2, release || 1);
+
+        this.attackDelta = null;
+        this.releaseDelta = null;
+    },
+
+    generate: function(inputBuffers, outputBuffers) {
+        var buffer = outputBuffers[0];
+        var channel = buffer.getChannelData(0);
+
+        var sampleRate = this.audiolet.sampleRate;
+
+        var gateParameter = this.gate;
+        var attackParameter = this.attack;
+        var releaseParameter = this.release;
+
+        var canTrigger = this.canTrigger;
+        var stage = this.stage;
+        var level = this.level;
+        var onComplete = this.onComplete;
+
+        var attackDelta = this.attackDelta;
+        var releaseDelta = this.releaseDelta;
+
+        var bufferLength = buffer.length;
+        for (var i=0; i<bufferLength; i++) {
+            var gate = gateParameter.getValue(i);
+            
+            if (canTrigger && gate) {
+                stage = ADSR.ATTACK;
+                var attack = attackParameter.getValue(i);
+                attackDelta = (1 - level)/(attack * sampleRate);
+                canTrigger = false;
+            }
+
+            if (!gate) {
+                canTrigger = true;
+            }
+
+            if (stage == ADSR.ATTACK) {
+                // Attack phase
+                level += attackDelta;
+                if (level >= 1) {
+                    level = 1;
+                    stage = ADSR.RELEASE;
+                    releaseDelta = 1/(release * sampleRate);
+                }
+            }
+
+            else if (stage == ADSR.RELEASE) {
+                level -= releaseDelta;
+                if (level <= 0) {
+                    level = 0;
+                    stage = null;
+                    if (onComplete) {
+                        onComplete();
+                    }
+                }
+            }
+
+            channel[i] = level;
+        }
+        this.canTrigger = canTrigger;
+        this.stage = stage;
+        this.level = level;
+
+        this.attackDelta = attackDelta;
+        this.releaseDelta = releaseDelta;
+    }
+});
+
+Percussive.ATTACK = 0;
+Percussive.RELEASE = 1;
 
 /**
  * @depends ../core/AudioletNode.js
@@ -1451,8 +1629,41 @@ var Triangle = new Class({
 Triangle.TABLE = [];
 for (var i = 0; i < 8192; i++) {
     // Smelly, but looks right...
-    Triangle.TABLE.push(Math.abs(((i - 2048) / 8192) % 1 * 2 - 1) * 2 - 1);
+    Triangle.TABLE.push(Math.abs(((((i - 2048) / 8192) % 1) + 1) % 1* 2 - 1) * 2 - 1);
 }
+
+
+/**
+ * @depends ../core/AudioletNode.js
+ */
+
+var UpMixer = new Class({
+    Extends: AudioletNode,
+    initialize: function(audiolet, outputChannels) {
+        AudioletNode.prototype.initialize.apply(this, [audiolet, 1, 1]);
+        this.outputChannels = outputChannels;
+        this.outputs[0].numberOfChannels = outputChannels;
+    },
+
+    generate: function(inputBuffers, outputBuffers) {
+        var inputBuffer = inputBuffers[0];
+        var outputBuffer = outputBuffers[0];
+
+        if (inputBuffer.isEmpty) {
+            outputBuffer.isEmpty = true;
+            return;
+        }
+
+        var outputChannels = this.outputChannels;
+
+        var numberOfChannels = inputBuffer.numberOfChannels;
+        for (var i = 0; i < outputChannels; i++) {
+            var inputChannel = inputBuffer.getChannelData(i % numberOfChannels);
+            var outputChannel = outputBuffer.getChannelData(i);
+            outputChannel.set(inputChannel);
+        }
+    }
+});
 
 
 /**
