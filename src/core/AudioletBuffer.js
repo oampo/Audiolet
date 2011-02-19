@@ -8,6 +8,8 @@ var AudioletBuffer = new Class({
 
         this.data = new Float32Array(numberOfChannels * length);
         this.unsliced_data = this.data;
+
+        this.isEmpty = false;
     },
 
     getChannelData: function(channel) {

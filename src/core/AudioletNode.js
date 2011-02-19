@@ -110,12 +110,15 @@ var AudioletNode = new Class({
                     }
                 }
 
-                input.buffer = inputBuffer;
                 inputBuffers.push(inputBuffer);
             }
             else {
-                // If we don't have any connections give a null
-                inputBuffers.push(null);
+                // If we don't have any connections give a single channel empty
+                // buffer of the correct length
+                var inputBuffer = input.buffer;
+                inputBuffer.resize(1, length);
+                inputBuffer.isEmpty = true;
+                inputBuffers.push(inputBuffer);
             }
         }
         return (inputBuffers);

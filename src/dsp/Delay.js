@@ -17,6 +17,11 @@ var Delay = new Class({
         var inputBuffer = inputBuffers[0];
         var outputBuffer = outputBuffers[0];
 
+        if (inputBuffer.isEmpty) {
+            outputBuffer.isEmpty = true;
+            return;
+        }
+
         // Local processing variables
         var delayTimeParameter = this.delayTime;
         var buffer = this.buffer;

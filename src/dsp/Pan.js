@@ -14,6 +14,12 @@ var Pan = new Class({
     generate: function(inputBuffers, outputBuffers) {
         var inputBuffer = inputBuffers[0];
         var outputBuffer = outputBuffers[0];
+
+        if (inputBuffer.isEmpty) {
+            outputBuffer.isEmpty = true;
+            return;
+        }
+
         var inputChannel = inputBuffer.getChannelData(0);
         var leftOutputChannel = outputBuffer.getChannelData(0);
         var rightOutputChannel = outputBuffer.getChannelData(1);

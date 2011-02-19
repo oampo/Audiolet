@@ -4,15 +4,20 @@
 
 var Gain = new Class({
     Extends: AudioletNode,
-    initialize: function(audiolet) {
+    initialize: function(audiolet, gain) {
         AudioletNode.prototype.initialize.apply(this, [audiolet, 2, 1]);
         this.outputs[0].link(this.inputs[0]);
-        this.gain = new AudioletParameter(this, 1, 1);
+        this.gain = new AudioletParameter(this, 1, gain || 1);
     },
 
     generate: function(inputBuffers, outputBuffers) {
         var inputBuffer = inputBuffers[0];
         var outputBuffer = outputBuffers[0];
+
+        if (inputBuffer.isEmpty) {
+            outputBuffer.isEmpty = true;
+            return;
+        }
 
         // Local processing variables
         var gain = this.gain;

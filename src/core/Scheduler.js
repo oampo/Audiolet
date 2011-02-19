@@ -21,6 +21,8 @@ var Scheduler = new Class({
 
         this.lastBeatTime = 0;
         this.beatLength = 60 / this.bpm * this.audiolet.sampleRate;
+
+        var emptyBuffer = new AudioletBuffer(1, 1);
     },
 
     addRelative: function(beats, callback) {
@@ -170,7 +172,18 @@ var Scheduler = new Class({
         var inputBuffer = inputBuffers[0];
         var outputBuffer = outputBuffers[0];
         for (var i = 0; i < inputBuffer.numberOfChannels; i++) {
-            var inputChannel = inputBuffer.getChannelData(i);
+            var inputChannel;
+            if (inputBuffer.isEmpty) {
+                // Substitute the supposedly empty buffer with an actually
+                // empty buffer.  This means that we don't have to  zero
+                // buffers in other nodes
+                emptyBuffer.resize(inputBuffer.numberOfChannels,
+                                   inputBuffer.length);
+                inputChannel = emptyBuffer.getChannelData(0);
+            }
+            else {
+                inputChannel = inputBuffer.getChannelData(i);
+            }
             var outputChannel = outputBuffer.getChannelData(i);
             outputChannel.set(inputChannel, offset);
         }
