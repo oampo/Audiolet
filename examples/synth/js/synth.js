@@ -44,7 +44,7 @@ window.addEvent("domready", function() {
         }
     });
     
-    var audiolet = new Audiolet(44100, 2, Math.pow(2, 13));
+    var audiolet = new Audiolet();
     var synth = new Synth(audiolet);
 
     var frequencyPattern = new PSequence([55, 55, 98, 98, 73, 73, 98, 98],

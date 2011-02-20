@@ -113,12 +113,12 @@ var Envelope = new Class({
 
     calculateDelta: function(stage, level) {
         var delta = this.levels[stage + 1] - level;
-        var stageTime = this.times[stage] * this.audiolet.sampleRate;
+        var stageTime = this.times[stage] * this.audiolet.device.sampleRate;
         return (delta / stageTime);
     },
 
     calculateChangeTime: function(stage, time) {
-        var stageTime = this.times[stage] * this.audiolet.sampleRate;
+        var stageTime = this.times[stage] * this.audiolet.device.sampleRate;
         return(time + stageTime);
     }
 });

@@ -4,8 +4,13 @@
 
 var WebAudioAPIDevice = new Class({
     Extends: AbstractAudioletDevice,
-    initialize: function(audiolet) {
+    initialize: function(audiolet, sampleRate, numberOfChannels, bufferSize) {
         AbstractAudioletDevice.prototype.initialize.apply(this, [audiolet]);
+
+        this.sampleRate = sampleRate || 44100.0;
+        this.numberOfChannels = numberOfChannels || 2;
+        this.bufferSize = bufferSize || 8192;
+
         // AudioContext is called webkitAudioContext in the current
         // implementation, so look for either
         var AudioContext, webkitAudioContext;

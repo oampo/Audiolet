@@ -4,7 +4,7 @@ var AudioletInput = new Class({
         this.index = index;
         this.connectedFrom = [];
         // Minimum sized buffer, which we can resize from accordingly
-        this.buffer = new AudioletBuffer(1, 1, node.audiolet.sampleRate);
+        this.buffer = new AudioletBuffer(1, 1);
     },
 
     connect: function(output) {

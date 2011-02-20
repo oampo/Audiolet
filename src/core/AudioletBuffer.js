@@ -1,10 +1,7 @@
 var AudioletBuffer = new Class({
-    initialize: function(numberOfChannels, length, sampleRate) {
+    initialize: function(numberOfChannels, length) {
         this.numberOfChannels = numberOfChannels;
-        this.sampleRate = sampleRate;
         this.length = length;
-
-        this.duration = this.length / this.sampleRate;
 
         this.data = new Float32Array(numberOfChannels * length);
         this.unsliced_data = this.data;

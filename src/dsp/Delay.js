@@ -9,7 +9,7 @@ var Delay = new Class({
         this.maximumDelayTime = maximumDelayTime;
         this.delayTime = new AudioletParameter(this, 1, delayTime || 1);
         this.buffer = new Float32Array(maximumDelayTime *
-                                       this.audiolet.sampleRate);
+                                       this.audiolet.device.sampleRate);
         this.readWriteIndex = 0;
     },
 
@@ -26,7 +26,7 @@ var Delay = new Class({
         var delayTimeParameter = this.delayTime;
         var buffer = this.buffer;
         var readWriteIndex = this.readWriteIndex;
-        var sampleRate = this.audiolet.sampleRate;
+        var sampleRate = this.audiolet.device.sampleRate;
 
         var inputChannel = inputBuffer.getChannelData(0);
         var outputChannel = outputBuffer.getChannelData(0);

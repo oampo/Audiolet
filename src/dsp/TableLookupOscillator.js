@@ -15,7 +15,7 @@ var TableLookupOscillator = new Class({
         var channel = buffer.getChannelData(0);
 
         // Make processing variables local
-        var sampleRate = this.audiolet.sampleRate;
+        var sampleRate = this.audiolet.device.sampleRate;
         var table = this.table;
         var tableSize = table.length;
         var phase = this.phase;

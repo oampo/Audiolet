@@ -6,9 +6,6 @@ var AbstractAudioletDevice = new Class({
     initialize: function(audiolet) {
         AudioletNode.prototype.initialize.apply(this, [audiolet, 1, 0]);
         this.audiolet = audiolet;
-        this.numberOfChannels = this.audiolet.numberOfChannels;
-        this.sampleRate = this.audiolet.sampleRate;
-        this.bufferSize = this.audiolet.bufferSize;
         this.buffer = null;
     },
 

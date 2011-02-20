@@ -4,8 +4,13 @@
 
 var DummyDevice = new Class({
     Extends: AbstractAudioletDevice,
-    initialize: function(audiolet) {
+    initialize: function(audiolet, sampleRate, numberOfChannels, bufferSize) {
         AbstractAudioletDevice.prototype.initialize.apply(this, [audiolet]);
+
+        this.sampleRate = sampleRate || 44100.0;
+        this.numberOfChannels = numberOfChannels || 2;
+        this.bufferSize = bufferSize || 8192;
+
         this.writePosition = 0;
 
         this.tick.periodical(1000 * this.bufferSize / this.sampleRate, this);

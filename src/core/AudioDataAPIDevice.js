@@ -4,8 +4,20 @@
 
 var AudioDataAPIDevice = new Class({
     Extends: AbstractAudioletDevice,
-    initialize: function(audiolet) {
+    initialize: function(audiolet, sampleRate, numberOfChannels, bufferSize) {
         AbstractAudioletDevice.prototype.initialize.apply(this, [audiolet]);
+
+        this.sampleRate = sampleRate || 44100.0;
+        this.numberOfChannels = numberOfChannels || 2;
+        if (bufferSize) {
+            this.bufferSize = bufferSize;
+            this.autoLatency = false;
+        }
+        else {
+            this.bufferSize = this.sampleRate * 0.02;
+            this.autoLatency = true;
+        }
+
         this.output = new Audio();
         this.overflow = null;
         this.writePosition = 0;
@@ -13,8 +25,6 @@ var AudioDataAPIDevice = new Class({
         this.output.mozSetup(this.numberOfChannels, this.sampleRate);
         
         this.started = new Date().valueOf();
-        this.autoLatency = true;
-        this.bufferSize = this.sampleRate * 0.02;
         this.interval = this.tick.periodical(10, this);
     },
 

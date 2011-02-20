@@ -20,7 +20,7 @@ var Scheduler = new Class({
         this.beatsPerBar = 0;
 
         this.lastBeatTime = 0;
-        this.beatLength = 60 / this.bpm * this.audiolet.sampleRate;
+        this.beatLength = 60 / this.bpm * this.audiolet.device.sampleRate;
 
         var emptyBuffer = new AudioletBuffer(1, 1);
     },
@@ -127,7 +127,7 @@ var Scheduler = new Class({
 
     updateClock: function(time) {
         this.time = time;
-        this.seconds = this.time * this.audiolet.sampleRate;
+        this.seconds = this.time * this.audiolet.device.sampleRate;
         if (this.time >= this.lastBeatTime + this.beatLength) {
             this.beat += 1;
             this.beatInBar += 1;

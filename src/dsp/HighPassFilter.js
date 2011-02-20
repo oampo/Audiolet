@@ -11,7 +11,7 @@ var HighPassFilter = new Class({
 
     calculateCoefficients: function(frequency) {
         var w0 = 2 * Math.PI *  frequency /
-                 this.audiolet.sampleRate;
+                 this.audiolet.device.sampleRate;
         var cosw0 = Math.cos(w0);
         var sinw0 = Math.sin(w0);
         var alpha = sinw0 / (2 / Math.sqrt(2));
