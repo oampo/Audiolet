@@ -51,7 +51,7 @@ var Envelope = new Class({
             if (gateOn && !gate) {
                 // Key released
                 gateOn = false;
-                if (releaseStage != null) {
+                if (releaseStage) {
                     // Jump to the release stage
                     stage = releaseStage;
                     stageChanged = true;
