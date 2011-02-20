@@ -19,12 +19,12 @@ window.addEvent("domready", function() {
 
             // Gain envelope
             this.gain = new Gain(audiolet);
-            this.env = new ADSR(audiolet,
-                                1, // Gate
-                                1.5, // Attack
-                                0.2, // Decay
-                                0.9, // Sustain
-                                2); // Release
+            this.env = new ADSREnvelope(audiolet,
+                                        1, // Gate
+                                        1.5, // Attack
+                                        0.2, // Decay
+                                        0.9, // Sustain
+                                        2); // Release
 
             // Main signal path
             this.saw.connect(this.filter);
