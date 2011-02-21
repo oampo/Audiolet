@@ -28,7 +28,7 @@ var Gain = new Class({
             var outputChannel = outputBuffer.getChannelData(i);
             var bufferLength = inputBuffer.length;
             for (var j = 0; j < bufferLength; j++) {
-                outputChannel[j] = inputChannel[j] * gain.getValue(i);
+                outputChannel[j] = inputChannel[j] * gain.getValue(j);
             }
         }
     }
