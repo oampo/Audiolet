@@ -79,6 +79,7 @@ var Envelope = new Class({
             }
 
             if (stageChanged) {
+                level = this.levels[stage];
                 if (stage != this.times.length) {
                     // Actually update the variables
                     delta = this.calculateDelta(stage, level);
