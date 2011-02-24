@@ -3,22 +3,45 @@ var AudioletBuffer = new Class({
         this.numberOfChannels = numberOfChannels;
         this.length = length;
 
-        this.data = new Float32Array(numberOfChannels * length);
-        this.unsliced_data = this.data;
+        this.channels = [];
+        for (var i=0; i<this.numberOfChannels; i++) {
+            this.channels.push(new Float32Array(numberOfChannels * length));
+        }
+
+        this.unsliced_channels = [];
+        for (var i=0; i<this.numberOfChannels; i++) {
+            this.unsliced_channels.push(this.channels[i]);
+        }
 
         this.isEmpty = false;
     },
 
     getChannelData: function(channel) {
-        return (this.data.subarray(channel * this.length,
-                               (channel + 1) * this.length));
+        return (this.channels[channel]);
     },
-
 
     set: function(buffer) {
-        this.data.set(buffer.data);
+        var numberOfChannels = buffer.numberOfChannels;
+        for (var i=0; i<numberOfChannels; i++) {
+            this.channels[i].set(buffer.getChannelData(i));
+        }
     },
 
+    setSection: function(buffer, length, inputOffset, outputOffset) {
+        inputOffset = inputOffset || 0;
+        outputOffset = outputOffset || 0;
+        var numberOfChannels = buffer.numberOfChannels;
+        for (var i = 0; i < numberOfChannels; i++) {
+            var channel1 = this.getChannelData(i).subarray(outputOffset,
+                                                           outputOffset +
+                                                           length);
+            var channel2 = buffer.getChannelData(i).subarray(inputOffset,
+                                                             inputOffset +
+                                                             length);
+            channel1.set(channel2);
+        }
+    },
+        
     add: function(buffer) {
         var length = this.length;
         var numberOfChannels = buffer.numberOfChannels;
@@ -31,19 +54,51 @@ var AudioletBuffer = new Class({
         }
     },
 
-    resize: function(numberOfChannels, length) {
-        if (numberOfChannels * length > this.unsliced_data.length) {
-            this.data = new Float32Array(numberOfChannels * length);
-            this.unsliced_data = this.data;
+    addSection: function(buffer, length, inputOffset, outputOffset) {
+        inputOffset = inputOffset || 0;
+        outputOffset = outputOffset || 0;
+        var numberOfChannels = buffer.numberOfChannels;
+        for (var i = 0; i < numberOfChannels; i++) {
+            var channel1 = this.getChannelData(i)
+            var channel2 = buffer.getChannelData(i);
+            for (var j = 0; j < length; j++) {
+                channel1[j + outputOffset] += channel2[j + inputOffset];
+            }
         }
-        else {
-            var numberOfSamples = numberOfChannels * length;
-            this.data = this.unsliced_data.subarray(0, numberOfSamples);
+    },
+
+    resize: function(numberOfChannels, length, offset, lazy) {
+        offset = offset || 0;
+        for (var i=0; i<numberOfChannels; i++) {
+            if (length > this.length) {
+                var channel = this.channels[i];
+                this.channels[i] = new Float32Array(length);
+                if (!lazy && channel) {
+                    this.channels[i].set(channel, offset);
+                }
+                this.unsliced_channels[i] = this.channels[i];
+            }
+            else {
+                this.channels[i] = this.unsliced_channels[i].subarray(offset,
+                                                                      offset +
+                                                                      length);
+            }
         }
         this.numberOfChannels = numberOfChannels;
         this.length = length;
     },
 
+    zero: function() {
+       var numberOfChannels = this.numberOfChannels;
+        for (var i = 0; i < numberOfChannels; i++) {
+            var channel = this.getChannelData(i);
+            var length = this.length;
+            for (var j = 0; j < length; j++) {
+                channel[j] = 0;
+            }
+        }
+    },
+            
     interleave: function() {
         var numberOfSamples = this.numberOfChannels * this.length;
         var interleaved = new Float32Array(numberOfSamples);
@@ -55,5 +110,11 @@ var AudioletBuffer = new Class({
             interleaved[2 * i + 1] = rightChannel[i];
         }
         this.data = interleaved;
+    },
+
+    copy: function() {
+        var buffer = new AudioletBuffer(this.numberOfChannels, this.length);
+        buffer.set(this);
+        return buffer;
     }
 });
