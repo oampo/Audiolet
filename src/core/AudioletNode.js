@@ -47,12 +47,16 @@ var AudioletNode = new Class({
 
     tick: function(length, timestamp) {
         if (timestamp != this.timestamp) {
+            // Need to set the timestamp before we tick the parents so we
+            // can't get into infinite loops where there is feedback in the
+            // graph
+            this.timestamp = timestamp;
             this.tickParents(length, timestamp);
 
             var inputBuffers = this.createInputBuffers(length);
             var outputBuffers = this.createOutputBuffers(length);
+
             this.generate(inputBuffers, outputBuffers);
-            this.timestamp = timestamp;
         }
     },
 
@@ -83,31 +87,49 @@ var AudioletNode = new Class({
                 // TODO: Optimizations
                 // We have connections
 
-                // Calculate the maximum number of channels in a connection
+                var regularOutputs = [];
+                var feedbackOutputs = [];
                 var numberOfChannels = 0;
-                var largestOutput;
                 for (var j=0; j<numberOfConnections; j++) {
                     var output = connectedFrom[j];
-                    var outputChannels = output.buffer.numberOfChannels;
-                    if (outputChannels > numberOfChannels) {
-                        numberOfChannels = outputChannels;
-                        largestOutput = output;
+                    var outputBuffer = output.buffer;
+                    if (outputBuffer.length == length) {
+                        regularOutputs.push(output);
+                        if (outputBuffer.numberOfChannels > numberOfChannels) {
+                            numberOfChannels = outputBuffer.numberOfChannels;
+                        }
+                    }
+                    else {
+                        feedbackOutputs.push(output);
+                        output.outputBuffer.resize(1, length);
+                        if (outputBuffer.numberOfChannels > numberOfChannels) {
+                            numberOfChannels = outputBuffer.numberOfChannels;
+                        }
+                        if (!outputBuffer.length) {
+                            outputBuffer.overflowSize = 0;
+                            outputBuffer.resize(1, length);
+                        }
+                        else {
+                            outputBuffer.overflowSize += outputBuffer.length - length;
+                        }
                     }
                 }
 
                 // Resize the input buffer accordingly
                 var inputBuffer = input.buffer;
                 inputBuffer.resize(numberOfChannels, length);
+                inputBuffer.zero();
+                
+                var numberOfOutputs = regularOutputs.length;
+                for (var j = 0; j < numberOfOutputs; j++) {
+                    var output = regularOutputs[j];
+                    inputBuffer.add(output.buffer);
+                }
 
-                // Set the buffer to the largest input
-                inputBuffer.set(largestOutput.buffer);
-
-                // Sum the other inputs
-                for (var j = 0; j < numberOfConnections; j++) {
-                    var output = connectedFrom[j];
-                    if (output != largestOutput) {
-                        inputBuffer.add(output.buffer);
-                    }
+                var numberOfOutputs = feedbackOutputs.length;
+                for (var j=0; j<numberOfOutputs; j++) {
+                    var output = feedbackOutputs[j];
+                    inputBuffer.add(output.get(length));
                 }
 
                 inputBuffers.push(inputBuffer);
@@ -121,7 +143,7 @@ var AudioletNode = new Class({
                 inputBuffers.push(inputBuffer);
             }
         }
-        return (inputBuffers);
+        return inputBuffers;
     },
 
     createOutputBuffers: function(length) {

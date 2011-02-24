@@ -4,7 +4,9 @@ var AudioletInput = new Class({
         this.index = index;
         this.connectedFrom = [];
         // Minimum sized buffer, which we can resize from accordingly
-        this.buffer = new AudioletBuffer(1, 1);
+        this.buffer = new AudioletBuffer(1, 0);
+        // Overflow buffer, for feedback loops
+        this.overflow = new AudioletBuffer(1, 0);
     },
 
     connect: function(output) {

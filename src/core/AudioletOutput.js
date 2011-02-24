@@ -4,7 +4,12 @@ var AudioletOutput = new Class({
         this.index = index;
         this.connectedTo = [];
         // Minimum sized buffer, which we can resize from accordingly
-        this.buffer = new AudioletBuffer(1, 1);
+        this.buffer = new AudioletBuffer(1, 0);
+        // Buffers overflowing data if we are in a feedback loop
+        this.overflow = new AudioletBuffer(1, 0);
+        // Where overflow and regular buffer are concatenated if we are in a
+        // feedback loop
+        this.outputBuffer = new AudioletBuffer(1, 0);
 
         this.linkedInput = null;
         this.numberOfChannels = 1;
@@ -41,6 +46,45 @@ var AudioletOutput = new Class({
             return(this.linkedInput.buffer.numberOfChannels);
         }
         return(this.numberOfChannels);
+    },
+
+    get: function(length) {
+        // Add the overflow to the output
+        var buffer = this.buffer;
+        var overflow = this.overflow;
+        var outputBuffer = this.outputBuffer;
+
+        var overflowLength = overflow.length;
+        var overflowSamples = Math.min(length, overflowLength);
+        var remainingOverflow = overflow.length - overflowSamples;
+        if (overflowSamples) {
+            // Set the first part of the output from the overflow
+            outputBuffer.setSection(overflow, overflowSamples);
+
+            if (remainingOverflow) {
+                // Move any unused overflow to the start
+                overflow.setSection(overflow, remainingOverflow,
+                                    overflowSamples, 0);
+            }
+        }
+                              
+        var bufferSamples = length - overflowSamples;
+        var remainingBuffer = buffer.length - bufferSamples;
+        if (bufferSamples) {
+            // Set the second part of the output from the buffer
+            this.outputBuffer.setSection(this.buffer, bufferSamples, 0,
+                                         overflowSamples);
+        }
+
+        // Resize the overflow to it's correct length
+        overflow.resize(overflow.numberOfChannels,
+                        remainingOverflow + remainingBuffer);
+        if (remainingBuffer) {
+            // Move any unused buffer to the start of the overflow
+            overflow.setSection(buffer, remainingBuffer,
+                                bufferSamples, remainingOverflow);
+        }
+        return this.outputBuffer;
     }
 });
 
