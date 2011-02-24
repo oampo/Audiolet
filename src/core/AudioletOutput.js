@@ -48,43 +48,59 @@ var AudioletOutput = new Class({
         return(this.numberOfChannels);
     },
 
-    get: function(length) {
-        // Add the overflow to the output
+    getBuffer: function(length) {
         var buffer = this.buffer;
-        var overflow = this.overflow;
-        var outputBuffer = this.outputBuffer;
+        if (buffer.length == length) {
+            // Buffer not part of a feedback loop, so just return it
+            return buffer;
+        }
+        else {
+            // Buffer is part of a feedback loop, so we need to take care of
+            // overflows and construct an output buffer
+            var overflow = this.overflow;
+            var outputBuffer = this.outputBuffer;
 
-        var overflowLength = overflow.length;
-        var overflowSamples = Math.min(length, overflowLength);
-        var remainingOverflow = overflow.length - overflowSamples;
-        if (overflowSamples) {
-            // Set the first part of the output from the overflow
-            outputBuffer.setSection(overflow, overflowSamples);
-
-            if (remainingOverflow) {
-                // Move any unused overflow to the start
-                overflow.setSection(overflow, remainingOverflow,
-                                    overflowSamples, 0);
+            if (outputBuffer.length == 0) {
+                // First run through, so buffer will not hold any data.  Give
+                // a buffer full of zeros
+                buffer.resize(1, length);
             }
-        }
-                              
-        var bufferSamples = length - overflowSamples;
-        var remainingBuffer = buffer.length - bufferSamples;
-        if (bufferSamples) {
-            // Set the second part of the output from the buffer
-            this.outputBuffer.setSection(this.buffer, bufferSamples, 0,
-                                         overflowSamples);
-        }
+            
+            // Make the output buffer the correct size
+            outputBuffer.resize(buffer.numberOfChannels, length);
 
-        // Resize the overflow to it's correct length
-        overflow.resize(overflow.numberOfChannels,
-                        remainingOverflow + remainingBuffer);
-        if (remainingBuffer) {
-            // Move any unused buffer to the start of the overflow
-            overflow.setSection(buffer, remainingBuffer,
-                                bufferSamples, remainingOverflow);
+            var overflowLength = overflow.length;
+            var overflowSamples = Math.min(length, overflowLength);
+            var remainingOverflow = overflow.length - overflowSamples;
+            if (overflowSamples) {
+                // Set the first part of the output from the overflow
+                outputBuffer.setSection(overflow, overflowSamples);
+
+                if (remainingOverflow) {
+                    // Move any unused overflow to the start
+                    overflow.setSection(overflow, remainingOverflow,
+                                        overflowSamples, 0);
+                }
+            }
+                                  
+            var bufferSamples = length - overflowSamples;
+            var remainingBuffer = buffer.length - bufferSamples;
+            if (bufferSamples) {
+                // Set the second part of the output from the buffer
+                this.outputBuffer.setSection(this.buffer, bufferSamples, 0,
+                                             overflowSamples);
+            }
+
+            // Resize the overflow to it's correct length
+            overflow.resize(overflow.numberOfChannels,
+                            remainingOverflow + remainingBuffer);
+            if (remainingBuffer) {
+                // Move any unused buffer to the start of the overflow
+                overflow.setSection(buffer, remainingBuffer,
+                                    bufferSamples, remainingOverflow);
+            }
+            return this.outputBuffer;
         }
-        return this.outputBuffer;
     }
 });
 
