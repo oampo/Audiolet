@@ -98,18 +98,29 @@ var AudioletBuffer = new Class({
             }
         }
     },
-            
-    interleave: function() {
-        var numberOfSamples = this.numberOfChannels * this.length;
-        var interleaved = new Float32Array(numberOfSamples);
-        var leftChannel = this.getChannelData(0);
-        var rightChannel = this.getChannelData(1);
+
+    combined: function() {
+        var channels = this.channels;
+        var numberOfChannels = this.numberOfChannels;
         var length = this.length;
-        for (var i = 0; i < length; i++) {
-            interleaved[2 * i] = leftChannel[i];
-            interleaved[2 * i + 1] = rightChannel[i];
+        var combined = new Float32Array(numberOfChannels * length);
+        for (var i=0; i<numberOfChannels; i++) {
+            combined.set(channels[i], i * length);
         }
-        this.data = interleaved;
+        return combined;
+    },
+            
+    interleaved: function() {
+        var channels = this.channels;
+        var numberOfChannels = this.numberOfChannels;
+        var length = this.length;
+        var interleaved = new Float32Array(numberOfChannels * length);
+        for (var i = 0; i < length; i++) {
+            for (var j=0; j<numberOfChannels; j++) {
+                interleaved[numberOfChannels * i + j] = channels[j][i];
+            }
+        }
+        return interleaved;
     },
 
     copy: function() {

@@ -62,8 +62,7 @@ var AudioDataAPIDevice = new Class({
             // Request some sound data from the callback function.
             AudioletNode.prototype.tick.apply(this, [samplesNeeded,
                                                      this.getWriteTime()]);
-            this.buffer.interleave();
-            var buffer = this.buffer.data;
+            var buffer = this.buffer.interleaved();
 
             // Writing the data.
             numSamplesWritten = this.output.mozWriteAudio(buffer);
