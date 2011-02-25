@@ -47,12 +47,16 @@ var AudioletNode = new Class({
 
     tick: function(length, timestamp) {
         if (timestamp != this.timestamp) {
+            // Need to set the timestamp before we tick the parents so we
+            // can't get into infinite loops where there is feedback in the
+            // graph
+            this.timestamp = timestamp;
             this.tickParents(length, timestamp);
 
             var inputBuffers = this.createInputBuffers(length);
             var outputBuffers = this.createOutputBuffers(length);
+
             this.generate(inputBuffers, outputBuffers);
-            this.timestamp = timestamp;
         }
     },
 
@@ -83,30 +87,29 @@ var AudioletNode = new Class({
                 // TODO: Optimizations
                 // We have connections
 
-                // Calculate the maximum number of channels in a connection
                 var numberOfChannels = 0;
-                var largestOutput;
+                var largestOutput = null;
                 for (var j=0; j<numberOfConnections; j++) {
                     var output = connectedFrom[j];
-                    var outputChannels = output.buffer.numberOfChannels;
-                    if (outputChannels > numberOfChannels) {
-                        numberOfChannels = outputChannels;
+                    var outputBuffer = output.buffer;
+                    if (outputBuffer.numberOfChannels > numberOfChannels) {
+                        numberOfChannels = outputBuffer.numberOfChannels;
                         largestOutput = output;
                     }
                 }
 
                 // Resize the input buffer accordingly
                 var inputBuffer = input.buffer;
-                inputBuffer.resize(numberOfChannels, length);
+                inputBuffer.resize(numberOfChannels, length, true);
 
-                // Set the buffer to the largest input
-                inputBuffer.set(largestOutput.buffer);
-
-                // Sum the other inputs
+                // Set the buffer using the largest output
+                inputBuffer.set(largestOutput.getBuffer(length));
+                
+                // Sum the rest of the outputs
                 for (var j = 0; j < numberOfConnections; j++) {
                     var output = connectedFrom[j];
                     if (output != largestOutput) {
-                        inputBuffer.add(output.buffer);
+                        inputBuffer.add(output.getBuffer(length));
                     }
                 }
 
@@ -116,12 +119,12 @@ var AudioletNode = new Class({
                 // If we don't have any connections give a single channel empty
                 // buffer of the correct length
                 var inputBuffer = input.buffer;
-                inputBuffer.resize(1, length);
+                inputBuffer.resize(1, length, true);
                 inputBuffer.isEmpty = true;
                 inputBuffers.push(inputBuffer);
             }
         }
-        return (inputBuffers);
+        return inputBuffers;
     },
 
     createOutputBuffers: function(length) {
@@ -130,7 +133,7 @@ var AudioletNode = new Class({
         var numberOfOutputs = this.numberOfOutputs;
         for (var i = 0; i < numberOfOutputs; i++) {
             var output = this.outputs[i];
-            output.buffer.resize(output.getNumberOfChannels(), length);
+            output.buffer.resize(output.getNumberOfChannels(), length, true);
             outputBuffers.push(output.buffer);
         }
         return (outputBuffers);
@@ -172,9 +175,6 @@ var AbstractAudioletDevice = new Class({
     initialize: function(audiolet) {
         AudioletNode.prototype.initialize.apply(this, [audiolet, 1, 0]);
         this.audiolet = audiolet;
-        this.numberOfChannels = this.audiolet.numberOfChannels;
-        this.sampleRate = this.audiolet.sampleRate;
-        this.bufferSize = this.audiolet.bufferSize;
         this.buffer = null;
     },
 
@@ -198,8 +198,20 @@ var AbstractAudioletDevice = new Class({
 
 var AudioDataAPIDevice = new Class({
     Extends: AbstractAudioletDevice,
-    initialize: function(audiolet) {
+    initialize: function(audiolet, sampleRate, numberOfChannels, bufferSize) {
         AbstractAudioletDevice.prototype.initialize.apply(this, [audiolet]);
+
+        this.sampleRate = sampleRate || 44100.0;
+        this.numberOfChannels = numberOfChannels || 2;
+        if (bufferSize) {
+            this.bufferSize = bufferSize;
+            this.autoLatency = false;
+        }
+        else {
+            this.bufferSize = this.sampleRate * 0.02;
+            this.autoLatency = true;
+        }
+
         this.output = new Audio();
         this.overflow = null;
         this.writePosition = 0;
@@ -207,8 +219,6 @@ var AudioDataAPIDevice = new Class({
         this.output.mozSetup(this.numberOfChannels, this.sampleRate);
         
         this.started = new Date().valueOf();
-        this.autoLatency = true;
-        this.bufferSize = this.sampleRate * 0.02;
         this.interval = this.tick.periodical(10, this);
     },
 
@@ -270,29 +280,49 @@ var AudioDataAPIDevice = new Class({
 
 
 var AudioletBuffer = new Class({
-    initialize: function(numberOfChannels, length, sampleRate) {
+    initialize: function(numberOfChannels, length) {
         this.numberOfChannels = numberOfChannels;
-        this.sampleRate = sampleRate;
         this.length = length;
 
-        this.duration = this.length / this.sampleRate;
+        this.channels = [];
+        for (var i=0; i<this.numberOfChannels; i++) {
+            this.channels.push(new Float32Array(numberOfChannels * length));
+        }
 
-        this.data = new Float32Array(numberOfChannels * length);
-        this.unsliced_data = this.data;
+        this.unsliced_channels = [];
+        for (var i=0; i<this.numberOfChannels; i++) {
+            this.unsliced_channels.push(this.channels[i]);
+        }
 
         this.isEmpty = false;
     },
 
     getChannelData: function(channel) {
-        return (this.data.subarray(channel * this.length,
-                               (channel + 1) * this.length));
+        return (this.channels[channel]);
     },
-
 
     set: function(buffer) {
-        this.data.set(buffer.data);
+        var numberOfChannels = buffer.numberOfChannels;
+        for (var i=0; i<numberOfChannels; i++) {
+            this.channels[i].set(buffer.getChannelData(i));
+        }
     },
 
+    setSection: function(buffer, length, inputOffset, outputOffset) {
+        inputOffset = inputOffset || 0;
+        outputOffset = outputOffset || 0;
+        var numberOfChannels = buffer.numberOfChannels;
+        for (var i = 0; i < numberOfChannels; i++) {
+            var channel1 = this.getChannelData(i).subarray(outputOffset,
+                                                           outputOffset +
+                                                           length);
+            var channel2 = buffer.getChannelData(i).subarray(inputOffset,
+                                                             inputOffset +
+                                                             length);
+            channel1.set(channel2);
+        }
+    },
+        
     add: function(buffer) {
         var length = this.length;
         var numberOfChannels = buffer.numberOfChannels;
@@ -305,19 +335,51 @@ var AudioletBuffer = new Class({
         }
     },
 
-    resize: function(numberOfChannels, length) {
-        if (numberOfChannels * length > this.unsliced_data.length) {
-            this.data = new Float32Array(numberOfChannels * length);
-            this.unsliced_data = this.data;
+    addSection: function(buffer, length, inputOffset, outputOffset) {
+        inputOffset = inputOffset || 0;
+        outputOffset = outputOffset || 0;
+        var numberOfChannels = buffer.numberOfChannels;
+        for (var i = 0; i < numberOfChannels; i++) {
+            var channel1 = this.getChannelData(i)
+            var channel2 = buffer.getChannelData(i);
+            for (var j = 0; j < length; j++) {
+                channel1[j + outputOffset] += channel2[j + inputOffset];
+            }
         }
-        else {
-            var numberOfSamples = numberOfChannels * length;
-            this.data = this.unsliced_data.subarray(0, numberOfSamples);
+    },
+
+    resize: function(numberOfChannels, length, lazy, offset) {
+        offset = offset || 0;
+        for (var i=0; i<numberOfChannels; i++) {
+            if (length > this.length) {
+                var channel = this.channels[i];
+                this.channels[i] = new Float32Array(length);
+                if (!lazy && channel) {
+                    this.channels[i].set(channel, offset);
+                }
+                this.unsliced_channels[i] = this.channels[i];
+            }
+            else {
+                this.channels[i] = this.unsliced_channels[i].subarray(offset,
+                                                                      offset +
+                                                                      length);
+            }
         }
         this.numberOfChannels = numberOfChannels;
         this.length = length;
     },
 
+    zero: function() {
+       var numberOfChannels = this.numberOfChannels;
+        for (var i = 0; i < numberOfChannels; i++) {
+            var channel = this.getChannelData(i);
+            var length = this.length;
+            for (var j = 0; j < length; j++) {
+                channel[j] = 0;
+            }
+        }
+    },
+            
     interleave: function() {
         var numberOfSamples = this.numberOfChannels * this.length;
         var interleaved = new Float32Array(numberOfSamples);
@@ -329,6 +391,12 @@ var AudioletBuffer = new Class({
             interleaved[2 * i + 1] = rightChannel[i];
         }
         this.data = interleaved;
+    },
+
+    copy: function() {
+        var buffer = new AudioletBuffer(this.numberOfChannels, this.length);
+        buffer.set(this);
+        return buffer;
     }
 });
 
@@ -375,33 +443,41 @@ var AudioletGroup = new Class({
 
 var AudioletDestination = new Class({
     Extends: AudioletGroup,
-    initialize: function(audiolet) {
+    initialize: function(audiolet, sampleRate, numberOfChannels, bufferSize) {
         AudioletGroup.prototype.initialize.apply(this, [audiolet, 1, 0]);
 
-        this.device = new AudioletDevice(audiolet);
+        this.device = new AudioletDevice(audiolet, sampleRate,
+                                         numberOfChannels, bufferSize);
+        audiolet.device = this.device; // Shortcut
         this.scheduler = new Scheduler(audiolet);
-        this.upMixer = new UpMixer(audiolet, audiolet.numberOfChannels);
+        audiolet.scheduler = this.scheduler; // Shortcut
+        this.feedbackController = new FeedbackController(audiolet);
+        this.upMixer = new UpMixer(audiolet, this.device.numberOfChannels);
 
-        this.inputs[0].connect(this.scheduler);
+        this.inputs[0].connect(this.feedbackController);
+        this.feedbackController.connect(this.scheduler);
         this.scheduler.connect(this.upMixer);
         this.upMixer.connect(this.device);
     }
 });
 
-function AudioletDevice(audiolet) {
+function AudioletDevice(audiolet, sampleRate, numberOfChannels, bufferSize) {
     // Mozilla?
     var tmpAudio = new Audio();
     var haveAudioDataAPI = (typeof tmpAudio.mozSetup == 'function');
     tmpAudio = null;
     if (haveAudioDataAPI) {
-        return (new AudioDataAPIDevice(audiolet));
+        return (new AudioDataAPIDevice(audiolet, sampleRate, numberOfChannels,
+                                       bufferSize));
     }
     // Webkit?
     else if (typeof AudioContext != 'undefined') {
-        return (new WebAudioAPIDevice(audiolet));
+        return (new WebAudioAPIDevice(audiolet, sampleRate, numberOfChannels,
+                                      bufferSize));
     }
     else {
-        return (new DummyDevice(audiolet));
+        return (new DummyDevice(audiolet, sampleRate, numberOfChannels,
+                                bufferSize));
     }
 }
 
@@ -412,7 +488,9 @@ var AudioletInput = new Class({
         this.index = index;
         this.connectedFrom = [];
         // Minimum sized buffer, which we can resize from accordingly
-        this.buffer = new AudioletBuffer(1, 1, node.audiolet.sampleRate);
+        this.buffer = new AudioletBuffer(1, 0);
+        // Overflow buffer, for feedback loops
+        this.overflow = new AudioletBuffer(1, 0);
     },
 
     connect: function(output) {
@@ -437,14 +515,8 @@ var AudioletInput = new Class({
 
 var Audiolet = new Class({
     initialize: function(sampleRate, numberOfChannels, bufferSize) {
-        this.sampleRate = sampleRate || 44100.0;
-        this.numberOfChannels = numberOfChannels || 2;
-        this.bufferSize = bufferSize || Math.pow(2, 14);
-        
-        this.output = new AudioletDestination(this);
-        // Easy-access destination variables
-        this.device = this.output.device;
-        this.scheduler = this.output.scheduler;
+        this.output = new AudioletDestination(this, sampleRate,
+                                              numberOfChannels, bufferSize);
     }
 });
 
@@ -455,7 +527,12 @@ var AudioletOutput = new Class({
         this.index = index;
         this.connectedTo = [];
         // Minimum sized buffer, which we can resize from accordingly
-        this.buffer = new AudioletBuffer(1, 1, node.audiolet.sampleRate);
+        this.buffer = new AudioletBuffer(1, 0);
+        // Buffers overflowing data if we are in a feedback loop
+        this.overflow = new AudioletBuffer(1, 0);
+        // Where overflow and regular buffer are concatenated if we are in a
+        // feedback loop
+        this.outputBuffer = new AudioletBuffer(1, 0);
 
         this.linkedInput = null;
         this.numberOfChannels = 1;
@@ -492,6 +569,61 @@ var AudioletOutput = new Class({
             return(this.linkedInput.buffer.numberOfChannels);
         }
         return(this.numberOfChannels);
+    },
+
+    getBuffer: function(length) {
+        var buffer = this.buffer;
+        if (buffer.length == length) {
+            // Buffer not part of a feedback loop, so just return it
+            return buffer;
+        }
+        else {
+            // Buffer is part of a feedback loop, so we need to take care of
+            // overflows and construct an output buffer
+            var overflow = this.overflow;
+            var outputBuffer = this.outputBuffer;
+
+            if (outputBuffer.length == 0) {
+                // First run through, so buffer will not hold any data.  Give
+                // a buffer full of zeros
+                buffer.resize(1, length, true);
+            }
+            
+            // Make the output buffer the correct size
+            outputBuffer.resize(buffer.numberOfChannels, length, true);
+
+            var overflowLength = overflow.length;
+            var overflowSamples = Math.min(length, overflowLength);
+            var remainingOverflow = overflow.length - overflowSamples;
+            if (overflowSamples) {
+                // Set the first part of the output from the overflow
+                outputBuffer.setSection(overflow, overflowSamples);
+
+                if (remainingOverflow) {
+                    // Move any unused overflow to the start
+                    overflow.setSection(overflow, remainingOverflow,
+                                        overflowSamples, 0);
+                }
+            }
+                                  
+            var bufferSamples = length - overflowSamples;
+            var remainingBuffer = buffer.length - bufferSamples;
+            if (bufferSamples) {
+                // Set the second part of the output from the buffer
+                this.outputBuffer.setSection(this.buffer, bufferSamples, 0,
+                                             overflowSamples);
+            }
+
+            // Resize the overflow to it's correct length
+            overflow.resize(overflow.numberOfChannels,
+                            remainingOverflow + remainingBuffer);
+            if (remainingBuffer) {
+                // Move any unused buffer to the start of the overflow
+                overflow.setSection(buffer, remainingBuffer,
+                                    bufferSamples, remainingOverflow);
+            }
+            return this.outputBuffer;
+        }
     }
 });
 
@@ -515,7 +647,7 @@ var AudioletParameter = new Class({
     getValue: function(index) {
         var input = this.input;
         if (input && input.isConnected()) {
-            return(input.buffer.data[index]);
+            return(input.buffer.getChannelData(0)[index]);
         }
         else {
             return(this.value);
@@ -529,8 +661,13 @@ var AudioletParameter = new Class({
 
 var DummyDevice = new Class({
     Extends: AbstractAudioletDevice,
-    initialize: function(audiolet) {
+    initialize: function(audiolet, sampleRate, numberOfChannels, bufferSize) {
         AbstractAudioletDevice.prototype.initialize.apply(this, [audiolet]);
+
+        this.sampleRate = sampleRate || 44100.0;
+        this.numberOfChannels = numberOfChannels || 2;
+        this.bufferSize = bufferSize || 8192;
+
         this.writePosition = 0;
 
         this.tick.periodical(1000 * this.bufferSize / this.sampleRate, this);
@@ -551,6 +688,80 @@ var DummyDevice = new Class({
     }
 });
 
+
+/**
+ * @depends AudioletNode.js
+ */
+
+var FeedbackController = new Class({
+    Extends: AudioletNode,
+    initialize: function(audiolet) {
+        AudioletNode.prototype.initialize.apply(this, [audiolet, 1, 1]);
+        this.lastTickSize = null;
+        this.overflowSize = 0;
+    },
+
+
+    tick: function(length, timestamp) {
+        if (this.lastTickSize == null) {
+            // First tick, just do a normal tick
+            AudioletNode.prototype.tick.apply(this, [length, timestamp]);
+            this.lastTickSize = length;
+            return;
+        }
+
+        var samplesAvailable = this.lastTickSize + this.overflowSize;
+        if (length < samplesAvailable) {
+            // Enough samples from the last tick and buffered, so just tick
+            // and recalculate any overflow
+            AudioletNode.prototype.tick.apply(this, [length, timestamp]);
+            this.lastTickSize = length;
+            this.overflowSize = samplesAvailable - length;
+        }
+        else {
+            // Not enough samples available, so we will have to do it in blocks
+            // of size samplesAvailable
+            var samplesGenerated = 0;
+            var outputBuffers = null;
+            while (samplesGenerated < length) {
+                var samplesNeeded;
+                // If length does not split exactly into the sample size,
+                // then do the small block size first, so at the end we still
+                // have a lastTickSize equal to samplesAvailable
+                var smallBlockSize = length % samplesAvailable;
+                if (samplesGenerated == 0 && smallBlockSize) {
+                    samplesNeeded = smallBlockSize;
+                }
+                else {
+                    samplesNeeded = samplesAvailable;
+                }
+                
+                this.tickParents(samplesNeeded, timestamp + samplesGenerated);
+
+                var inputBuffers = this.createInputBuffers(samplesNeeded);
+                if (!outputBuffers) {
+                    outputBuffers = this.createOutputBuffers(length);
+                }
+                this.generate(inputBuffers, outputBuffers, samplesGenerated);
+
+                samplesGenerated += samplesNeeded;
+                this.lastTickSize = samplesNeeded;
+                this.overflowSize = 0;
+            }
+        }
+    },
+
+    generate: function(inputBuffers, outputBuffers, offset) {
+        var inputBuffer = inputBuffers[0];
+        var outputBuffer = outputBuffers[0];
+        if (inputBuffer.isEmpty) {
+            outputBuffer.isEmpty = true;
+            return;
+        }
+        outputBuffer.setSection(inputBuffer, inputBuffer.length,
+                                0, offset);
+    }
+});
 
 /**
  * @depends AudioletNode.js
@@ -695,7 +906,7 @@ var Scheduler = new Class({
         this.beatsPerBar = 0;
 
         this.lastBeatTime = 0;
-        this.beatLength = 60 / this.bpm * this.audiolet.sampleRate;
+        this.beatLength = 60 / this.bpm * this.audiolet.device.sampleRate;
 
         var emptyBuffer = new AudioletBuffer(1, 1);
     },
@@ -802,7 +1013,7 @@ var Scheduler = new Class({
 
     updateClock: function(time) {
         this.time = time;
-        this.seconds = this.time * this.audiolet.sampleRate;
+        this.seconds = this.time * this.audiolet.device.sampleRate;
         if (this.time >= this.lastBeatTime + this.beatLength) {
             this.beat += 1;
             this.beatInBar += 1;
@@ -895,8 +1106,13 @@ for (var i = 0; i < types.length; ++i) {
 
 var WebAudioAPIDevice = new Class({
     Extends: AbstractAudioletDevice,
-    initialize: function(audiolet) {
+    initialize: function(audiolet, sampleRate, numberOfChannels, bufferSize) {
         AbstractAudioletDevice.prototype.initialize.apply(this, [audiolet]);
+
+        this.sampleRate = sampleRate || 44100.0;
+        this.numberOfChannels = numberOfChannels || 2;
+        this.bufferSize = bufferSize || 8192;
+
         // AudioContext is called webkitAudioContext in the current
         // implementation, so look for either
         var AudioContext, webkitAudioContext;
@@ -934,119 +1150,144 @@ var WebAudioAPIDevice = new Class({
 
 var Envelope = new Class({
     Extends: AudioletNode,
-    initialize: function(audiolet, gate, numberOfInputs, onComplete) {
-        AudioletNode.prototype.initialize.apply(this, [audiolet, 1,
-                                                       numberOfInputs]);
-        this.gate = new AudioletParameter(this, 0, gate || 1);
-        this.onComplete = onComplete;
-    }
-});
-
-/**
- * @depends Envelope.js
- */
-var ADSR = new Class({
-    Extends: Envelope,
-    initialize: function(audiolet, gate, attack, decay, sustain, release,
+    initialize: function(audiolet, gate, levels, times, releaseStage,
                          onComplete) {
-        Envelope.prototype.initialize.apply(this, [audiolet, gate, 5,
-                                                   onComplete]);
-        this.on = false;
+        AudioletNode.prototype.initialize.apply(this, [audiolet, 1, 1]);
+        this.gate = new AudioletParameter(this, 0, gate || 1);
+
+        this.levels = levels;
+        this.times = times;
+        this.releaseStage = releaseStage;
+        this.onComplete = onComplete;
+
         this.stage = null;
+        this.time = null;
+        this.changeTime = null;
+
         this.level = 0;
-
-        this.attack = new AudioletParameter(this, 1, attack || 0.01);
-        this.decay = new AudioletParameter(this, 2, decay || 0.3);
-        this.sustain = new AudioletParameter(this, 3, sustain || 0.5);
-        this.release = new AudioletParameter(this, 4, release || 1);
-
-        this.attackDelta = null;
-        this.releaseDelta = null;
+        this.delta = 0;
+        this.gateOn = false;
     },
 
     generate: function(inputBuffers, outputBuffers) {
         var buffer = outputBuffers[0];
         var channel = buffer.getChannelData(0);
 
-        var sampleRate = this.audiolet.sampleRate;
-
         var gateParameter = this.gate;
-        var attackParameter = this.attack;
-        var decayParameter = this.decay;
-        var sustainParameter = this.sustain;
-        var releaseParameter = this.release;
+        var releaseStage = this.releaseStage;
 
-        var on = this.on;
         var stage = this.stage;
+        var time = this.time;
+        var changeTime = this.changeTime;
+
         var level = this.level;
-        var onComplete = this.onComplete;
+        var delta = this.delta;
+        var gateOn = this.gateOn;
 
-        var attackDelta = this.attackDelta;
-        var releaseDelta = this.releaseDelta;
-
+        var stageChanged = false;
+        
         var bufferLength = buffer.length;
         for (var i=0; i<bufferLength; i++) {
-            var gate = gateParameter.getValue(i);
-            
-            if (!on && gate) {
-                on = true;
-                stage = ADSR.ATTACK;
-                var attack = attackParameter.getValue(i);
-                attackDelta = (1 - level)/(attack * sampleRate);
+            var gate = gateParameter.getValue();
+
+            if (gate && !gateOn) {
+                // Key pressed
+                gateOn = true;
+                stage = 0;
+                time = 0;
+                stageChanged = true;
             }
 
-            if (on && !gate) {
-                on = false;
-                stage = ADSR.RELEASE;
-                var release = releaseParameter.getValue(i);
-                releaseDelta = level/(release * sampleRate);
+            if (gateOn && !gate) {
+                // Key released
+                gateOn = false;
+                if (releaseStage) {
+                    // Jump to the release stage
+                    stage = releaseStage;
+                    stageChanged = true;
+                }
             }
 
-            if (stage == ADSR.ATTACK) {
-                // Attack phase
-                level += attackDelta;
-                if (level >= 1) {
-                    level = 1;
-                    stage = ADSR.DECAY;
-                    var decay = decayParameter.getValue(i);
-                    var sustain = sustainParameter.getValue(i);
-                    decayDelta = (1 - sustain)/(decay * sampleRate);
-                }
-            }
-            else if (stage == ADSR.DECAY) {
-                level -= decayDelta;
-                var sustain = sustainParameter.getValue(i);
-                if (level <= sustain) {
-                    level = sustain;
-                    stage = ADSR.SUSTAIN;
-                }
-            }
-            else if (stage == ADSR.RELEASE) {
-                level -= releaseDelta;
-                if (level <= 0) {
-                    level = 0;
-                    stage = null;
-                    if (onComplete) {
-                        onComplete();
+            if (changeTime) {
+                // We are not sustaining, and we are playing, so increase the
+                // time
+                time += 1;
+                if (time == changeTime) {
+                    // Need to go to the next stage
+                    stage += 1;
+                    if (stage != releaseStage) {
+                        stageChanged = true;
+                    }
+                    else {
+                        // If we reach the release stage then sustain the value
+                        // until the gate is released rather than moving on
+                        // to the next level.
+                        changeTime = null;
+                        delta = 0;
                     }
                 }
             }
 
+            if (stageChanged) {
+                level = this.levels[stage];
+                if (stage != this.times.length) {
+                    // Actually update the variables
+                    delta = this.calculateDelta(stage, level);
+                    changeTime = this.calculateChangeTime(stage, time);
+                }
+                else {
+                    // Made it to the end, so finish up
+                    if (this.onComplete) {
+                        this.onComplete();
+                    }
+                    stage = null;
+                    time = null;
+                    changeTime = null;
+
+                    delta = 0;
+                }
+                stageChanged = false;
+            }
+                
+            level += delta;
             channel[i] = level;
         }
-        this.on = on;
-        this.stage = stage;
-        this.level = level;
 
-        this.attackDelta = attackDelta;
-        this.releaseDelta = releaseDelta;
+        this.stage = stage;
+        this.time = time;
+        this.changeTime = changeTime;
+
+        this.level = level;
+        this.delta = delta;
+        this.gateOn = gateOn;
+    },
+
+    calculateDelta: function(stage, level) {
+        var delta = this.levels[stage + 1] - level;
+        var stageTime = this.times[stage] * this.audiolet.device.sampleRate;
+        return (delta / stageTime);
+    },
+
+    calculateChangeTime: function(stage, time) {
+        var stageTime = this.times[stage] * this.audiolet.device.sampleRate;
+        return(time + stageTime);
     }
 });
 
-ADSR.ATTACK = 0;
-ADSR.DECAY = 1;
-ADSR.SUSTAIN = 2;
-ADSR.RELEASE = 3;
+/**
+ * @depends Envelope.js
+ */
+var ADSREnvelope = new Class({
+    Extends: Envelope,
+    initialize: function(audiolet, gate, attack, decay, sustain, release,
+                         onComplete) {
+        var levels = [0, 1, sustain, 0];
+        var times = [attack, decay, release];
+        Envelope.prototype.initialize.apply(this, [audiolet, gate, levels,
+                                                   times, 2, onComplete]);
+    }
+});
+
 
 /**
  * @depends ../core/AudioletNode.js
@@ -1172,7 +1413,7 @@ var AllPassFilter = new Class({
 
     calculateCoefficients: function(frequency) {
         var w0 = 2 * Math.PI *  frequency /
-                 this.audiolet.sampleRate;
+                 this.audiolet.device.sampleRate;
         var cosw0 = Math.cos(w0);
         var sinw0 = Math.sin(w0);
         var alpha = sinw0 / (2 / Math.sqrt(2));
@@ -1199,7 +1440,7 @@ var BandPassFilter = new Class({
 
     calculateCoefficients: function(frequency) {
         var w0 = 2 * Math.PI *  frequency /
-                 this.audiolet.sampleRate;
+                 this.audiolet.device.sampleRate;
         var cosw0 = Math.cos(w0);
         var sinw0 = Math.sin(w0);
         var alpha = sinw0 / (2 / Math.sqrt(2));
@@ -1226,7 +1467,7 @@ var BandRejectFilter = new Class({
 
     calculateCoefficients: function(frequency) {
         var w0 = 2 * Math.PI *  frequency /
-                 this.audiolet.sampleRate;
+                 this.audiolet.device.sampleRate;
         var cosw0 = Math.cos(w0);
         var sinw0 = Math.sin(w0);
         var alpha = sinw0 / (2 / Math.sqrt(2));
@@ -1252,7 +1493,7 @@ var Delay = new Class({
         this.maximumDelayTime = maximumDelayTime;
         this.delayTime = new AudioletParameter(this, 1, delayTime || 1);
         this.buffer = new Float32Array(maximumDelayTime *
-                                       this.audiolet.sampleRate);
+                                       this.audiolet.device.sampleRate);
         this.readWriteIndex = 0;
     },
 
@@ -1269,7 +1510,7 @@ var Delay = new Class({
         var delayTimeParameter = this.delayTime;
         var buffer = this.buffer;
         var readWriteIndex = this.readWriteIndex;
-        var sampleRate = this.audiolet.sampleRate;
+        var sampleRate = this.audiolet.device.sampleRate;
 
         var inputChannel = inputBuffer.getChannelData(0);
         var outputChannel = outputBuffer.getChannelData(0);
@@ -1315,7 +1556,7 @@ var Gain = new Class({
             var outputChannel = outputBuffer.getChannelData(i);
             var bufferLength = inputBuffer.length;
             for (var j = 0; j < bufferLength; j++) {
-                outputChannel[j] = inputChannel[j] * gain.getValue(i);
+                outputChannel[j] = inputChannel[j] * gain.getValue(j);
             }
         }
     }
@@ -1335,7 +1576,7 @@ var HighPassFilter = new Class({
 
     calculateCoefficients: function(frequency) {
         var w0 = 2 * Math.PI *  frequency /
-                 this.audiolet.sampleRate;
+                 this.audiolet.device.sampleRate;
         var cosw0 = Math.cos(w0);
         var sinw0 = Math.sin(w0);
         var alpha = sinw0 / (2 / Math.sqrt(2));
@@ -1362,7 +1603,7 @@ var LowPassFilter = new Class({
 
     calculateCoefficients: function(frequency) {
         var w0 = 2 * Math.PI *  frequency /
-                 this.audiolet.sampleRate;
+                 this.audiolet.device.sampleRate;
         var cosw0 = Math.cos(w0);
         var sinw0 = Math.sin(w0);
         var alpha = sinw0 / (2 / Math.sqrt(2));
@@ -1455,90 +1696,17 @@ var Pan = new Class({
 /**
  * @depends Envelope.js
  */
-var Percussive = new Class({
+var PercussiveEnvelope = new Class({
     Extends: Envelope,
-    initialize: function(audiolet, gate, attack, decay, sustain, release,
-                         onComplete) {
-        Envelope.prototype.initialize.apply(this, [audiolet, gate, 3,
-                                                   onComplete]);
-        this.canTrigger = true;
-        this.stage = null;
-        this.level = 0;
-
-        this.attack = new AudioletParameter(this, 1, attack || 0.01);
-        this.release = new AudioletParameter(this, 2, release || 1);
-
-        this.attackDelta = null;
-        this.releaseDelta = null;
-    },
-
-    generate: function(inputBuffers, outputBuffers) {
-        var buffer = outputBuffers[0];
-        var channel = buffer.getChannelData(0);
-
-        var sampleRate = this.audiolet.sampleRate;
-
-        var gateParameter = this.gate;
-        var attackParameter = this.attack;
-        var releaseParameter = this.release;
-
-        var canTrigger = this.canTrigger;
-        var stage = this.stage;
-        var level = this.level;
-        var onComplete = this.onComplete;
-
-        var attackDelta = this.attackDelta;
-        var releaseDelta = this.releaseDelta;
-
-        var bufferLength = buffer.length;
-        for (var i=0; i<bufferLength; i++) {
-            var gate = gateParameter.getValue(i);
-            
-            if (canTrigger && gate) {
-                stage = ADSR.ATTACK;
-                var attack = attackParameter.getValue(i);
-                attackDelta = (1 - level)/(attack * sampleRate);
-                canTrigger = false;
-            }
-
-            if (!gate) {
-                canTrigger = true;
-            }
-
-            if (stage == ADSR.ATTACK) {
-                // Attack phase
-                level += attackDelta;
-                if (level >= 1) {
-                    level = 1;
-                    stage = ADSR.RELEASE;
-                    releaseDelta = 1/(release * sampleRate);
-                }
-            }
-
-            else if (stage == ADSR.RELEASE) {
-                level -= releaseDelta;
-                if (level <= 0) {
-                    level = 0;
-                    stage = null;
-                    if (onComplete) {
-                        onComplete();
-                    }
-                }
-            }
-
-            channel[i] = level;
-        }
-        this.canTrigger = canTrigger;
-        this.stage = stage;
-        this.level = level;
-
-        this.attackDelta = attackDelta;
-        this.releaseDelta = releaseDelta;
+    initialize: function(audiolet, gate, attack, release, onComplete) {
+        var levels = [0, 1, 0];
+        var times = [attack, release];
+        Envelope.prototype.initialize.apply(this, [audiolet, gate, levels,
+                                                   times, null,  onComplete]);
     }
 });
 
-Percussive.ATTACK = 0;
-Percussive.RELEASE = 1;
+
 
 /**
  * @depends ../core/AudioletNode.js
@@ -1557,7 +1725,7 @@ var TableLookupOscillator = new Class({
         var channel = buffer.getChannelData(0);
 
         // Make processing variables local
-        var sampleRate = this.audiolet.sampleRate;
+        var sampleRate = this.audiolet.device.sampleRate;
         var table = this.table;
         var tableSize = table.length;
         var phase = this.phase;
@@ -1612,6 +1780,7 @@ Sine.TABLE = [];
 for (var i = 0; i < 8192; i++) {
     Sine.TABLE.push(Math.sin(i * 2 * Math.PI / 8192));
 }
+
 
 
 /**
