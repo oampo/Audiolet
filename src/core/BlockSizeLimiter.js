@@ -2,47 +2,42 @@
  * @depends AudioletNode.js
  */
 
-var FeedbackController = new Class({
+var BlockSizeLimiter = new Class({
     Extends: AudioletNode,
-    initialize: function(audiolet) {
+    initialize: function(audiolet, maximumBlockSize) {
         AudioletNode.prototype.initialize.apply(this, [audiolet, 1, 1]);
-        this.lastTickSize = null;
-        this.overflowSize = 0;
+        this.maximumBlockSize = maximumBlockSize;
     },
 
 
     tick: function(length, timestamp) {
-        if (this.lastTickSize == null) {
+        if (timestamp == 0) {
             // First tick, just do a normal tick
             AudioletNode.prototype.tick.apply(this, [length, timestamp]);
-            this.lastTickSize = length;
             return;
         }
-
-        var samplesAvailable = this.lastTickSize + this.overflowSize;
-        if (length < samplesAvailable) {
+        var maximumBlockSize = this.maximumBlockSize;
+        if (length < maximumBlockSize) {
             // Enough samples from the last tick and buffered, so just tick
             // and recalculate any overflow
             AudioletNode.prototype.tick.apply(this, [length, timestamp]);
-            this.lastTickSize = length;
-            this.overflowSize = samplesAvailable - length;
         }
         else {
             // Not enough samples available, so we will have to do it in blocks
-            // of size samplesAvailable
+            // of size maximumBlockSize
             var samplesGenerated = 0;
             var outputBuffers = null;
             while (samplesGenerated < length) {
                 var samplesNeeded;
-                // If length does not split exactly into the sample size,
+                // If length does not split exactly into the block size,
                 // then do the small block size first, so at the end we still
-                // have a lastTickSize equal to samplesAvailable
-                var smallBlockSize = length % samplesAvailable;
+                // have a lastTickSize equal to maximumBlockSize
+                var smallBlockSize = length % maximumBlockSize;
                 if (samplesGenerated == 0 && smallBlockSize) {
                     samplesNeeded = smallBlockSize;
                 }
                 else {
-                    samplesNeeded = samplesAvailable;
+                    samplesNeeded = maximumBlockSize;
                 }
                 
                 this.tickParents(samplesNeeded, timestamp + samplesGenerated);
@@ -54,8 +49,6 @@ var FeedbackController = new Class({
                 this.generate(inputBuffers, outputBuffers, samplesGenerated);
 
                 samplesGenerated += samplesNeeded;
-                this.lastTickSize = samplesNeeded;
-                this.overflowSize = 0;
             }
         }
     },

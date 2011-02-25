@@ -63,7 +63,8 @@ var AudioletOutput = new Class({
             if (outputBuffer.length == 0) {
                 // First run through, so buffer will not hold any data.  Give
                 // a buffer full of zeros
-                buffer.resize(1, length, true);
+                var limiter = this.node.audiolet.blockSizeLimiter;
+                buffer.resize(1, limiter.maximumBlockSize, true);
             }
             
             // Make the output buffer the correct size

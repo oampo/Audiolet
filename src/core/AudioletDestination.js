@@ -12,11 +12,15 @@ var AudioletDestination = new Class({
         audiolet.device = this.device; // Shortcut
         this.scheduler = new Scheduler(audiolet);
         audiolet.scheduler = this.scheduler; // Shortcut
-        this.feedbackController = new FeedbackController(audiolet);
+
+        this.blockSizeLimiter = new BlockSizeLimiter(audiolet,
+                                                     Math.pow(2, 12));
+        audiolet.blockSizeLimiter = this.blockSizeLimiter; // Shortcut
+
         this.upMixer = new UpMixer(audiolet, this.device.numberOfChannels);
 
-        this.inputs[0].connect(this.feedbackController);
-        this.feedbackController.connect(this.scheduler);
+        this.inputs[0].connect(this.blockSizeLimiter);
+        this.blockSizeLimiter.connect(this.scheduler);
         this.scheduler.connect(this.upMixer);
         this.upMixer.connect(this.device);
     }
