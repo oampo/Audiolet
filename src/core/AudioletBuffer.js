@@ -67,7 +67,7 @@ var AudioletBuffer = new Class({
         }
     },
 
-    resize: function(numberOfChannels, length, offset, lazy) {
+    resize: function(numberOfChannels, length, lazy, offset) {
         offset = offset || 0;
         for (var i=0; i<numberOfChannels; i++) {
             if (length > this.length) {
