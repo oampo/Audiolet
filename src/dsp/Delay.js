@@ -35,7 +35,10 @@ var Delay = new Class({
             var delayTime = delayTimeParameter.getValue(i) * sampleRate;
             outputChannel[i] = buffer[readWriteIndex];
             buffer[readWriteIndex] = inputChannel[i];
-            readWriteIndex = (readWriteIndex + 1) % delayTime;
+            readWriteIndex += 1;
+            if (readWriteIndex >= delayTime) {
+                readWriteIndex = 0;
+            }
         }
         this.readWriteIndex = readWriteIndex;
     }
