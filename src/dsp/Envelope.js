@@ -38,7 +38,7 @@ var Envelope = new Class({
         
         var bufferLength = buffer.length;
         for (var i=0; i<bufferLength; i++) {
-            var gate = gateParameter.getValue();
+            var gate = gateParameter.getValue(i);
 
             if (gate && !gateOn) {
                 // Key pressed
