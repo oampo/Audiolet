@@ -100,7 +100,7 @@ var AudioletNode = new Class({
 
                 // Resize the input buffer accordingly
                 var inputBuffer = input.buffer;
-                inputBuffer.resize(numberOfChannels, length);
+                inputBuffer.resize(numberOfChannels, length, true);
 
                 // Set the buffer using the largest output
                 inputBuffer.set(largestOutput.getBuffer(length));
@@ -119,7 +119,7 @@ var AudioletNode = new Class({
                 // If we don't have any connections give a single channel empty
                 // buffer of the correct length
                 var inputBuffer = input.buffer;
-                inputBuffer.resize(1, length);
+                inputBuffer.resize(1, length, true);
                 inputBuffer.isEmpty = true;
                 inputBuffers.push(inputBuffer);
             }
@@ -133,7 +133,7 @@ var AudioletNode = new Class({
         var numberOfOutputs = this.numberOfOutputs;
         for (var i = 0; i < numberOfOutputs; i++) {
             var output = this.outputs[i];
-            output.buffer.resize(output.getNumberOfChannels(), length);
+            output.buffer.resize(output.getNumberOfChannels(), length, true);
             outputBuffers.push(output.buffer);
         }
         return (outputBuffers);

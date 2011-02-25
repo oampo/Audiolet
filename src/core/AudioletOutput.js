@@ -63,11 +63,11 @@ var AudioletOutput = new Class({
             if (outputBuffer.length == 0) {
                 // First run through, so buffer will not hold any data.  Give
                 // a buffer full of zeros
-                buffer.resize(1, length);
+                buffer.resize(1, length, true);
             }
             
             // Make the output buffer the correct size
-            outputBuffer.resize(buffer.numberOfChannels, length);
+            outputBuffer.resize(buffer.numberOfChannels, length, true);
 
             var overflowLength = overflow.length;
             var overflowSamples = Math.min(length, overflowLength);
