@@ -8,8 +8,8 @@ var Delay = new Class({
         AudioletNode.prototype.initialize.apply(this, [audiolet, 2, 1]);
         this.maximumDelayTime = maximumDelayTime;
         this.delayTime = new AudioletParameter(this, 1, delayTime || 1);
-        this.buffer = new Float32Array(maximumDelayTime *
-                                       this.audiolet.device.sampleRate);
+        var bufferSize = maximumDelayTime * this.audiolet.device.sampleRate;
+        this.buffer = new Float32Array(Math.floor(bufferSize));
         this.readWriteIndex = 0;
     },
 
@@ -33,6 +33,7 @@ var Delay = new Class({
         var bufferLength = inputBuffer.length;
         for (var i = 0; i < bufferLength; i++) {
             var delayTime = delayTimeParameter.getValue(i) * sampleRate;
+            delayTime = Math.floor(delayTime);
             outputChannel[i] = buffer[readWriteIndex];
             buffer[readWriteIndex] = inputChannel[i];
             readWriteIndex += 1;
