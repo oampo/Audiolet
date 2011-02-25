@@ -17,7 +17,7 @@ var AudioletParameter = new Class({
     getValue: function(index) {
         var input = this.input;
         if (input && input.connectedFrom.length) {
-            return(input.buffer.getChannelData(0)[index]);
+            return(input.buffer.channels[0][index]);
         }
         else {
             return(this.value);
