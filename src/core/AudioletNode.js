@@ -65,8 +65,11 @@ var AudioletNode = new Class({
         for (var i = 0; i < numberOfInputs; i++) {
             var input = this.inputs[i];
             var numberOfStreams = input.connectedFrom.length;
+            // Tick backwards, as the input may disconnect itself during the
+            // loop
             for (var j = 0; j < numberOfStreams; j++) {
-                input.connectedFrom[j].node.tick(length, timestamp);
+                var index = numberOfStreams - j - 1;
+                input.connectedFrom[index].node.tick(length, timestamp);
             }
         }
     },
@@ -158,7 +161,7 @@ var AudioletNode = new Class({
             var output = this.outputs[i];
             var numberOfStreams = output.connectedTo.length;
             for (var j=0; j<numberOfStreams; j++) {
-                var inputPin = input.connectedFrom[j];
+                var inputPin = output.connectedTo[j];
                 var input = inputPin.node;
                 this.disconnect(input, i, inputPin.index);
             }

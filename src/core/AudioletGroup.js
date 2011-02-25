@@ -28,7 +28,8 @@ var AudioletGroup = new Class({
         for (var i=0; i<numberOfInputs; i++) {
             this.inputs[i].remove();
         }
-
+        
+        var numberOfOutputs = this.outputs.length;
         for (var i=0; i<numberOfOutputs; i++) {
             this.outputs[i].remove();
         }
