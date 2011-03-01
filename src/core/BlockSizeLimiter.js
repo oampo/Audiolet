@@ -11,11 +11,6 @@ var BlockSizeLimiter = new Class({
 
 
     tick: function(length, timestamp) {
-        if (timestamp == 0) {
-            // First tick, just do a normal tick
-            AudioletNode.prototype.tick.apply(this, [length, timestamp]);
-            return;
-        }
         var maximumBlockSize = this.maximumBlockSize;
         if (length < maximumBlockSize) {
             // Enough samples from the last tick and buffered, so just tick
@@ -54,6 +49,7 @@ var BlockSizeLimiter = new Class({
     },
 
     generate: function(inputBuffers, outputBuffers, offset) {
+        offset = offset || 0;
         var inputBuffer = inputBuffers[0];
         var outputBuffer = outputBuffers[0];
         if (inputBuffer.isEmpty) {
@@ -62,5 +58,9 @@ var BlockSizeLimiter = new Class({
         }
         outputBuffer.setSection(inputBuffer, inputBuffer.length,
                                 0, offset);
+    },
+
+    toString: function() {
+        return "Block Size Limiter";
     }
 });
