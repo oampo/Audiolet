@@ -79,13 +79,39 @@ var AudioletBuffer = new Class({
                 this.unsliced_channels[i] = this.channels[i];
             }
             else {
-                this.channels[i] = this.unsliced_channels[i].subarray(offset,
-                                                                      offset +
-                                                                      length);
+                this.channels[i] = this.channels[i].subarray(offset, offset +
+                                                                     length);
             }
         }
         this.numberOfChannels = numberOfChannels;
         this.length = length;
+    },
+
+    push: function(buffer) {
+        var bufferLength = buffer.length;
+        this.resize(this.numberOfChannels, this.length + bufferLength);
+        this.setSection(buffer, bufferLength, 0, this.length - bufferLength);
+    },
+
+    pop: function(buffer) {
+        var bufferLength = buffer.length;
+        var offset = bufferLength - length;
+        buffer.setSection(this, bufferLength, offset, 0);
+        this.resize(this.numberOfChannels, offset);
+    },
+
+    unshift: function(buffer) {
+        var bufferLength = buffer.length;
+        this.resize(this.numberOfChannels, this.length + bufferLength, false,
+                    bufferLength);
+        this.setSection(buffer, bufferLength, 0, 0);
+    },
+
+    shift: function(buffer) {
+        var bufferLength = buffer.length;
+        buffer.setSection(this, bufferLength, 0, 0);
+        this.resize(this.numberOfChannels, this.length - bufferLength,
+                    false, bufferLength);
     },
 
     zero: function() {
