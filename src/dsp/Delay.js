@@ -42,6 +42,10 @@ var Delay = new Class({
             }
         }
         this.readWriteIndex = readWriteIndex;
+    },
+
+    toString: function() {
+        return "Delay";
     }
 });
 

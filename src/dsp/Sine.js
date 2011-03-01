@@ -7,6 +7,10 @@ var Sine = new Class({
         TableLookupOscillator.prototype.initialize.apply(this, [audiolet,
                                                                 Sine.TABLE,
                                                                 frequency]);
+    },
+
+    toString: function() {
+        return "Sine";
     }
 });
 

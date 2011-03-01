@@ -27,6 +27,10 @@ var UpMixer = new Class({
             var outputChannel = outputBuffer.getChannelData(i);
             outputChannel.set(inputChannel);
         }
+    },
+
+    toString: function() {
+        return "UpMixer";
     }
 });
 

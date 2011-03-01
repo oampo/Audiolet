@@ -187,5 +187,9 @@ var Scheduler = new Class({
             var outputChannel = outputBuffer.getChannelData(i);
             outputChannel.set(inputChannel, offset);
         }
+    },
+
+    toString: function() {
+        return "Scheduler";
     }
 });

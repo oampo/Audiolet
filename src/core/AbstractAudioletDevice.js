@@ -19,6 +19,10 @@ var AbstractAudioletDevice = new Class({
 
     getWriteTime: function() {
         return 0;
+    },
+
+    toString: function() {
+        return "Device";
     }
 });
 

@@ -31,6 +31,10 @@ var Gain = new Class({
                 outputChannel[j] = inputChannel[j] * gain.getValue(j);
             }
         }
+    },
+
+    toString: function() {
+        return("Gain");
     }
 });
 

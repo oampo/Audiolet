@@ -28,6 +28,10 @@ var PassThroughNode = new Class({
             outputBuffers.push(output.buffer);
         }
         return(outputBuffers);
+    },
+
+    toString: function() {
+        return "Pass Through Node";
     }
 });
 
