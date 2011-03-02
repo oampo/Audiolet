@@ -33,7 +33,7 @@ var MulAdd = new Class({
     },
 
     toString: function() {
-        return "Multiplier/Adder";
+        return 'Multiplier/Adder';
     }
 });
 

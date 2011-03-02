@@ -34,7 +34,7 @@ var Gain = new Class({
     },
 
     toString: function() {
-        return("Gain");
+        return ('Gain');
     }
 });
 

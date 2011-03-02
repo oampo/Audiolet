@@ -10,7 +10,7 @@ var Sine = new Class({
     },
 
     toString: function() {
-        return "Sine";
+        return 'Sine';
     }
 });
 

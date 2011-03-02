@@ -35,7 +35,7 @@ var TableLookupOscillator = new Class({
     },
 
     toString: function() {
-        return "Table Lookup Oscillator";
+        return 'Table Lookup Oscillator';
     }
 });
 

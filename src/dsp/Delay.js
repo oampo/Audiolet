@@ -45,7 +45,7 @@ var Delay = new Class({
     },
 
     toString: function() {
-        return "Delay";
+        return 'Delay';
     }
 });
 

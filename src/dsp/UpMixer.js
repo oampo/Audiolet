@@ -30,7 +30,7 @@ var UpMixer = new Class({
     },
 
     toString: function() {
-        return "UpMixer";
+        return 'UpMixer';
     }
 });
 

@@ -43,7 +43,7 @@ var BiquadFilter = new Class({
         var inputChannels = [];
         var outputChannels = [];
         var numberOfChannels = inputBuffer.numberOfChannels;
-        for (var i=0; i<numberOfChannels; i++) {
+        for (var i = 0; i < numberOfChannels; i++) {
             inputChannels.push(inputBuffer.getChannelData(i));
             outputChannels.push(outputBuffer.getChannelData(i));
             if (i >= this.xValues.length) {
@@ -77,8 +77,8 @@ var BiquadFilter = new Class({
                 b1 = this.b1;
                 b2 = this.b2;
             }
-            
-            for (var j=0; j<numberOfChannels; j++) {
+
+            for (var j = 0; j < numberOfChannels; j++) {
                 var inputChannel = inputChannels[j];
                 var outputChannel = outputChannels[j];
 
@@ -88,7 +88,7 @@ var BiquadFilter = new Class({
                 var yValues = this.yValues[j];
                 var y1 = yValues[0];
                 var y2 = yValues[1];
-            
+
                 var x0 = inputChannel[i];
                 var y0 = (b0 / a0) * x0 +
                          (b1 / a0) * x1 +
@@ -97,7 +97,7 @@ var BiquadFilter = new Class({
                          (a2 / a0) * y2;
 
                 outputChannel[i] = y0;
-            
+
 
                 xValues[0] = x0;
                 xValues[1] = x1;
@@ -109,6 +109,6 @@ var BiquadFilter = new Class({
     },
 
     toString: function() {
-        return "Biquad Filter";
+        return 'Biquad Filter';
     }
 });

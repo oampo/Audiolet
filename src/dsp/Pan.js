@@ -38,6 +38,6 @@ var Pan = new Class({
     },
 
     toString: function() {
-        return "Stereo Panner";
+        return 'Stereo Panner';
     }
 });

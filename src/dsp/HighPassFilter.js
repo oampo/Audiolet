@@ -10,7 +10,7 @@ var HighPassFilter = new Class({
     },
 
     calculateCoefficients: function(frequency) {
-        var w0 = 2 * Math.PI *  frequency /
+        var w0 = 2 * Math.PI * frequency /
                  this.audiolet.device.sampleRate;
         var cosw0 = Math.cos(w0);
         var sinw0 = Math.sin(w0);
@@ -25,6 +25,6 @@ var HighPassFilter = new Class({
     },
 
     toString: function() {
-        return "High Pass Filter";
+        return 'High Pass Filter';
     }
 });

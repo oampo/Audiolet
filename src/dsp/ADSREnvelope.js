@@ -12,7 +12,7 @@ var ADSREnvelope = new Class({
     },
 
     toString: function() {
-        return "ADSR Envelope";
+        return 'ADSR Envelope';
     }
 });
 

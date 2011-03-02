@@ -35,9 +35,9 @@ var Envelope = new Class({
         var gateOn = this.gateOn;
 
         var stageChanged = false;
-        
+
         var bufferLength = buffer.length;
-        for (var i=0; i<bufferLength; i++) {
+        for (var i = 0; i < bufferLength; i++) {
             var gate = gateParameter.getValue(i);
 
             if (gate && !gateOn) {
@@ -98,7 +98,7 @@ var Envelope = new Class({
                 }
                 stageChanged = false;
             }
-                
+
             level += delta;
             channel[i] = level;
         }
@@ -120,10 +120,10 @@ var Envelope = new Class({
 
     calculateChangeTime: function(stage, time) {
         var stageTime = this.times[stage] * this.audiolet.device.sampleRate;
-        return(time + stageTime);
+        return (time + stageTime);
     },
 
     toString: function() {
-        return "Envelope";
+        return 'Envelope';
     }
 });

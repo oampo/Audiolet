@@ -10,7 +10,7 @@ var Saw = new Class({
     },
 
     toString: function() {
-        return "Saw";
+        return 'Saw';
     }
 });
 

@@ -19,7 +19,7 @@ var WhiteNoise = new Class({
     },
 
     toString: function() {
-        return "White Noise";
+        return 'White Noise';
     }
 });
 
