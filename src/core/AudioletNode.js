@@ -45,6 +45,14 @@ var AudioletNode = new Class({
         outputPin.disconnect(inputPin);
     },
 
+    setNumberOfOutputChannels: function(output, numberOfChannels) {
+        this.outputs[output].numberOfChannels = numberOfChannels;
+    },
+
+    linkNumberOfOutputChannels: function(output, input) {
+        this.outputs[output].linkNumberOfChannels(this.inputs[input]);
+    },
+
     tick: function(length, timestamp) {
         if (timestamp != this.timestamp) {
             // Need to set the timestamp before we tick the parents so we

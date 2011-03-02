@@ -6,7 +6,7 @@ var Gain = new Class({
     Extends: AudioletNode,
     initialize: function(audiolet, gain) {
         AudioletNode.prototype.initialize.apply(this, [audiolet, 2, 1]);
-        this.outputs[0].link(this.inputs[0]);
+        this.linkNumberOfOutputChannels(0, 0);
         this.gain = new AudioletParameter(this, 1, gain || 1);
     },
 

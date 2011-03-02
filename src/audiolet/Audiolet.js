@@ -45,6 +45,14 @@ var AudioletNode = new Class({
         outputPin.disconnect(inputPin);
     },
 
+    setNumberOfOutputChannels: function(output, numberOfChannels) {
+        this.outputs[output].numberOfChannels = numberOfChannels;
+    },
+
+    linkNumberOfOutputChannels: function(output, input) {
+        this.outputs[output].linkNumberOfChannels(this.inputs[input]);
+    },
+
     tick: function(length, timestamp) {
         if (timestamp != this.timestamp) {
             // Need to set the timestamp before we tick the parents so we
@@ -931,7 +939,7 @@ var Scheduler = new Class({
     Extends: AudioletNode,
     initialize: function(audiolet, bpm) {
         AudioletNode.prototype.initialize.apply(this, [audiolet, 1, 1]);
-        this.outputs[0].link(this.inputs[0]);
+        this.linkNumberOfOutputChannels(0, 0);
         this.bpm = bpm || 120;
         this.queue = new PriorityQueue(null, function(a, b) {
             return (a.time < b.time);
@@ -1343,7 +1351,7 @@ var BiquadFilter = new Class({
         AudioletNode.prototype.initialize.apply(this, [audiolet, 2, 1]);
 
         // Same number of output channels as input channels
-        this.outputs[0].link(this.inputs[0]);
+        this.linkNumberOfOutputChannels(0, 0);
 
         this.frequency = new AudioletParameter(this, 1, frequency || 22100);
         this.lastFrequency = null; // See if we need to recalculate coefficients
@@ -1585,7 +1593,7 @@ var DiscontinuityDetector = new Class({
     Extends: PassThroughNode,
     initialize: function(audiolet) {
         PassThroughNode.prototype.initialize.apply(this, [audiolet, 1, 1]);
-        this.outputs[0].link(this.inputs[0]);
+        this.linkNumberOfOutputChannels(0, 0);
         this.lastValue = null;
     },
 
@@ -1619,7 +1627,7 @@ var Gain = new Class({
     Extends: AudioletNode,
     initialize: function(audiolet, gain) {
         AudioletNode.prototype.initialize.apply(this, [audiolet, 2, 1]);
-        this.outputs[0].link(this.inputs[0]);
+        this.linkNumberOfOutputChannels(0, 0);
         this.gain = new AudioletParameter(this, 1, gain || 1);
     },
 
@@ -1714,7 +1722,7 @@ var MulAdd = new Class({
     Extends: AudioletNode,
     initialize: function(audiolet, mul, add) {
         AudioletNode.prototype.initialize.apply(this, [audiolet, 3, 1]);
-        this.outputs[0].link(this.inputs[0]);
+        this.linkNumberOfOutputChannels(0, 0);
         this.mul = new AudioletParameter(this, 1, mul || 1);
         this.add = new AudioletParameter(this, 2, add || 0);
     },
@@ -1751,7 +1759,7 @@ var Pan = new Class({
     initialize: function(audiolet) {
         AudioletNode.prototype.initialize.apply(this, [audiolet, 2, 1]);
         // Hardcode two output channels
-        this.outputs[0].numberOfChannels = 2;
+        this.setNumberOfOutputChannels(0, 2);
         this.pan = new AudioletParameter(this, 1, 0.5);
     },
 

@@ -9,7 +9,7 @@ var BiquadFilter = new Class({
         AudioletNode.prototype.initialize.apply(this, [audiolet, 2, 1]);
 
         // Same number of output channels as input channels
-        this.outputs[0].link(this.inputs[0]);
+        this.linkNumberOfOutputChannels(0, 0);
 
         this.frequency = new AudioletParameter(this, 1, frequency || 22100);
         this.lastFrequency = null; // See if we need to recalculate coefficients

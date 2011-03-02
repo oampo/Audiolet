@@ -6,7 +6,7 @@ var MulAdd = new Class({
     Extends: AudioletNode,
     initialize: function(audiolet, mul, add) {
         AudioletNode.prototype.initialize.apply(this, [audiolet, 3, 1]);
-        this.outputs[0].link(this.inputs[0]);
+        this.linkNumberOfOutputChannels(0, 0);
         this.mul = new AudioletParameter(this, 1, mul || 1);
         this.add = new AudioletParameter(this, 2, add || 0);
     },

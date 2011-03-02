@@ -7,7 +7,7 @@ var Pan = new Class({
     initialize: function(audiolet) {
         AudioletNode.prototype.initialize.apply(this, [audiolet, 2, 1]);
         // Hardcode two output channels
-        this.outputs[0].numberOfChannels = 2;
+        this.setNumberOfOutputChannels(0, 2);
         this.pan = new AudioletParameter(this, 1, 0.5);
     },
 

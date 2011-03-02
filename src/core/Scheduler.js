@@ -6,7 +6,7 @@ var Scheduler = new Class({
     Extends: AudioletNode,
     initialize: function(audiolet, bpm) {
         AudioletNode.prototype.initialize.apply(this, [audiolet, 1, 1]);
-        this.outputs[0].link(this.inputs[0]);
+        this.linkNumberOfOutputChannels(0, 0);
         this.bpm = bpm || 120;
         this.queue = new PriorityQueue(null, function(a, b) {
             return (a.time < b.time);
