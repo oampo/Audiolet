@@ -27,7 +27,7 @@ var AudioletNode = new Class({
         if (instanceOf(node, AudioletGroup)) {
             // Connect to the pass-through node rather than the group
             node = node.inputs[input || 0];
-        } 
+        }
         var outputPin = this.outputs[output || 0];
         var inputPin = node.inputs[input || 0];
         outputPin.connect(inputPin);
@@ -100,7 +100,7 @@ var AudioletNode = new Class({
 
                 var numberOfChannels = 0;
                 var largestOutput = null;
-                for (var j=0; j<numberOfConnections; j++) {
+                for (var j = 0; j < numberOfConnections; j++) {
                     var output = connectedFrom[j];
                     var outputBuffer = output.buffer;
                     if (outputBuffer.numberOfChannels > numberOfChannels) {
@@ -115,7 +115,7 @@ var AudioletNode = new Class({
 
                 // Set the buffer using the largest output
                 inputBuffer.set(largestOutput.getBuffer(length));
-                
+
                 // Sum the rest of the outputs
                 for (var j = 0; j < numberOfConnections; j++) {
                     var output = connectedFrom[j];
@@ -153,10 +153,10 @@ var AudioletNode = new Class({
     remove: function() {
         // Disconnect inputs
         var numberOfInputs = this.inputs.length;
-        for (var i=0; i<numberOfInputs; i++) {
+        for (var i = 0; i < numberOfInputs; i++) {
             var input = this.inputs[i];
             var numberOfStreams = input.connectedFrom.length;
-            for (var j=0; j<numberOfStreams; j++) {
+            for (var j = 0; j < numberOfStreams; j++) {
                 var outputPin = input.connectedFrom[j];
                 var output = outputPin.node;
                 output.disconnect(this, outputPin.index, i);
@@ -165,10 +165,10 @@ var AudioletNode = new Class({
 
         // Disconnect outputs
         var numberOfOutputs = this.outputs.length;
-        for (var i=0; i<numberOfOutputs; i++) {
+        for (var i = 0; i < numberOfOutputs; i++) {
             var output = this.outputs[i];
             var numberOfStreams = output.connectedTo.length;
-            for (var j=0; j<numberOfStreams; j++) {
+            for (var j = 0; j < numberOfStreams; j++) {
                 var inputPin = output.connectedTo[j];
                 var input = inputPin.node;
                 this.disconnect(input, i, inputPin.index);
@@ -202,7 +202,7 @@ var AbstractAudioletDevice = new Class({
     },
 
     toString: function() {
-        return "Device";
+        return 'Device';
     }
 });
 
@@ -232,7 +232,7 @@ var AudioDataAPIDevice = new Class({
         this.writePosition = 0;
 
         this.output.mozSetup(this.numberOfChannels, this.sampleRate);
-        
+
         this.started = new Date().valueOf();
         this.interval = this.tick.periodical(10, this);
     },
@@ -289,6 +289,10 @@ var AudioDataAPIDevice = new Class({
 
     getWriteTime: function() {
         return this.writePosition / this.numberOfChannels;
+    },
+
+    toString: function() {
+        return 'Audio Data API Device';
     }
 });
 
@@ -299,12 +303,12 @@ var AudioletBuffer = new Class({
         this.length = length;
 
         this.channels = [];
-        for (var i=0; i<this.numberOfChannels; i++) {
+        for (var i = 0; i < this.numberOfChannels; i++) {
             this.channels.push(new Float32Array(numberOfChannels * length));
         }
 
         this.unsliced_channels = [];
-        for (var i=0; i<this.numberOfChannels; i++) {
+        for (var i = 0; i < this.numberOfChannels; i++) {
             this.unsliced_channels.push(this.channels[i]);
         }
 
@@ -317,7 +321,7 @@ var AudioletBuffer = new Class({
 
     set: function(buffer) {
         var numberOfChannels = buffer.numberOfChannels;
-        for (var i=0; i<numberOfChannels; i++) {
+        for (var i = 0; i < numberOfChannels; i++) {
             this.channels[i].set(buffer.getChannelData(i));
         }
     },
@@ -336,7 +340,7 @@ var AudioletBuffer = new Class({
             channel1.set(channel2);
         }
     },
-        
+
     add: function(buffer) {
         var length = this.length;
         var numberOfChannels = buffer.numberOfChannels;
@@ -354,7 +358,7 @@ var AudioletBuffer = new Class({
         outputOffset = outputOffset || 0;
         var numberOfChannels = buffer.numberOfChannels;
         for (var i = 0; i < numberOfChannels; i++) {
-            var channel1 = this.getChannelData(i)
+            var channel1 = this.getChannelData(i);
             var channel2 = buffer.getChannelData(i);
             for (var j = 0; j < length; j++) {
                 channel1[j + outputOffset] += channel2[j + inputOffset];
@@ -364,7 +368,7 @@ var AudioletBuffer = new Class({
 
     resize: function(numberOfChannels, length, lazy, offset) {
         offset = offset || 0;
-        for (var i=0; i<numberOfChannels; i++) {
+        for (var i = 0; i < numberOfChannels; i++) {
             if (length > this.length) {
                 var channel = this.channels[i];
                 this.channels[i] = new Float32Array(length);
@@ -425,19 +429,19 @@ var AudioletBuffer = new Class({
         var numberOfChannels = this.numberOfChannels;
         var length = this.length;
         var combined = new Float32Array(numberOfChannels * length);
-        for (var i=0; i<numberOfChannels; i++) {
+        for (var i = 0; i < numberOfChannels; i++) {
             combined.set(channels[i], i * length);
         }
         return combined;
     },
-            
+
     interleaved: function() {
         var channels = this.channels;
         var numberOfChannels = this.numberOfChannels;
         var length = this.length;
         var interleaved = new Float32Array(numberOfChannels * length);
         for (var i = 0; i < length; i++) {
-            for (var j=0; j<numberOfChannels; j++) {
+            for (var j = 0; j < numberOfChannels; j++) {
                 interleaved[numberOfChannels * i + j] = channels[j][i];
             }
         }
@@ -458,12 +462,12 @@ var AudioletGroup = new Class({
         this.numberOfOutputs = numberOfOutputs;
 
         this.inputs = [];
-        for (var i=0; i<numberOfInputs; i++) {
+        for (var i = 0; i < numberOfInputs; i++) {
             this.inputs.push(new PassThroughNode(this.audiolet, 1, 1));
         }
-        
+
         this.outputs = [];
-        for (var i=0; i<numberOfOutputs; i++) {
+        for (var i = 0; i < numberOfOutputs; i++) {
             this.outputs.push(new PassThroughNode(this.audiolet, 1, 1));
         }
     },
@@ -478,12 +482,12 @@ var AudioletGroup = new Class({
 
     remove: function() {
         var numberOfInputs = this.inputs.length;
-        for (var i=0; i<numberOfInputs; i++) {
+        for (var i = 0; i < numberOfInputs; i++) {
             this.inputs[i].remove();
         }
-        
+
         var numberOfOutputs = this.outputs.length;
-        for (var i=0; i<numberOfOutputs; i++) {
+        for (var i = 0; i < numberOfOutputs; i++) {
             this.outputs[i].remove();
         }
     }
@@ -564,7 +568,7 @@ var AudioletInput = new Class({
     },
 
     isConnected: function() {
-        return(this.connectedFrom.length > 0);
+        return (this.connectedFrom.length > 0);
     }
 });
 
@@ -611,7 +615,7 @@ var AudioletOutput = new Class({
     },
 
     isConnected: function() {
-        return(this.connectedTo.length > 0);
+        return (this.connectedTo.length > 0);
     },
 
     link: function(input) {
@@ -624,9 +628,9 @@ var AudioletOutput = new Class({
 
     getNumberOfChannels: function() {
         if (this.linkedInput && this.linkedInput.isConnected()) {
-            return(this.linkedInput.buffer.numberOfChannels);
+            return (this.linkedInput.buffer.numberOfChannels);
         }
-        return(this.numberOfChannels);
+        return (this.numberOfChannels);
     },
 
     getBuffer: function(length) {
@@ -681,7 +685,7 @@ var AudioletOutput = new Class({
 var AudioletParameter = new Class({
     initialize: function(node, inputIndex, value) {
         this.node = node;
-        if (typeof inputIndex != "undefined" && inputIndex != null) {
+        if (typeof inputIndex != 'undefined' && inputIndex != null) {
             this.input = node.inputs[inputIndex];
         }
         else {
@@ -697,10 +701,10 @@ var AudioletParameter = new Class({
     getValue: function(index) {
         var input = this.input;
         if (input && input.connectedFrom.length) {
-            return(input.buffer.channels[0][index]);
+            return (input.buffer.channels[0][index]);
         }
         else {
-            return(this.value);
+            return (this.value);
         }
     }
 });
@@ -741,7 +745,7 @@ var BlockSizeLimiter = new Class({
                 else {
                     samplesNeeded = maximumBlockSize;
                 }
-                
+
                 this.tickParents(samplesNeeded, timestamp + samplesGenerated);
 
                 var inputBuffers = this.createInputBuffers(samplesNeeded);
@@ -768,7 +772,7 @@ var BlockSizeLimiter = new Class({
     },
 
     toString: function() {
-        return "Block Size Limiter";
+        return 'Block Size Limiter';
     }
 });
 
@@ -802,6 +806,10 @@ var DummyDevice = new Class({
 
     getWriteTime: function() {
         return this.writePosition;
+    },
+
+    toString: function() {
+        return 'Dummy Device';
     }
 });
 
@@ -823,7 +831,7 @@ var PassThroughNode = new Class({
         var numberOfOutputs = this.numberOfOutputs;
         var numberOfInputs = this.numberOfInputs;
         // Copy the inputs buffers straight to the output buffers
-        for (var i=0; i<numberOfOutputs; i++) {
+        for (var i = 0; i < numberOfOutputs; i++) {
             var output = this.outputs[i];
             if (i < numberOfInputs) {
                 // Copy the input buffer straight to the output buffers
@@ -835,11 +843,11 @@ var PassThroughNode = new Class({
             }
             outputBuffers.push(output.buffer);
         }
-        return(outputBuffers);
+        return (outputBuffers);
     },
 
     toString: function() {
-        return "Pass Through Node";
+        return 'Pass Through Node';
     }
 });
 
@@ -888,7 +896,7 @@ var PriorityQueue = new Class({
     },
 
     isEmpty: function() {
-        return(this.heap.length == 0);
+        return (this.heap.length == 0);
     },
 
     siftDown: function(startPosition, position) {
@@ -928,7 +936,7 @@ var PriorityQueue = new Class({
 
     compare: function(a, b) {
         return (a < b);
-    },
+    }
 });
 
 /**
@@ -1006,7 +1014,7 @@ var Scheduler = new Class({
         // Generate the block of samples and carry out events, generating a
         // new sub-block each time an event is carried out
         var lastEventTime = startTime;
-        while (!this.queue.isEmpty() && 
+        while (!this.queue.isEmpty() &&
                this.queue.peek().time <= startTime + length) {
             var event = this.queue.pop();
 
@@ -1019,7 +1027,7 @@ var Scheduler = new Class({
 
                 // Get the summed input
                 var inputBuffers = this.createInputBuffers(timeToEvent);
-            
+
                 // Create the output buffer
                 if (!outputBuffers) {
                     var outputBuffers = this.createOutputBuffers(length);
@@ -1079,7 +1087,7 @@ var Scheduler = new Class({
             var args = [];
             var patterns = event.patterns;
             var numberOfPatterns = patterns.length;
-            for (var i=0; i<numberOfPatterns; i++) {
+            for (var i = 0; i < numberOfPatterns; i++) {
                 var pattern = patterns[i];
                 args.push(pattern.next());
             }
@@ -1095,7 +1103,7 @@ var Scheduler = new Class({
 
             if (duration) {
                 // Beats -> time
-                event.time += duration * this.beatLength; 
+                event.time += duration * this.beatLength;
                 this.queue.push(event);
             }
         }
@@ -1123,7 +1131,7 @@ var Scheduler = new Class({
     },
 
     toString: function() {
-        return "Scheduler";
+        return 'Scheduler';
     }
 });
 
@@ -1136,12 +1144,12 @@ var original, shim;
 for (var i = 0; i < types.length; ++i) {
     if (types[i]) {
         if (types[i].prototype.slice === undefined) {
-            original = "subarray";
-            shim = "slice";
+            original = 'subarray';
+            shim = 'slice';
         }
         else if (types[i].prototype.subarray === undefined) {
-            original = "slice";
-            shim = "subarray";
+            original = 'slice';
+            shim = 'subarray';
         }
         Object.defineProperty(types[i].prototype, shim, {
             value: types[i].prototype[original],
@@ -1195,6 +1203,10 @@ var WebAudioAPIDevice = new Class({
 
     getWriteTime: function() {
         return this.writePosition;
+    },
+
+    toString: function() {
+        return 'Web Audio API Device';
     }
 });
 
@@ -1236,9 +1248,9 @@ var Envelope = new Class({
         var gateOn = this.gateOn;
 
         var stageChanged = false;
-        
+
         var bufferLength = buffer.length;
-        for (var i=0; i<bufferLength; i++) {
+        for (var i = 0; i < bufferLength; i++) {
             var gate = gateParameter.getValue(i);
 
             if (gate && !gateOn) {
@@ -1299,7 +1311,7 @@ var Envelope = new Class({
                 }
                 stageChanged = false;
             }
-                
+
             level += delta;
             channel[i] = level;
         }
@@ -1321,7 +1333,11 @@ var Envelope = new Class({
 
     calculateChangeTime: function(stage, time) {
         var stageTime = this.times[stage] * this.audiolet.device.sampleRate;
-        return(time + stageTime);
+        return (time + stageTime);
+    },
+
+    toString: function() {
+        return 'Envelope';
     }
 });
 
@@ -1336,6 +1352,10 @@ var ADSREnvelope = new Class({
         var times = [attack, decay, release];
         Envelope.prototype.initialize.apply(this, [audiolet, gate, levels,
                                                    times, 2, onComplete]);
+    },
+
+    toString: function() {
+        return 'ADSR Envelope';
     }
 });
 
@@ -1385,7 +1405,7 @@ var BiquadFilter = new Class({
         var inputChannels = [];
         var outputChannels = [];
         var numberOfChannels = inputBuffer.numberOfChannels;
-        for (var i=0; i<numberOfChannels; i++) {
+        for (var i = 0; i < numberOfChannels; i++) {
             inputChannels.push(inputBuffer.getChannelData(i));
             outputChannels.push(outputBuffer.getChannelData(i));
             if (i >= this.xValues.length) {
@@ -1419,8 +1439,8 @@ var BiquadFilter = new Class({
                 b1 = this.b1;
                 b2 = this.b2;
             }
-            
-            for (var j=0; j<numberOfChannels; j++) {
+
+            for (var j = 0; j < numberOfChannels; j++) {
                 var inputChannel = inputChannels[j];
                 var outputChannel = outputChannels[j];
 
@@ -1430,7 +1450,7 @@ var BiquadFilter = new Class({
                 var yValues = this.yValues[j];
                 var y1 = yValues[0];
                 var y2 = yValues[1];
-            
+
                 var x0 = inputChannel[i];
                 var y0 = (b0 / a0) * x0 +
                          (b1 / a0) * x1 +
@@ -1439,7 +1459,7 @@ var BiquadFilter = new Class({
                          (a2 / a0) * y2;
 
                 outputChannel[i] = y0;
-            
+
 
                 xValues[0] = x0;
                 xValues[1] = x1;
@@ -1448,6 +1468,10 @@ var BiquadFilter = new Class({
             }
         }
         this.lastFrequency = lastFrequency;
+    },
+
+    toString: function() {
+        return 'Biquad Filter';
     }
 });
 
@@ -1463,7 +1487,7 @@ var AllPassFilter = new Class({
     },
 
     calculateCoefficients: function(frequency) {
-        var w0 = 2 * Math.PI *  frequency /
+        var w0 = 2 * Math.PI * frequency /
                  this.audiolet.device.sampleRate;
         var cosw0 = Math.cos(w0);
         var sinw0 = Math.sin(w0);
@@ -1475,6 +1499,10 @@ var AllPassFilter = new Class({
         this.a0 = 1 + alpha;
         this.a1 = -2 * cosw0;
         this.a2 = 1 - alpha;
+    },
+
+    toString: function() {
+        return 'All Pass Filter';
     }
 });
 
@@ -1490,7 +1518,7 @@ var BandPassFilter = new Class({
     },
 
     calculateCoefficients: function(frequency) {
-        var w0 = 2 * Math.PI *  frequency /
+        var w0 = 2 * Math.PI * frequency /
                  this.audiolet.device.sampleRate;
         var cosw0 = Math.cos(w0);
         var sinw0 = Math.sin(w0);
@@ -1502,6 +1530,10 @@ var BandPassFilter = new Class({
         this.a0 = 1 + alpha;
         this.a1 = -2 * cosw0;
         this.a2 = 1 - alpha;
+    },
+
+    toString: function() {
+        return 'Band Pass Filter';
     }
 });
 
@@ -1517,7 +1549,7 @@ var BandRejectFilter = new Class({
     },
 
     calculateCoefficients: function(frequency) {
-        var w0 = 2 * Math.PI *  frequency /
+        var w0 = 2 * Math.PI * frequency /
                  this.audiolet.device.sampleRate;
         var cosw0 = Math.cos(w0);
         var sinw0 = Math.sin(w0);
@@ -1529,6 +1561,10 @@ var BandRejectFilter = new Class({
         this.a0 = 1 + alpha;
         this.a1 = -2 * cosw0;
         this.a2 = 1 - alpha;
+    },
+
+    toString: function() {
+        return 'Band Reject Filter';
     }
 });
 
@@ -1580,7 +1616,7 @@ var Delay = new Class({
     },
 
     toString: function() {
-        return "Delay";
+        return 'Delay';
     }
 });
 
@@ -1591,30 +1627,54 @@ var Delay = new Class({
 
 var DiscontinuityDetector = new Class({
     Extends: PassThroughNode,
-    initialize: function(audiolet) {
+    initialize: function(audiolet, threshold, callback) {
         PassThroughNode.prototype.initialize.apply(this, [audiolet, 1, 1]);
         this.linkNumberOfOutputChannels(0, 0);
-        this.lastValue = null;
+
+        this.threshold = threshold || 0.2;
+        if (callback) {
+            this.callback = callback;
+        }
+        this.lastValues = [];
+
+    },
+
+    // Override me
+    callback: function() {
     },
 
     generate: function(inputBuffers, outputBuffers) {
         var inputBuffer = inputBuffers[0];
-        var lastValue = this.lastValue;
+
+        var lastValues = this.lastValues;
+        var threshold = this.threshold;
+
         var numberOfChannels = inputBuffer.numberOfChannels;
         for (var i = 0; i < numberOfChannels; i++) {
             var channel = inputBuffer.getChannelData(i);
+
+            if (i >= lastValues.length) {
+                lastValues.push(null);
+            }
+            var lastValue = lastValues[i];
+
             var bufferLength = inputBuffer.length;
             for (var j = 0; j < bufferLength; j++) {
                 var value = channel[j];
                 if (lastValue != null) {
-                    if (Math.abs(lastValue - value) > 0.2) {
-                        console.log("shit");
+                    if (Math.abs(lastValue - value) > threshold) {
+                        this.callback();
                     }
                 }
                 lastValue = value;
             }
+
+            lastValues[i] = lastValue;
         }
-        this.lastValue = lastValue;
+    },
+
+    toString: function() {
+        return 'Discontinuity Detector';
     }
 });
 
@@ -1655,7 +1715,7 @@ var Gain = new Class({
     },
 
     toString: function() {
-        return("Gain");
+        return ('Gain');
     }
 });
 
@@ -1672,7 +1732,7 @@ var HighPassFilter = new Class({
     },
 
     calculateCoefficients: function(frequency) {
-        var w0 = 2 * Math.PI *  frequency /
+        var w0 = 2 * Math.PI * frequency /
                  this.audiolet.device.sampleRate;
         var cosw0 = Math.cos(w0);
         var sinw0 = Math.sin(w0);
@@ -1684,6 +1744,10 @@ var HighPassFilter = new Class({
         this.a0 = 1 + alpha;
         this.a1 = -2 * cosw0;
         this.a2 = 1 - alpha;
+    },
+
+    toString: function() {
+        return 'High Pass Filter';
     }
 });
 
@@ -1699,7 +1763,7 @@ var LowPassFilter = new Class({
     },
 
     calculateCoefficients: function(frequency) {
-        var w0 = 2 * Math.PI *  frequency /
+        var w0 = 2 * Math.PI * frequency /
                  this.audiolet.device.sampleRate;
         var cosw0 = Math.cos(w0);
         var sinw0 = Math.sin(w0);
@@ -1711,6 +1775,10 @@ var LowPassFilter = new Class({
         this.a0 = 1 + alpha;
         this.a1 = -2 * cosw0;
         this.a2 = 1 - alpha;
+    },
+
+    toString: function() {
+        return 'Low Pass Filter';
     }
 });
 
@@ -1746,6 +1814,10 @@ var MulAdd = new Class({
                 outputChannel[j] = inputChannel[j] * mul + add;
             }
         }
+    },
+
+    toString: function() {
+        return 'Multiplier/Adder';
     }
 });
 
@@ -1787,6 +1859,10 @@ var Pan = new Class({
             leftOutputChannel[i] = value * Math.cos(scaledPan);
             rightOutputChannel[i] = value * Math.sin(scaledPan);
         }
+    },
+
+    toString: function() {
+        return 'Stereo Panner';
     }
 });
 
@@ -1799,7 +1875,11 @@ var PercussiveEnvelope = new Class({
         var levels = [0, 1, 0];
         var times = [attack, release];
         Envelope.prototype.initialize.apply(this, [audiolet, gate, levels,
-                                                   times, null,  onComplete]);
+                                                   times, null, onComplete]);
+    },
+
+    toString: function() {
+        return 'Percussive Envelope';
     }
 });
 
@@ -1839,6 +1919,10 @@ var TableLookupOscillator = new Class({
             channel[i] = table[Math.floor(phase)];
         }
         this.phase = phase;
+    },
+
+    toString: function() {
+        return 'Table Lookup Oscillator';
     }
 });
 
@@ -1852,6 +1936,10 @@ var Saw = new Class({
         TableLookupOscillator.prototype.initialize.apply(this, [audiolet,
                                                                 Saw.TABLE,
                                                                 frequency]);
+    },
+
+    toString: function() {
+        return 'Saw';
     }
 });
 
@@ -1873,7 +1961,7 @@ var Sine = new Class({
     },
 
     toString: function() {
-        return "Sine";
+        return 'Sine';
     }
 });
 
@@ -1893,13 +1981,17 @@ var Triangle = new Class({
         TableLookupOscillator.prototype.initialize.apply(this, [audiolet,
                                                                 Triangle.TABLE,
                                                                 frequency]);
+    },
+
+    toString: function() {
+        return 'Triangle';
     }
 });
 
 Triangle.TABLE = [];
 for (var i = 0; i < 8192; i++) {
     // Smelly, but looks right...
-    Triangle.TABLE.push(Math.abs(((((i - 2048) / 8192) % 1) + 1) % 1* 2 - 1) * 2 - 1);
+    Triangle.TABLE.push(Math.abs(((((i - 2048) / 8192) % 1) + 1) % 1 * 2 - 1) * 2 - 1);
 }
 
 
@@ -1935,7 +2027,7 @@ var UpMixer = new Class({
     },
 
     toString: function() {
-        return "UpMixer";
+        return 'UpMixer';
     }
 });
 
@@ -1958,6 +2050,10 @@ var WhiteNoise = new Class({
         for (var i = 0; i < bufferLength; i++) {
             channel[i] = Math.random() * 2 - 1;
         }
+    },
+
+    toString: function() {
+        return 'White Noise';
     }
 });
 
