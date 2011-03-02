@@ -32,7 +32,7 @@ var AudioletOutput = new Class({
     },
 
     isConnected: function() {
-        return(this.connectedTo.length > 0);
+        return (this.connectedTo.length > 0);
     },
 
     link: function(input) {
@@ -45,9 +45,9 @@ var AudioletOutput = new Class({
 
     getNumberOfChannels: function() {
         if (this.linkedInput && this.linkedInput.isConnected()) {
-            return(this.linkedInput.buffer.numberOfChannels);
+            return (this.linkedInput.buffer.numberOfChannels);
         }
-        return(this.numberOfChannels);
+        return (this.numberOfChannels);
     },
 
     getBuffer: function(length) {

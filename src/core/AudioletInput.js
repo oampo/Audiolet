@@ -24,7 +24,7 @@ var AudioletInput = new Class({
     },
 
     isConnected: function() {
-        return(this.connectedFrom.length > 0);
+        return (this.connectedFrom.length > 0);
     }
 });
 

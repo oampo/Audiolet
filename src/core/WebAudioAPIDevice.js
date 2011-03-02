@@ -45,7 +45,7 @@ var WebAudioAPIDevice = new Class({
     },
 
     toString: function() {
-        return "Web Audio API Device";
+        return 'Web Audio API Device';
     }
 });
 

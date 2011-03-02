@@ -7,12 +7,12 @@ var original, shim;
 for (var i = 0; i < types.length; ++i) {
     if (types[i]) {
         if (types[i].prototype.slice === undefined) {
-            original = "subarray";
-            shim = "slice";
+            original = 'subarray';
+            shim = 'slice';
         }
         else if (types[i].prototype.subarray === undefined) {
-            original = "slice";
-            shim = "subarray";
+            original = 'slice';
+            shim = 'subarray';
         }
         Object.defineProperty(types[i].prototype, shim, {
             value: types[i].prototype[original],

@@ -73,7 +73,7 @@ var Scheduler = new Class({
         // Generate the block of samples and carry out events, generating a
         // new sub-block each time an event is carried out
         var lastEventTime = startTime;
-        while (!this.queue.isEmpty() && 
+        while (!this.queue.isEmpty() &&
                this.queue.peek().time <= startTime + length) {
             var event = this.queue.pop();
 
@@ -86,7 +86,7 @@ var Scheduler = new Class({
 
                 // Get the summed input
                 var inputBuffers = this.createInputBuffers(timeToEvent);
-            
+
                 // Create the output buffer
                 if (!outputBuffers) {
                     var outputBuffers = this.createOutputBuffers(length);
@@ -146,7 +146,7 @@ var Scheduler = new Class({
             var args = [];
             var patterns = event.patterns;
             var numberOfPatterns = patterns.length;
-            for (var i=0; i<numberOfPatterns; i++) {
+            for (var i = 0; i < numberOfPatterns; i++) {
                 var pattern = patterns[i];
                 args.push(pattern.next());
             }
@@ -162,7 +162,7 @@ var Scheduler = new Class({
 
             if (duration) {
                 // Beats -> time
-                event.time += duration * this.beatLength; 
+                event.time += duration * this.beatLength;
                 this.queue.push(event);
             }
         }
@@ -190,6 +190,6 @@ var Scheduler = new Class({
     },
 
     toString: function() {
-        return "Scheduler";
+        return 'Scheduler';
     }
 });

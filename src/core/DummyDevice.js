@@ -31,7 +31,7 @@ var DummyDevice = new Class({
     },
 
     toString: function() {
-        return "Dummy Device";
+        return 'Dummy Device';
     }
 });
 

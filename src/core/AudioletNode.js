@@ -27,7 +27,7 @@ var AudioletNode = new Class({
         if (instanceOf(node, AudioletGroup)) {
             // Connect to the pass-through node rather than the group
             node = node.inputs[input || 0];
-        } 
+        }
         var outputPin = this.outputs[output || 0];
         var inputPin = node.inputs[input || 0];
         outputPin.connect(inputPin);
@@ -100,7 +100,7 @@ var AudioletNode = new Class({
 
                 var numberOfChannels = 0;
                 var largestOutput = null;
-                for (var j=0; j<numberOfConnections; j++) {
+                for (var j = 0; j < numberOfConnections; j++) {
                     var output = connectedFrom[j];
                     var outputBuffer = output.buffer;
                     if (outputBuffer.numberOfChannels > numberOfChannels) {
@@ -115,7 +115,7 @@ var AudioletNode = new Class({
 
                 // Set the buffer using the largest output
                 inputBuffer.set(largestOutput.getBuffer(length));
-                
+
                 // Sum the rest of the outputs
                 for (var j = 0; j < numberOfConnections; j++) {
                     var output = connectedFrom[j];
@@ -153,10 +153,10 @@ var AudioletNode = new Class({
     remove: function() {
         // Disconnect inputs
         var numberOfInputs = this.inputs.length;
-        for (var i=0; i<numberOfInputs; i++) {
+        for (var i = 0; i < numberOfInputs; i++) {
             var input = this.inputs[i];
             var numberOfStreams = input.connectedFrom.length;
-            for (var j=0; j<numberOfStreams; j++) {
+            for (var j = 0; j < numberOfStreams; j++) {
                 var outputPin = input.connectedFrom[j];
                 var output = outputPin.node;
                 output.disconnect(this, outputPin.index, i);
@@ -165,10 +165,10 @@ var AudioletNode = new Class({
 
         // Disconnect outputs
         var numberOfOutputs = this.outputs.length;
-        for (var i=0; i<numberOfOutputs; i++) {
+        for (var i = 0; i < numberOfOutputs; i++) {
             var output = this.outputs[i];
             var numberOfStreams = output.connectedTo.length;
-            for (var j=0; j<numberOfStreams; j++) {
+            for (var j = 0; j < numberOfStreams; j++) {
                 var inputPin = output.connectedTo[j];
                 var input = inputPin.node;
                 this.disconnect(input, i, inputPin.index);

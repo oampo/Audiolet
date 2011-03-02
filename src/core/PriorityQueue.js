@@ -42,7 +42,7 @@ var PriorityQueue = new Class({
     },
 
     isEmpty: function() {
-        return(this.heap.length == 0);
+        return (this.heap.length == 0);
     },
 
     siftDown: function(startPosition, position) {
@@ -82,5 +82,5 @@ var PriorityQueue = new Class({
 
     compare: function(a, b) {
         return (a < b);
-    },
+    }
 });

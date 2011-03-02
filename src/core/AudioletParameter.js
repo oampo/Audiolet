@@ -1,7 +1,7 @@
 var AudioletParameter = new Class({
     initialize: function(node, inputIndex, value) {
         this.node = node;
-        if (typeof inputIndex != "undefined" && inputIndex != null) {
+        if (typeof inputIndex != 'undefined' && inputIndex != null) {
             this.input = node.inputs[inputIndex];
         }
         else {
@@ -17,10 +17,10 @@ var AudioletParameter = new Class({
     getValue: function(index) {
         var input = this.input;
         if (input && input.connectedFrom.length) {
-            return(input.buffer.channels[0][index]);
+            return (input.buffer.channels[0][index]);
         }
         else {
-            return(this.value);
+            return (this.value);
         }
     }
 });

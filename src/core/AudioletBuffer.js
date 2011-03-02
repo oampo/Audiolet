@@ -4,12 +4,12 @@ var AudioletBuffer = new Class({
         this.length = length;
 
         this.channels = [];
-        for (var i=0; i<this.numberOfChannels; i++) {
+        for (var i = 0; i < this.numberOfChannels; i++) {
             this.channels.push(new Float32Array(numberOfChannels * length));
         }
 
         this.unsliced_channels = [];
-        for (var i=0; i<this.numberOfChannels; i++) {
+        for (var i = 0; i < this.numberOfChannels; i++) {
             this.unsliced_channels.push(this.channels[i]);
         }
 
@@ -22,7 +22,7 @@ var AudioletBuffer = new Class({
 
     set: function(buffer) {
         var numberOfChannels = buffer.numberOfChannels;
-        for (var i=0; i<numberOfChannels; i++) {
+        for (var i = 0; i < numberOfChannels; i++) {
             this.channels[i].set(buffer.getChannelData(i));
         }
     },
@@ -41,7 +41,7 @@ var AudioletBuffer = new Class({
             channel1.set(channel2);
         }
     },
-        
+
     add: function(buffer) {
         var length = this.length;
         var numberOfChannels = buffer.numberOfChannels;
@@ -69,7 +69,7 @@ var AudioletBuffer = new Class({
 
     resize: function(numberOfChannels, length, lazy, offset) {
         offset = offset || 0;
-        for (var i=0; i<numberOfChannels; i++) {
+        for (var i = 0; i < numberOfChannels; i++) {
             if (length > this.length) {
                 var channel = this.channels[i];
                 this.channels[i] = new Float32Array(length);
@@ -130,19 +130,19 @@ var AudioletBuffer = new Class({
         var numberOfChannels = this.numberOfChannels;
         var length = this.length;
         var combined = new Float32Array(numberOfChannels * length);
-        for (var i=0; i<numberOfChannels; i++) {
+        for (var i = 0; i < numberOfChannels; i++) {
             combined.set(channels[i], i * length);
         }
         return combined;
     },
-            
+
     interleaved: function() {
         var channels = this.channels;
         var numberOfChannels = this.numberOfChannels;
         var length = this.length;
         var interleaved = new Float32Array(numberOfChannels * length);
         for (var i = 0; i < length; i++) {
-            for (var j=0; j<numberOfChannels; j++) {
+            for (var j = 0; j < numberOfChannels; j++) {
                 interleaved[numberOfChannels * i + j] = channels[j][i];
             }
         }

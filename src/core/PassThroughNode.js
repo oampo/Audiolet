@@ -15,7 +15,7 @@ var PassThroughNode = new Class({
         var numberOfOutputs = this.numberOfOutputs;
         var numberOfInputs = this.numberOfInputs;
         // Copy the inputs buffers straight to the output buffers
-        for (var i=0; i<numberOfOutputs; i++) {
+        for (var i = 0; i < numberOfOutputs; i++) {
             var output = this.outputs[i];
             if (i < numberOfInputs) {
                 // Copy the input buffer straight to the output buffers
@@ -27,11 +27,11 @@ var PassThroughNode = new Class({
             }
             outputBuffers.push(output.buffer);
         }
-        return(outputBuffers);
+        return (outputBuffers);
     },
 
     toString: function() {
-        return "Pass Through Node";
+        return 'Pass Through Node';
     }
 });
 

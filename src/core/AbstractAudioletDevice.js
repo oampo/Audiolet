@@ -22,7 +22,7 @@ var AbstractAudioletDevice = new Class({
     },
 
     toString: function() {
-        return "Device";
+        return 'Device';
     }
 });
 

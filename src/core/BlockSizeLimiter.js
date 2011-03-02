@@ -34,7 +34,7 @@ var BlockSizeLimiter = new Class({
                 else {
                     samplesNeeded = maximumBlockSize;
                 }
-                
+
                 this.tickParents(samplesNeeded, timestamp + samplesGenerated);
 
                 var inputBuffers = this.createInputBuffers(samplesNeeded);
@@ -61,6 +61,6 @@ var BlockSizeLimiter = new Class({
     },
 
     toString: function() {
-        return "Block Size Limiter";
+        return 'Block Size Limiter';
     }
 });

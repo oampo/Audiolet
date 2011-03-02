@@ -23,7 +23,7 @@ var AudioDataAPIDevice = new Class({
         this.writePosition = 0;
 
         this.output.mozSetup(this.numberOfChannels, this.sampleRate);
-        
+
         this.started = new Date().valueOf();
         this.interval = this.tick.periodical(10, this);
     },
@@ -83,7 +83,7 @@ var AudioDataAPIDevice = new Class({
     },
 
     toString: function() {
-        return "Audio Data API Device";
+        return 'Audio Data API Device';
     }
 });
 
