@@ -16,6 +16,10 @@ var WhiteNoise = new Class({
         for (var i = 0; i < bufferLength; i++) {
             channel[i] = Math.random() * 2 - 1;
         }
+    },
+
+    toString: function() {
+        return "White Noise";
     }
 });
 

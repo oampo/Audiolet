@@ -9,6 +9,10 @@ var ADSREnvelope = new Class({
         var times = [attack, decay, release];
         Envelope.prototype.initialize.apply(this, [audiolet, gate, levels,
                                                    times, 2, onComplete]);
+    },
+
+    toString: function() {
+        return "ADSR Envelope";
     }
 });
 

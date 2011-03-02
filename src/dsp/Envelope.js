@@ -121,5 +121,9 @@ var Envelope = new Class({
     calculateChangeTime: function(stage, time) {
         var stageTime = this.times[stage] * this.audiolet.device.sampleRate;
         return(time + stageTime);
+    },
+
+    toString: function() {
+        return "Envelope";
     }
 });

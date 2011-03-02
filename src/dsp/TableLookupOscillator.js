@@ -32,6 +32,10 @@ var TableLookupOscillator = new Class({
             channel[i] = table[Math.floor(phase)];
         }
         this.phase = phase;
+    },
+
+    toString: function() {
+        return "Table Lookup Oscillator";
     }
 });
 

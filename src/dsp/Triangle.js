@@ -7,6 +7,10 @@ var Triangle = new Class({
         TableLookupOscillator.prototype.initialize.apply(this, [audiolet,
                                                                 Triangle.TABLE,
                                                                 frequency]);
+    },
+
+    toString: function() {
+        return "Triangle";
     }
 });
 

@@ -106,5 +106,9 @@ var BiquadFilter = new Class({
             }
         }
         this.lastFrequency = lastFrequency;
+    },
+
+    toString: function() {
+        return "Biquad Filter";
     }
 });

@@ -8,6 +8,10 @@ var PercussiveEnvelope = new Class({
         var times = [attack, release];
         Envelope.prototype.initialize.apply(this, [audiolet, gate, levels,
                                                    times, null,  onComplete]);
+    },
+
+    toString: function() {
+        return "Percussive Envelope";
     }
 });
 

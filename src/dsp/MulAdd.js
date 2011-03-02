@@ -30,6 +30,10 @@ var MulAdd = new Class({
                 outputChannel[j] = inputChannel[j] * mul + add;
             }
         }
+    },
+
+    toString: function() {
+        return "Multiplier/Adder";
     }
 });
 

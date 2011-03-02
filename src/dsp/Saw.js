@@ -7,6 +7,10 @@ var Saw = new Class({
         TableLookupOscillator.prototype.initialize.apply(this, [audiolet,
                                                                 Saw.TABLE,
                                                                 frequency]);
+    },
+
+    toString: function() {
+        return "Saw";
     }
 });
 

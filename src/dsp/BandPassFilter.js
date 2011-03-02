@@ -22,5 +22,9 @@ var BandPassFilter = new Class({
         this.a0 = 1 + alpha;
         this.a1 = -2 * cosw0;
         this.a2 = 1 - alpha;
+    },
+
+    toString: function() {
+        return "Band Pass Filter";
     }
 });

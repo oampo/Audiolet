@@ -80,6 +80,10 @@ var AudioDataAPIDevice = new Class({
 
     getWriteTime: function() {
         return this.writePosition / this.numberOfChannels;
+    },
+
+    toString: function() {
+        return "Audio Data API Device";
     }
 });
 

@@ -28,6 +28,10 @@ var DummyDevice = new Class({
 
     getWriteTime: function() {
         return this.writePosition;
+    },
+
+    toString: function() {
+        return "Dummy Device";
     }
 });
 

@@ -35,5 +35,9 @@ var Pan = new Class({
             leftOutputChannel[i] = value * Math.cos(scaledPan);
             rightOutputChannel[i] = value * Math.sin(scaledPan);
         }
+    },
+
+    toString: function() {
+        return "Stereo Panner";
     }
 });

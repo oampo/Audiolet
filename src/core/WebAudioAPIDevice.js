@@ -42,6 +42,10 @@ var WebAudioAPIDevice = new Class({
 
     getWriteTime: function() {
         return this.writePosition;
+    },
+
+    toString: function() {
+        return "Web Audio API Device";
     }
 });
 
