@@ -148,7 +148,15 @@ var Scheduler = new Class({
             var numberOfPatterns = patterns.length;
             for (var i = 0; i < numberOfPatterns; i++) {
                 var pattern = patterns[i];
-                args.push(pattern.next());
+                var value = pattern.next();
+                if (value != null) {                   
+                    args.push(value);
+                }
+                else {
+                    // Null value for an argument, so don't process the
+                    // callback or add any further events
+                    return;
+                }
             }
             event.callback.apply(null, args);
 
