@@ -6,6 +6,7 @@ var PGeometric = new Class({
     Extends: Pattern,
     initialize: function(start, step, repeats) {
         Pattern.prototype.initialize(this);
+        this.start = start;
         this.value = start;
         this.step = step;
         this.repeats = repeats;
@@ -29,6 +30,14 @@ var PGeometric = new Class({
             returnValue = null;
         }
         return (returnValue);
+    },
+
+    reset: function() {
+        this.value = this.start;
+        this.position = 0;
+        if (instanceOf(this.step, Pattern)) {
+            this.step.reset();
+        }
     }
 });
 var Pgeom = PGeometric;

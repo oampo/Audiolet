@@ -2088,6 +2088,7 @@ var PArithmetic = new Class({
     Extends: Pattern,
     initialize: function(start, step, repeats) {
         Pattern.prototype.initialize.apply(this);
+        this.start = start;
         this.value = start;
         this.step = step;
         this.repeats = repeats;
@@ -2111,6 +2112,14 @@ var PArithmetic = new Class({
             returnValue = null;
         }
         return (returnValue);
+    },
+
+    reset: function() {
+        this.value = this.start;
+        this.position = 0;
+        if (instanceOf(this.step, Pattern)) {
+            this.step.reset();
+        }
     }
 });
 
@@ -2143,6 +2152,9 @@ var PChoose = new Class({
                 returnValue = value;
             }
             else {
+                if (instanceOf(item, Pattern)) {
+                    item.reset();
+                }
                 this.position += 1;
                 returnValue = this.next();
             }
@@ -2151,6 +2163,16 @@ var PChoose = new Class({
             returnValue = null;
         }
         return (returnValue);
+    },
+
+    reset: function() {
+        this.position = 0;
+        for (var i = 0; i < this.list.length; i++) {
+            var item = this.list[i];
+            if (instanceOf(item, Pattern)) {
+                item.reset();
+            }
+        }
     }
 });
 var Prand = PChoose;
@@ -2164,6 +2186,7 @@ var PGeometric = new Class({
     Extends: Pattern,
     initialize: function(start, step, repeats) {
         Pattern.prototype.initialize(this);
+        this.start = start;
         this.value = start;
         this.step = step;
         this.repeats = repeats;
@@ -2187,6 +2210,14 @@ var PGeometric = new Class({
             returnValue = null;
         }
         return (returnValue);
+    },
+
+    reset: function() {
+        this.value = this.start;
+        this.position = 0;
+        if (instanceOf(this.step, Pattern)) {
+            this.step.reset();
+        }
     }
 });
 var Pgeom = PGeometric;
@@ -2224,6 +2255,10 @@ var PRandom = new Class({
             returnValue = null;
         }
         return (returnValue);
+    },
+
+    reset: function() {
+        this.position = 0;
     }
 });
 var Pwhite = PRandom;
@@ -2256,6 +2291,9 @@ var PSequence = new Class({
                 returnValue = value;
             }
             else {
+                if (instanceOf(item, Pattern)) {
+                    item.reset();
+                }
                 this.position += 1;
                 returnValue = this.next();
             }
@@ -2264,6 +2302,16 @@ var PSequence = new Class({
             returnValue = null;
         }
         return (returnValue);
+    },
+
+    reset: function() {
+        this.position = 0;
+        for (var i = 0; i < this.list.length; i++) {
+            var item = this.list[i];
+            if (instanceOf(item, Pattern)) {
+                item.reset();
+            }
+        }
     }
 });
 var Pseq = PSequence;
@@ -2296,6 +2344,9 @@ var PSeries = new Class({
                 returnValue = value;
             }
             else {
+                if (instanceOf(item, Pattern)) {
+                    item.reset();
+                }
                 this.position += 1;
                 returnValue = this.next();
             }
@@ -2304,6 +2355,16 @@ var PSeries = new Class({
             returnValue = null;
         }
         return (returnValue);
+    },
+
+    reset: function() {
+        this.position = 0;
+        for (var i = 0; i < this.list.length; i++) {
+            var item = this.list[i];
+            if (instanceOf(item, Pattern)) {
+                item.reset();
+            }
+        }
     }
 });
 var Pser = PSeries;

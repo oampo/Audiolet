@@ -30,6 +30,10 @@ var PRandom = new Class({
             returnValue = null;
         }
         return (returnValue);
+    },
+
+    reset: function() {
+        this.position = 0;
     }
 });
 var Pwhite = PRandom;
