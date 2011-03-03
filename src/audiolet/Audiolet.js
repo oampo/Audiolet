@@ -618,11 +618,11 @@ var AudioletOutput = new Class({
         return (this.connectedTo.length > 0);
     },
 
-    link: function(input) {
+    linkNumberOfChannels: function(input) {
         this.linkedInput = input;
     },
 
-    unlink: function() {
+    unlinkNumberOfChannels: function() {
         this.linkedInput = null;
     },
 
@@ -2349,4 +2349,54 @@ var PWeightedChoose = new Class({
 });
 
 Pwrand = PWeightedChoose;
+
+var Scale = new Class({
+    initialize: function(degrees, tuning) {
+        this.degrees = degrees;
+        this.tuning = tuning || new EqualTemperamentTuning(12);
+    },
+
+    getFrequency: function(degree, rootFrequency, octave) {
+        var frequency = rootFrequency;
+        frequency *= Math.pow(this.tuning.octaveRatio, octave);
+        frequency *= this.tuning.ratios[this.degrees[degree]];
+        return frequency;
+    }
+});
+
+/**
+ * @depends Scale.js
+ */
+var MajorScale = new Class({
+    Extends: Scale,
+    initialize: function() {
+        Scale.prototype.initialize.apply(this, [[0, 2, 4, 5, 7, 9, 11]]);
+    }
+});
+
+var Tuning = new Class({
+    initialize: function(semitones, octaveRatio) {
+        this.semitones = semitones;
+        this.octaveRatio = octaveRatio || 2;
+        this.ratios = [];
+        var tuningLength = this.semitones.length;
+        for (var i=0; i<tuningLength; i++) {
+            this.ratios.push(Math.pow(2, i / tuningLength));
+        }
+    }
+});
+
+/**
+ * @depends Tuning.js
+ */
+var EqualTemperamentTuning = new Class({
+    Extends: Tuning,
+    initialize: function(pitchesPerOctave) {
+        var semitones = [];
+        for (var i=0; i<pitchesPerOctave; i++) {
+            semitones.push(i);
+        }
+        Tuning.prototype.initialize.apply(this, [semitones, 2]);
+    }
+});
 
