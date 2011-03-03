@@ -7,6 +7,7 @@ var BlockSizeLimiter = new Class({
     initialize: function(audiolet, maximumBlockSize) {
         AudioletNode.prototype.initialize.apply(this, [audiolet, 1, 1]);
         this.maximumBlockSize = maximumBlockSize;
+        this.linkNumberOfOutputChannels(0, 0);
     },
 
 
