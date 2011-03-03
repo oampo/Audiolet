@@ -171,6 +171,7 @@ var Scheduler = new Class({
             if (duration) {
                 // Beats -> time
                 event.time += duration * this.beatLength;
+                event.time = Math.floor(event.time);
                 this.queue.push(event);
             }
         }
