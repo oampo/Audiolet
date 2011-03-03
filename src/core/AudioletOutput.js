@@ -35,11 +35,11 @@ var AudioletOutput = new Class({
         return (this.connectedTo.length > 0);
     },
 
-    link: function(input) {
+    linkNumberOfChannels: function(input) {
         this.linkedInput = input;
     },
 
-    unlink: function() {
+    unlinkNumberOfChannels: function() {
         this.linkedInput = null;
     },
 
