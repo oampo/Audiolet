@@ -2074,7 +2074,7 @@ var Pattern = new Class({
         return null;
     },
 
-    value: function(item) {
+    valueOf: function(item) {
         if (instanceOf(item, Pattern)) {
            return (item.next());
         }
@@ -2105,8 +2105,12 @@ var PArithmetic = new Class({
 
     next: function() {
         var returnValue;
-        if (this.position < this.repeats) {
-            var step = this.value(this.step);
+        if (this.position == 0) {
+            returnValue = this.value;
+            this.position += 1;
+        }
+        else if (this.position < this.repeats) {
+            var step = this.valueOf(this.step);
             if (step != null) {
                 this.value += step;
                 returnValue = this.value;
@@ -2152,7 +2156,7 @@ var PChoose = new Class({
         if (this.position < this.repeats) {
             var index = Math.floor(Math.random() * this.list.length);
             var item = this.list[index];
-            var value = this.value(item);
+            var value = this.valueOf(item);
             if (value != null) {
                 if (!instanceOf(item, Pattern)) {
                     this.position += 1;
@@ -2203,8 +2207,12 @@ var PGeometric = new Class({
 
     next: function() {
         var returnValue;
-        if (this.position < this.repeats) {
-            var step = this.value(this.step);
+        if (this.position == 0) {
+            returnValue = this.value;
+            this.position += 1;
+        }
+        else if (this.position < this.repeats) {
+            var step = this.valueOf(this.step);
             if (step != null) {
                 this.value *= step;
                 returnValue = this.value;
@@ -2248,8 +2256,8 @@ var PRandom = new Class({
     next: function() {
         var returnValue;
         if (this.position < this.repeats) {
-            var low = this.value(this.low);
-            var high = this.value(this.high);
+            var low = this.valueOf(this.low);
+            var high = this.valueOf(this.high);
             if (low != null && high != null) {
                 this.value *= step;
                 returnValue = this.value;
@@ -2291,7 +2299,7 @@ var PSequence = new Class({
         if (this.position < this.repeats * this.list.length) {
             var index = (this.position + this.offset) % this.list.length;
             var item = this.list[index];
-            var value = this.value(item);
+            var value = this.valueOf(item);
             if (value != null) {
                 if (!instanceOf(item, Pattern)) {
                     this.position += 1;
@@ -2344,7 +2352,7 @@ var PSeries = new Class({
         if (this.position < this.repeats) {
             var index = (this.position + this.offset) % this.list.length;
             var item = this.list[index];
-            var value = this.value(item);
+            var value = this.valueOf(item);
             if (value != null) {
                 if (!instanceOf(item, Pattern)) {
                     this.position += 1;

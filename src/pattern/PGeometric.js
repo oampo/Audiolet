@@ -15,8 +15,12 @@ var PGeometric = new Class({
 
     next: function() {
         var returnValue;
-        if (this.position < this.repeats) {
-            var step = this.value(this.step);
+        if (this.position == 0) {
+            returnValue = this.value;
+            this.position += 1;
+        }
+        else if (this.position < this.repeats) {
+            var step = this.valueOf(this.step);
             if (step != null) {
                 this.value *= step;
                 returnValue = this.value;

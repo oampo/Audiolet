@@ -6,7 +6,7 @@ var Pattern = new Class({
         return null;
     },
 
-    value: function(item) {
+    valueOf: function(item) {
         if (instanceOf(item, Pattern)) {
            return (item.next());
         }

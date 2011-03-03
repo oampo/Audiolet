@@ -15,8 +15,8 @@ var PRandom = new Class({
     next: function() {
         var returnValue;
         if (this.position < this.repeats) {
-            var low = this.value(this.low);
-            var high = this.value(this.high);
+            var low = this.valueOf(this.low);
+            var high = this.valueOf(this.high);
             if (low != null && high != null) {
                 this.value *= step;
                 returnValue = this.value;

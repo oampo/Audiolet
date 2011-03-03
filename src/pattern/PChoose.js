@@ -16,7 +16,7 @@ var PChoose = new Class({
         if (this.position < this.repeats) {
             var index = Math.floor(Math.random() * this.list.length);
             var item = this.list[index];
-            var value = this.value(item);
+            var value = this.valueOf(item);
             if (value != null) {
                 if (!instanceOf(item, Pattern)) {
                     this.position += 1;
