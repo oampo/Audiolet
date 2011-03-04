@@ -72,7 +72,7 @@ var PriorityQueue = new Class({
                               this.heap[rightPosition])) {
                 childPosition = rightPosition;
             }
-            this.heap[position] = this.heap[childposition];
+            this.heap[position] = this.heap[childPosition];
             position = childPosition;
             childPosition = 2 * position + 1;
         }
