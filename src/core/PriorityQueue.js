@@ -77,7 +77,7 @@ var PriorityQueue = new Class({
             childPosition = 2 * position + 1;
         }
         this.heap[position] = newItem;
-        siftDown(startPosition, position);
+        this.siftDown(startPosition, position);
     },
 
     compare: function(a, b) {
