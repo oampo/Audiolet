@@ -25,6 +25,11 @@ var Scheduler = new Class({
         var emptyBuffer = new AudioletBuffer(1, 1);
     },
 
+    setTempo: function(bpm) {
+        this.bpm = bpm;
+        this.beatLength = 60 / this.bpm * this.audiolet.device.sampleRate;
+    },
+
     addRelative: function(beats, callback) {
         var event = {};
         event.callback = callback;
