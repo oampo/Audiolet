@@ -1,3 +1,6 @@
+/**
+ * @depends ../core/AudioletNode.js
+ */
 var Envelope = new Class({
     Extends: AudioletNode,
     initialize: function(audiolet, gate, levels, times, releaseStage,
