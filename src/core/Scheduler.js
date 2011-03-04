@@ -82,7 +82,7 @@ var Scheduler = new Class({
                this.queue.peek().time <= startTime + length) {
             var event = this.queue.pop();
             // Event can't take place before the previous event
-            var eventTime = Math.max(event.time, lastEventTime);
+            var eventTime = Math.floor(Math.max(event.time, lastEventTime));
 
             // Generate samples to take us to the event
             var timeToEvent = eventTime - lastEventTime;
@@ -178,7 +178,6 @@ var Scheduler = new Class({
             if (duration) {
                 // Beats -> time
                 event.time += duration * this.beatLength;
-                event.time = Math.floor(event.time);
                 this.queue.push(event);
             }
         }
