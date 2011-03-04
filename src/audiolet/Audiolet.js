@@ -927,7 +927,7 @@ var PriorityQueue = new Class({
                               this.heap[rightPosition])) {
                 childPosition = rightPosition;
             }
-            this.heap[position] = this.heap[childposition];
+            this.heap[position] = this.heap[childPosition];
             position = childPosition;
             childPosition = 2 * position + 1;
         }
@@ -1023,9 +1023,11 @@ var Scheduler = new Class({
         while (!this.queue.isEmpty() &&
                this.queue.peek().time <= startTime + length) {
             var event = this.queue.pop();
+            // Event can't take place before the previous event
+            var eventTime = Math.floor(Math.max(event.time, lastEventTime));
 
             // Generate samples to take us to the event
-            var timeToEvent = event.time - lastEventTime;
+            var timeToEvent = eventTime - lastEventTime;
             if (timeToEvent > 0) {
                 var offset = lastEventTime - startTime;
                 this.tickParents(timeToEvent,
@@ -1050,7 +1052,7 @@ var Scheduler = new Class({
 
 
             // Set this before processEvent, as that can change the event time
-            lastEventTime = event.time;
+            lastEventTime = eventTime;
             // Carry out the event
             this.processEvent(event);
         }
@@ -1118,9 +1120,12 @@ var Scheduler = new Class({
             if (duration) {
                 // Beats -> time
                 event.time += duration * this.beatLength;
-                event.time = Math.floor(event.time);
                 this.queue.push(event);
             }
+        }
+        else {
+            // Regular event
+            event.callback();
         }
     },
 
