@@ -65,7 +65,7 @@ var Envelope = new Class({
                 // We are not sustaining, and we are playing, so increase the
                 // time
                 time += 1;
-                if (time == changeTime) {
+                if (time >= changeTime) {
                     // Need to go to the next stage
                     stage += 1;
                     if (stage != releaseStage) {
