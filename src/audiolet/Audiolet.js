@@ -718,6 +718,7 @@ var BlockSizeLimiter = new Class({
     initialize: function(audiolet, maximumBlockSize) {
         AudioletNode.prototype.initialize.apply(this, [audiolet, 1, 1]);
         this.maximumBlockSize = maximumBlockSize;
+        this.linkNumberOfOutputChannels(0, 0);
     },
 
 
@@ -931,7 +932,7 @@ var PriorityQueue = new Class({
             childPosition = 2 * position + 1;
         }
         this.heap[position] = newItem;
-        siftDown(startPosition, position);
+        this.siftDown(startPosition, position);
     },
 
     compare: function(a, b) {
@@ -964,6 +965,11 @@ var Scheduler = new Class({
         this.beatLength = 60 / this.bpm * this.audiolet.device.sampleRate;
 
         var emptyBuffer = new AudioletBuffer(1, 1);
+    },
+
+    setTempo: function(bpm) {
+        this.bpm = bpm;
+        this.beatLength = 60 / this.bpm * this.audiolet.device.sampleRate;
     },
 
     addRelative: function(beats, callback) {
@@ -1112,6 +1118,7 @@ var Scheduler = new Class({
             if (duration) {
                 // Beats -> time
                 event.time += duration * this.beatLength;
+                event.time = Math.floor(event.time);
                 this.queue.push(event);
             }
         }
@@ -1219,6 +1226,9 @@ var WebAudioAPIDevice = new Class({
 });
 
 
+/**
+ * @depends ../core/AudioletNode.js
+ */
 var Envelope = new Class({
     Extends: AudioletNode,
     initialize: function(audiolet, gate, levels, times, releaseStage,
@@ -1283,7 +1293,7 @@ var Envelope = new Class({
                 // We are not sustaining, and we are playing, so increase the
                 // time
                 time += 1;
-                if (time == changeTime) {
+                if (time >= changeTime) {
                     // Need to go to the next stage
                     stage += 1;
                     if (stage != releaseStage) {
@@ -2002,6 +2012,41 @@ for (var i = 0; i < 8192; i++) {
     Triangle.TABLE.push(Math.abs(((((i - 2048) / 8192) % 1) + 1) % 1 * 2 - 1) * 2 - 1);
 }
 
+
+/**
+ * @depends ../core/AudioletNode.js
+ */
+
+var TriggerControl = new Class({
+    Extends: AudioletNode,
+    initialize: function(audiolet, trigger) {
+        AudioletNode.prototype.initialize.apply(this, [audiolet, 0, 1]);
+        this.trigger = new AudioletParameter(this, null, trigger || 0);
+    },
+
+    generate: function(inputBuffers, outputBuffers) {
+        var buffer = outputBuffers[0];
+        var channel = buffer.getChannelData(0);
+
+        var triggerParameter = this.trigger;
+        var bufferLength = buffer.length;
+        for (var i = 0; i < bufferLength; i++) {
+            var trigger = triggerParameter.getValue(i);
+
+            if (trigger) {
+                channel[i] = 1;
+                triggerParameter.setValue(0);
+            }
+            else {
+                channel[i] = 0;
+            }
+        }
+    },
+
+    toString: function() {
+        return 'TriggerControl';
+    }
+});
 
 /**
  * @depends ../core/AudioletNode.js
