@@ -84,6 +84,14 @@ var AudioletNode = new Class({
 
     // Overwrite me!
     generate: function(inputBuffers, outputBuffers) {
+        // Sane default - pass along any empty flags
+        var numberOfInputs = inputBuffers.length;
+        var numberOfOutputs = outputBuffers.length;
+        for (var i=0; i<numberOfInputs; i++) {
+            if (i < numberOfOutputs && inputBuffers[i].isEmpty) {
+                outputBuffers[i].isEmpty = true;
+            }
+        }   
     },
 
     createInputBuffers: function(length) {
@@ -92,26 +100,29 @@ var AudioletNode = new Class({
         for (var i = 0; i < numberOfInputs; i++) {
             var input = this.inputs[i];
 
+            // Find the non-empty output with the most channels
+            var numberOfChannels = 0;
+            var largestOutput = null;
             var connectedFrom = input.connectedFrom;
             var numberOfConnections = connectedFrom.length;
-            if (numberOfConnections) {
-                // TODO: Optimizations
-                // We have connections
-
-                var numberOfChannels = 0;
-                var largestOutput = null;
-                for (var j = 0; j < numberOfConnections; j++) {
-                    var output = connectedFrom[j];
-                    var outputBuffer = output.buffer;
-                    if (outputBuffer.numberOfChannels > numberOfChannels) {
-                        numberOfChannels = outputBuffer.numberOfChannels;
-                        largestOutput = output;
-                    }
+            for (var j = 0; j < numberOfConnections; j++) {
+                var output = connectedFrom[j];
+                var outputBuffer = output.buffer;
+                if (outputBuffer.numberOfChannels > numberOfChannels &&
+                    !outputBuffer.isEmpty) {
+                    numberOfChannels = outputBuffer.numberOfChannels;
+                    largestOutput = output;
                 }
+            }
+
+            if (largestOutput) {
+                // TODO: Optimizations
+                // We have non-empty connections
 
                 // Resize the input buffer accordingly
                 var inputBuffer = input.buffer;
                 inputBuffer.resize(numberOfChannels, length, true);
+                inputBuffer.isEmpty = false;
 
                 // Set the buffer using the largest output
                 inputBuffer.set(largestOutput.getBuffer(length));
@@ -119,7 +130,7 @@ var AudioletNode = new Class({
                 // Sum the rest of the outputs
                 for (var j = 0; j < numberOfConnections; j++) {
                     var output = connectedFrom[j];
-                    if (output != largestOutput) {
+                    if (output != largestOutput && !output.buffer.isEmpty) {
                         inputBuffer.add(output.getBuffer(length));
                     }
                 }
@@ -127,8 +138,8 @@ var AudioletNode = new Class({
                 inputBuffers.push(inputBuffer);
             }
             else {
-                // If we don't have any connections give a single channel empty
-                // buffer of the correct length
+                // If we don't have any non-empty connections give a single
+                // channel empty buffer of the correct length
                 var inputBuffer = input.buffer;
                 inputBuffer.resize(1, length, true);
                 inputBuffer.isEmpty = true;
@@ -145,6 +156,7 @@ var AudioletNode = new Class({
         for (var i = 0; i < numberOfOutputs; i++) {
             var output = this.outputs[i];
             output.buffer.resize(output.getNumberOfChannels(), length, true);
+            output.buffer.isEmpty = false;
             outputBuffers.push(output.buffer);
         }
         return (outputBuffers);
