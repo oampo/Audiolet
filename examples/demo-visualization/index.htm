@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>Audiolet Demo</title>
+        <!-- Production -->
+        <!--
+        <script src="../../src/mootools/mootools-core-1.3-full-nocompat-yc.js"></script>
+        <script src="../../src/audiolet/Audiolet.min.js"></script>
+        -->
+
+        <!-- Development -->
+        <script src="../../src/mootools/mootools-core-1.3-full-nocompat.js"></script>
+        <script src="../../src/audiolet/Audiolet.js"></script>
+
+        <!-- Common -->
+        <script src="js/processing-1.1.0.js"></script>
+        <script src="js/audiolet_app.js"></script>
+        <link rel="stylesheet" href="css/main.css" />
+    </head>
+    <body>
+        <script id="processing" type="application/processing">
+// Draw synth signal with Processing.js
+void setup() {
+    size(420, 100);
+    stroke(0);
+    strokeWeight(1);
+}
+
+void draw() {
+    background(230, 217, 255);
+
+    var signal = window.demo.audiolet.output.device.buffer.channels[0];
+
+    if (!signal) return;
+    int lastY = height * 0.5;
+    for (int i = 0; i < width; i++) {
+        int currentY = height * 0.5 * (1 + signal[i]);
+        line(i - 1, lastY, i, currentY);
+        lastY = currentY;
+    }
+}
+        </script>
+        <canvas id="signal" style="border: solid 1px black"></canvas>
+
+    </body>
+</html>
+
+
