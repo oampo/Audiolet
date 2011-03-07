@@ -95,6 +95,10 @@ var AudioletOutput = new Class({
                 return outputBuffer;
             }
         }
+    },
+
+    toString: function() {
+        return this.node.toString() + "Output #" + this.index + " - ";
     }
 });
 
