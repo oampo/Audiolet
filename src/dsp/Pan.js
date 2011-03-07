@@ -25,11 +25,21 @@ var Pan = new Class({
         var rightOutputChannel = outputBuffer.getChannelData(1);
 
         // Local processing variables
-        var pan = this.pan;
+        var panParameter = this.pan;
+        var pan, panChannel;
+        if (panParameter.isStatic()) {
+            pan = panParameter.getValue();
+        }
+        else {
+            panChannel = panParameter.getChannel();
+        }
 
         var bufferLength = outputBuffer.length;
         for (var i = 0; i < bufferLength; i++) {
-            var scaledPan = this.pan.getValue(i) * Math.PI / 2;
+            if (panChannel) {
+                pan = panChannel[i];
+            }
+            var scaledPan = pan * Math.PI / 2;
             var value = inputChannel[i];
             // TODO: Use sine/cos tables?
             leftOutputChannel[i] = value * Math.cos(scaledPan);

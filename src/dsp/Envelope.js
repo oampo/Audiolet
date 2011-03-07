@@ -27,6 +27,13 @@ var Envelope = new Class({
         var channel = buffer.getChannelData(0);
 
         var gateParameter = this.gate;
+        var gate, gateChannel;
+        if (gateParameter.isStatic()) {
+            gate = gateParameter.getValue();
+        }
+        else {
+            gateChannel = gateParameter.getChannel();
+        }
         var releaseStage = this.releaseStage;
 
         var stage = this.stage;
@@ -41,7 +48,9 @@ var Envelope = new Class({
 
         var bufferLength = buffer.length;
         for (var i = 0; i < bufferLength; i++) {
-            var gate = gateParameter.getValue(i);
+            if (gateChannel) {
+                gate = gateChannel[i];
+            }
 
             if (gate && !gateOn) {
                 // Key pressed

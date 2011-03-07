@@ -15,9 +15,29 @@ var MulAdd = new Class({
         var inputBuffer = inputBuffers[0];
         var outputBuffer = outputBuffers[0];
 
+        if (inputBuffer.isEmpty) {
+            outputBuffer.isEmpty = true;
+            return;
+        }
+
         // Local processing variables
         var mulParameter = this.mul;
+        var mul, mulChannel;
+        if (mulParameter.isStatic()) {
+            mul = mulParameter.getValue();
+        }
+        else {
+            mulChannel = mulParameter.getChannel();
+        }
+
         var addParameter = this.add;
+        var add, addChannel;
+        if (addParameter.isStatic()) {
+            add = addParameter.getValue();
+        }
+        else {
+            addChannel = addParameter.getChannel();
+        }
 
         var numberOfChannels = inputBuffer.numberOfChannels;
         for (var i = 0; i < numberOfChannels; i++) {
@@ -25,8 +45,12 @@ var MulAdd = new Class({
             var outputChannel = outputBuffer.getChannelData(i);
             var bufferLength = inputBuffer.length;
             for (var j = 0; j < bufferLength; j++) {
-                var mul = mulParameter.getValue(j);
-                var add = addParameter.getValue(j);
+                if (mulChannel) {
+                    mul = mulChannel[j];
+                }
+                if (addChannel) {
+                    add = addChannel[j];
+                }
                 outputChannel[j] = inputChannel[j] * mul + add;
             }
         }

@@ -23,17 +23,27 @@ var Delay = new Class({
         }
 
         // Local processing variables
+        var sampleRate = this.audiolet.device.sampleRate;
+
         var delayTimeParameter = this.delayTime;
+        var delayTime, delayTimeChannel;
+        if (delayTimeParameter.isStatic()) {
+            delayTime = Math.floor(delayTimeParameter.getValue() * sampleRate);
+        }
+        else {
+            delayTimeChannel = delayTimeParameter.getChannel();
+        }
+
         var buffer = this.buffer;
         var readWriteIndex = this.readWriteIndex;
-        var sampleRate = this.audiolet.device.sampleRate;
 
         var inputChannel = inputBuffer.getChannelData(0);
         var outputChannel = outputBuffer.getChannelData(0);
         var bufferLength = inputBuffer.length;
         for (var i = 0; i < bufferLength; i++) {
-            var delayTime = delayTimeParameter.getValue(i) * sampleRate;
-            delayTime = Math.floor(delayTime);
+            if (delayTimeChannel) {
+                delayTime = Math.floor(delayTimeChannel[i] * sampleRate);
+            }
             outputChannel[i] = buffer[readWriteIndex];
             buffer[readWriteIndex] = inputChannel[i];
             readWriteIndex += 1;

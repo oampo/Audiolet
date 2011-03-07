@@ -19,12 +19,22 @@ var TableLookupOscillator = new Class({
         var table = this.table;
         var tableSize = table.length;
         var phase = this.phase;
-        var frequency = this.frequency;
+        var frequencyParameter = this.frequency;
+        var frequency, frequencyChannel;
+        if (frequencyParameter.isStatic()) {
+            frequency = frequencyParameter.getValue();
+        }
+        else {
+            frequencyChannel = frequencyParameter.getChannel();
+        }
 
         // Processing loop
         var bufferLength = buffer.length;
         for (var i = 0; i < bufferLength; i++) {
-            var step = frequency.getValue(i) * tableSize / sampleRate;
+            if (frequencyChannel) {
+                frequency = frequencyChannel[i];
+            }
+            var step = frequency * tableSize / sampleRate;
             phase += step;
             if (phase >= tableSize) {
                 phase %= tableSize;

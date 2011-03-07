@@ -10,17 +10,25 @@ var AudioletParameter = new Class({
         this.value = value || 0;
     },
 
+    isStatic: function() {
+        var input = this.input;
+        return (!(input && input.connectedFrom.length));
+    },
+
+    isDynamic: function() {
+        var input = this.input;
+        return (input && input.connectedFrom.length);
+    },
+
     setValue: function(value) {
         this.value = value;
     },
 
-    getValue: function(index) {
-        var input = this.input;
-        if (input && input.connectedFrom.length) {
-            return (input.buffer.channels[0][index]);
-        }
-        else {
-            return (this.value);
-        }
+    getValue: function() {
+        return this.value;
+    },
+
+    getChannel: function() {
+        return this.input.buffer.channels[0];
     }
 });

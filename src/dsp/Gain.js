@@ -20,7 +20,14 @@ var Gain = new Class({
         }
 
         // Local processing variables
-        var gain = this.gain;
+        var gainParameter = this.gain;
+        var gain, gainChannel;
+        if (gainParameter.isStatic()) {
+            gain = gainParameter.getValue();
+        }
+        else {
+            gainChannel = gainParameter.getChannel();
+        }
 
         var numberOfChannels = inputBuffer.numberOfChannels;
         for (var i = 0; i < numberOfChannels; i++) {
@@ -28,7 +35,10 @@ var Gain = new Class({
             var outputChannel = outputBuffer.getChannelData(i);
             var bufferLength = inputBuffer.length;
             for (var j = 0; j < bufferLength; j++) {
-                outputChannel[j] = inputChannel[j] * gain.getValue(j);
+                if (gainChannel) {
+                    gain = gainChannel[j];
+                }
+                outputChannel[j] = inputChannel[j] * gain;
             }
         }
     },

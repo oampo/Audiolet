@@ -54,6 +54,15 @@ var BiquadFilter = new Class({
 
         // Local processing variables
         var frequencyParameter = this.frequency;
+        var frequency, frequencyChannel;
+        if (frequencyParameter.isStatic()) {
+            frequency = frequencyParameter.getValue();
+        }
+        else {
+            frequencyChannel = frequencyParameter.getChannel();
+        }
+            
+            
         var lastFrequency = this.lastFrequency;
 
         var a0 = this.a0;
@@ -65,7 +74,10 @@ var BiquadFilter = new Class({
 
         var bufferLength = outputBuffer.length;
         for (var i = 0; i < bufferLength; i++) {
-            var frequency = frequencyParameter.getValue(i);
+            if (frequencyChannel) {
+                var frequency = frequencyChannel[i];
+            }
+
             if (frequency != lastFrequency) {
                 // Recalculate and make the coefficients local
                 this.calculateCoefficients(frequency);
