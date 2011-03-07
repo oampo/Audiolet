@@ -84,6 +84,14 @@ var AudioletNode = new Class({
 
     // Overwrite me!
     generate: function(inputBuffers, outputBuffers) {
+        // Sane default - pass along any empty flags
+        var numberOfInputs = inputBuffers.length;
+        var numberOfOutputs = outputBuffers.length;
+        for (var i=0; i<numberOfInputs; i++) {
+            if (i < numberOfOutputs && inputBuffers[i].isEmpty) {
+                outputBuffers[i].isEmpty = true;
+            }
+        }   
     },
 
     createInputBuffers: function(length) {
@@ -92,26 +100,29 @@ var AudioletNode = new Class({
         for (var i = 0; i < numberOfInputs; i++) {
             var input = this.inputs[i];
 
+            // Find the non-empty output with the most channels
+            var numberOfChannels = 0;
+            var largestOutput = null;
             var connectedFrom = input.connectedFrom;
             var numberOfConnections = connectedFrom.length;
-            if (numberOfConnections) {
-                // TODO: Optimizations
-                // We have connections
-
-                var numberOfChannels = 0;
-                var largestOutput = null;
-                for (var j = 0; j < numberOfConnections; j++) {
-                    var output = connectedFrom[j];
-                    var outputBuffer = output.buffer;
-                    if (outputBuffer.numberOfChannels > numberOfChannels) {
-                        numberOfChannels = outputBuffer.numberOfChannels;
-                        largestOutput = output;
-                    }
+            for (var j = 0; j < numberOfConnections; j++) {
+                var output = connectedFrom[j];
+                var outputBuffer = output.buffer;
+                if (outputBuffer.numberOfChannels > numberOfChannels &&
+                    !outputBuffer.isEmpty) {
+                    numberOfChannels = outputBuffer.numberOfChannels;
+                    largestOutput = output;
                 }
+            }
+
+            if (largestOutput) {
+                // TODO: Optimizations
+                // We have non-empty connections
 
                 // Resize the input buffer accordingly
                 var inputBuffer = input.buffer;
                 inputBuffer.resize(numberOfChannels, length, true);
+                inputBuffer.isEmpty = false;
 
                 // Set the buffer using the largest output
                 inputBuffer.set(largestOutput.getBuffer(length));
@@ -119,7 +130,7 @@ var AudioletNode = new Class({
                 // Sum the rest of the outputs
                 for (var j = 0; j < numberOfConnections; j++) {
                     var output = connectedFrom[j];
-                    if (output != largestOutput) {
+                    if (output != largestOutput && !output.buffer.isEmpty) {
                         inputBuffer.add(output.getBuffer(length));
                     }
                 }
@@ -127,8 +138,8 @@ var AudioletNode = new Class({
                 inputBuffers.push(inputBuffer);
             }
             else {
-                // If we don't have any connections give a single channel empty
-                // buffer of the correct length
+                // If we don't have any non-empty connections give a single
+                // channel empty buffer of the correct length
                 var inputBuffer = input.buffer;
                 inputBuffer.resize(1, length, true);
                 inputBuffer.isEmpty = true;
@@ -145,6 +156,7 @@ var AudioletNode = new Class({
         for (var i = 0; i < numberOfOutputs; i++) {
             var output = this.outputs[i];
             output.buffer.resize(output.getNumberOfChannels(), length, true);
+            output.buffer.isEmpty = false;
             outputBuffers.push(output.buffer);
         }
         return (outputBuffers);
@@ -509,7 +521,7 @@ var AudioletDestination = new Class({
         audiolet.scheduler = this.scheduler; // Shortcut
 
         this.blockSizeLimiter = new BlockSizeLimiter(audiolet,
-                                                     Math.pow(2, 12));
+                                                     Math.pow(2, 15));
         audiolet.blockSizeLimiter = this.blockSizeLimiter; // Shortcut
 
         this.upMixer = new UpMixer(audiolet, this.device.numberOfChannels);
@@ -569,6 +581,10 @@ var AudioletInput = new Class({
 
     isConnected: function() {
         return (this.connectedFrom.length > 0);
+    },
+
+    toString: function() {
+        return this.node.toString() + "Input #" + this.index;
     }
 });
 
@@ -678,6 +694,10 @@ var AudioletOutput = new Class({
                 return outputBuffer;
             }
         }
+    },
+
+    toString: function() {
+        return this.node.toString() + "Output #" + this.index + " - ";
     }
 });
 
@@ -694,18 +714,26 @@ var AudioletParameter = new Class({
         this.value = value || 0;
     },
 
+    isStatic: function() {
+        var input = this.input;
+        return (!(input && input.connectedFrom.length));
+    },
+
+    isDynamic: function() {
+        var input = this.input;
+        return (input && input.connectedFrom.length);
+    },
+
     setValue: function(value) {
         this.value = value;
     },
 
-    getValue: function(index) {
-        var input = this.input;
-        if (input && input.connectedFrom.length) {
-            return (input.buffer.channels[0][index]);
-        }
-        else {
-            return (this.value);
-        }
+    getValue: function() {
+        return this.value;
+    },
+
+    getChannel: function() {
+        return this.input.buffer.channels[0];
     }
 });
 
@@ -964,7 +992,7 @@ var Scheduler = new Class({
         this.lastBeatTime = 0;
         this.beatLength = 60 / this.bpm * this.audiolet.device.sampleRate;
 
-        var emptyBuffer = new AudioletBuffer(1, 1);
+        this.emptyBuffer = new AudioletBuffer(1, 1);
     },
 
     setTempo: function(bpm) {
@@ -1048,7 +1076,7 @@ var Scheduler = new Class({
             }
 
             // Update the clock so it is correct for the current event
-            this.updateClock(event.time);
+            this.updateClock(eventTime);
 
 
             // Set this before processEvent, as that can change the event time
@@ -1138,6 +1166,7 @@ var Scheduler = new Class({
                 // Substitute the supposedly empty buffer with an actually
                 // empty buffer.  This means that we don't have to  zero
                 // buffers in other nodes
+                var emptyBuffer = this.emptyBuffer;
                 emptyBuffer.resize(inputBuffer.numberOfChannels,
                                    inputBuffer.length);
                 inputChannel = emptyBuffer.getChannelData(0);
@@ -1260,6 +1289,13 @@ var Envelope = new Class({
         var channel = buffer.getChannelData(0);
 
         var gateParameter = this.gate;
+        var gate, gateChannel;
+        if (gateParameter.isStatic()) {
+            gate = gateParameter.getValue();
+        }
+        else {
+            gateChannel = gateParameter.getChannel();
+        }
         var releaseStage = this.releaseStage;
 
         var stage = this.stage;
@@ -1274,7 +1310,9 @@ var Envelope = new Class({
 
         var bufferLength = buffer.length;
         for (var i = 0; i < bufferLength; i++) {
-            var gate = gateParameter.getValue(i);
+            if (gateChannel) {
+                gate = gateChannel[i];
+            }
 
             if (gate && !gateOn) {
                 // Key pressed
@@ -1439,6 +1477,15 @@ var BiquadFilter = new Class({
 
         // Local processing variables
         var frequencyParameter = this.frequency;
+        var frequency, frequencyChannel;
+        if (frequencyParameter.isStatic()) {
+            frequency = frequencyParameter.getValue();
+        }
+        else {
+            frequencyChannel = frequencyParameter.getChannel();
+        }
+            
+            
         var lastFrequency = this.lastFrequency;
 
         var a0 = this.a0;
@@ -1450,7 +1497,10 @@ var BiquadFilter = new Class({
 
         var bufferLength = outputBuffer.length;
         for (var i = 0; i < bufferLength; i++) {
-            var frequency = frequencyParameter.getValue(i);
+            if (frequencyChannel) {
+                var frequency = frequencyChannel[i];
+            }
+
             if (frequency != lastFrequency) {
                 // Recalculate and make the coefficients local
                 this.calculateCoefficients(frequency);
@@ -1617,17 +1667,27 @@ var Delay = new Class({
         }
 
         // Local processing variables
+        var sampleRate = this.audiolet.device.sampleRate;
+
         var delayTimeParameter = this.delayTime;
+        var delayTime, delayTimeChannel;
+        if (delayTimeParameter.isStatic()) {
+            delayTime = Math.floor(delayTimeParameter.getValue() * sampleRate);
+        }
+        else {
+            delayTimeChannel = delayTimeParameter.getChannel();
+        }
+
         var buffer = this.buffer;
         var readWriteIndex = this.readWriteIndex;
-        var sampleRate = this.audiolet.device.sampleRate;
 
         var inputChannel = inputBuffer.getChannelData(0);
         var outputChannel = outputBuffer.getChannelData(0);
         var bufferLength = inputBuffer.length;
         for (var i = 0; i < bufferLength; i++) {
-            var delayTime = delayTimeParameter.getValue(i) * sampleRate;
-            delayTime = Math.floor(delayTime);
+            if (delayTimeChannel) {
+                delayTime = Math.floor(delayTimeChannel[i] * sampleRate);
+            }
             outputChannel[i] = buffer[readWriteIndex];
             buffer[readWriteIndex] = inputChannel[i];
             readWriteIndex += 1;
@@ -1724,7 +1784,14 @@ var Gain = new Class({
         }
 
         // Local processing variables
-        var gain = this.gain;
+        var gainParameter = this.gain;
+        var gain, gainChannel;
+        if (gainParameter.isStatic()) {
+            gain = gainParameter.getValue();
+        }
+        else {
+            gainChannel = gainParameter.getChannel();
+        }
 
         var numberOfChannels = inputBuffer.numberOfChannels;
         for (var i = 0; i < numberOfChannels; i++) {
@@ -1732,7 +1799,10 @@ var Gain = new Class({
             var outputChannel = outputBuffer.getChannelData(i);
             var bufferLength = inputBuffer.length;
             for (var j = 0; j < bufferLength; j++) {
-                outputChannel[j] = inputChannel[j] * gain.getValue(j);
+                if (gainChannel) {
+                    gain = gainChannel[j];
+                }
+                outputChannel[j] = inputChannel[j] * gain;
             }
         }
     },
@@ -1822,9 +1892,29 @@ var MulAdd = new Class({
         var inputBuffer = inputBuffers[0];
         var outputBuffer = outputBuffers[0];
 
+        if (inputBuffer.isEmpty) {
+            outputBuffer.isEmpty = true;
+            return;
+        }
+
         // Local processing variables
         var mulParameter = this.mul;
+        var mul, mulChannel;
+        if (mulParameter.isStatic()) {
+            mul = mulParameter.getValue();
+        }
+        else {
+            mulChannel = mulParameter.getChannel();
+        }
+
         var addParameter = this.add;
+        var add, addChannel;
+        if (addParameter.isStatic()) {
+            add = addParameter.getValue();
+        }
+        else {
+            addChannel = addParameter.getChannel();
+        }
 
         var numberOfChannels = inputBuffer.numberOfChannels;
         for (var i = 0; i < numberOfChannels; i++) {
@@ -1832,8 +1922,12 @@ var MulAdd = new Class({
             var outputChannel = outputBuffer.getChannelData(i);
             var bufferLength = inputBuffer.length;
             for (var j = 0; j < bufferLength; j++) {
-                var mul = mulParameter.getValue(j);
-                var add = addParameter.getValue(j);
+                if (mulChannel) {
+                    mul = mulChannel[j];
+                }
+                if (addChannel) {
+                    add = addChannel[j];
+                }
                 outputChannel[j] = inputChannel[j] * mul + add;
             }
         }
@@ -1872,11 +1966,21 @@ var Pan = new Class({
         var rightOutputChannel = outputBuffer.getChannelData(1);
 
         // Local processing variables
-        var pan = this.pan;
+        var panParameter = this.pan;
+        var pan, panChannel;
+        if (panParameter.isStatic()) {
+            pan = panParameter.getValue();
+        }
+        else {
+            panChannel = panParameter.getChannel();
+        }
 
         var bufferLength = outputBuffer.length;
         for (var i = 0; i < bufferLength; i++) {
-            var scaledPan = this.pan.getValue(i) * Math.PI / 2;
+            if (panChannel) {
+                pan = panChannel[i];
+            }
+            var scaledPan = pan * Math.PI / 2;
             var value = inputChannel[i];
             // TODO: Use sine/cos tables?
             leftOutputChannel[i] = value * Math.cos(scaledPan);
@@ -1929,12 +2033,22 @@ var TableLookupOscillator = new Class({
         var table = this.table;
         var tableSize = table.length;
         var phase = this.phase;
-        var frequency = this.frequency;
+        var frequencyParameter = this.frequency;
+        var frequency, frequencyChannel;
+        if (frequencyParameter.isStatic()) {
+            frequency = frequencyParameter.getValue();
+        }
+        else {
+            frequencyChannel = frequencyParameter.getChannel();
+        }
 
         // Processing loop
         var bufferLength = buffer.length;
         for (var i = 0; i < bufferLength; i++) {
-            var step = frequency.getValue(i) * tableSize / sampleRate;
+            if (frequencyChannel) {
+                frequency = frequencyChannel[i];
+            }
+            var step = frequency * tableSize / sampleRate;
             phase += step;
             if (phase >= tableSize) {
                 phase %= tableSize;
@@ -2034,13 +2148,14 @@ var TriggerControl = new Class({
         var channel = buffer.getChannelData(0);
 
         var triggerParameter = this.trigger;
+        var trigger = triggerParameter.getValue();
+
         var bufferLength = buffer.length;
         for (var i = 0; i < bufferLength; i++) {
-            var trigger = triggerParameter.getValue(i);
-
             if (trigger) {
                 channel[i] = 1;
                 triggerParameter.setValue(0);
+                trigger = 0;
             }
             else {
                 channel[i] = 0;
