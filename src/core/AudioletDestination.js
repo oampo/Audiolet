@@ -14,7 +14,7 @@ var AudioletDestination = new Class({
         audiolet.scheduler = this.scheduler; // Shortcut
 
         this.blockSizeLimiter = new BlockSizeLimiter(audiolet,
-                                                     Math.pow(2, 12));
+                                                     Math.pow(2, 15));
         audiolet.blockSizeLimiter = this.blockSizeLimiter; // Shortcut
 
         this.upMixer = new UpMixer(audiolet, this.device.numberOfChannels);
