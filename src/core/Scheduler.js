@@ -22,7 +22,7 @@ var Scheduler = new Class({
         this.lastBeatTime = 0;
         this.beatLength = 60 / this.bpm * this.audiolet.device.sampleRate;
 
-        var emptyBuffer = new AudioletBuffer(1, 1);
+        this.emptyBuffer = new AudioletBuffer(1, 1);
     },
 
     setTempo: function(bpm) {
@@ -106,7 +106,7 @@ var Scheduler = new Class({
             }
 
             // Update the clock so it is correct for the current event
-            this.updateClock(event.time);
+            this.updateClock(eventTime);
 
 
             // Set this before processEvent, as that can change the event time
@@ -196,6 +196,7 @@ var Scheduler = new Class({
                 // Substitute the supposedly empty buffer with an actually
                 // empty buffer.  This means that we don't have to  zero
                 // buffers in other nodes
+                var emptyBuffer = this.emptyBuffer;
                 emptyBuffer.resize(inputBuffer.numberOfChannels,
                                    inputBuffer.length);
                 inputChannel = emptyBuffer.getChannelData(0);
