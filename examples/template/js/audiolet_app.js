@@ -5,7 +5,7 @@ window.addEvent("domready", function() {
         }
     });
 
-    this.audiolet_app = new AudioletApp();
+    this.audioletApp = new AudioletApp();
 });
 
 
