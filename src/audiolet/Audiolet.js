@@ -464,6 +464,127 @@ var AudioletBuffer = new Class({
         var buffer = new AudioletBuffer(this.numberOfChannels, this.length);
         buffer.set(this);
         return buffer;
+    },
+
+    // WAV and AIFF loading based on http://pastebin.com/XVptxYEC from
+    // yuri & ccliffe
+    load: function(path, async) {
+        if (typeof async == 'undefined' || async == null) {
+            async = true;
+        }
+        var request = new Request({
+            url: path,
+            async: async,
+            onSuccess: function(data) {
+                // TODO: Maybe should check header, rather than just believing
+                // the extension
+                var splitPath = path.split(".");
+                var extension = splitPath[splitPath.length - 1].toLowerCase();
+                if (extension == "wav") {
+                    this.loadWAVData(data);
+                }
+                else if (extension == "aiff" || extension == "aif") {
+                    this.loadAIFFData(data);
+                }
+                else {
+                    console.error("Cannot load ." + extension + " files");
+                }
+                    
+            }.bind(this),
+
+            onFailure: function(xhr) {
+                console.error("Could not load", path);
+            }.bind(this)
+        });
+        request.xhr.overrideMimeType('text/plain; charset=x-user-defined');
+        request.get();
+    },
+
+    loadWAVData: function(data) {
+        // TODO: More robust loading!
+        // Ignore header - 12 bytes
+        // fmt chunk
+        // Ignore fmt - 4 bytes
+        // Ignore length of fmt - 4 bytes
+        // Ignore file encoding
+        // Number of channels - 2 bytes
+        var numberOfChannels =   (data.charCodeAt(22) & 0xFF) |
+                                ((data.charCodeAt(23) & 0xFF) << 8);
+        // Ignore sample rate - 4 bytes
+        // Ignore bytes/sec - 4 bytes
+        // Ignore block align - 2 bytes
+        // Ignore bitrate - 2 bytes
+
+        // data chunk
+        // Ignore data - 4 bytes
+        // Data size - 4 bytes
+        var length =  (data.charCodeAt(40) & 0xFF)        |
+                     ((data.charCodeAt(41) & 0xFF) << 8)  |
+                     ((data.charCodeAt(42) & 0xFF) << 16) |
+                     ((data.charCodeAt(43) & 0xFF) << 24);
+        // 2 bytes per sample
+        length /= 2 * numberOfChannels;
+        this.resize(numberOfChannels, length);
+
+        var offset = 44;
+        for (var i = 0; i < numberOfChannels; i++) {
+            var channel = this.channels[i];
+            for (var j = 0; j < length; j++) {
+                var index = offset + (j * numberOfChannels + i) * 2;
+                // Sample - 2 bytes
+                var value =  (data.charCodeAt(index) & 0xFF) |
+                            ((data.charCodeAt(index + 1) & 0xFF) << 8);
+                // Scale range from 0 to 2**16 -> -2**15 to 2**15
+                if (value >= 0x8000) {
+                    value |= ~0x7FFF;
+                }
+                // Scale range to -1 to 1
+                channel[j] = value / 0x8000;
+            }
+        }
+    },
+
+    loadAIFFData: function(data) {
+        // TODO: More robust loading!
+        // Only loads 16 bit AIFF-Cs without comments, ignoring the sample rate
+        // Ignore the header - 16 bytes
+        // COMM Chunk
+        // Ignore COMM - 4 bytes
+        // Number of channels - 2 bytes
+        var numberOfChannels = ((data.charCodeAt(20) & 0xFF) << 8) |
+                                (data.charCodeAt(21) & 0xFF);
+        // Number of samples - 4 bytes
+        var length = ((data.charCodeAt(22) & 0xFF) << 24) |
+                     ((data.charCodeAt(23) & 0xFF) << 16) |
+                     ((data.charCodeAt(24) & 0xFF) << 8)  |
+                      (data.charCodeAt(25) & 0xFF);
+        this.resize(numberOfChannels, length, true);
+        
+        // Ignore bitrate - 2 bytes
+        // Ignore sample rate - 10 bytes
+
+        // SSND Chunk
+        // Ignore SSND - 4 bytes
+        // Ignore chunk size - 4 bytes
+        // Ignore offset - 4 bytes
+        // Ignore block size - 4 bytes
+        // Hope to hell that there isn't a comment - 0 bytes
+        var offset = 54;
+        for (var i = 0; i < numberOfChannels; i++) {
+            var channel = this.channels[i];
+            for (var j = 0; j < length; j++) {
+                var index = offset + (j * numberOfChannels + i) * 2;
+                // Sample - 2 bytes
+                var value = ((data.charCodeAt(index) & 0xFF) << 8) |
+                             (data.charCodeAt(index + 1) & 0xFF);
+                // Scale range from 0 to 2**16 -> -2**15 to 2**15
+                if (value >= 0x8000) {
+                    value |= ~0x7FFF;
+                }
+                // Scale range to -1 to 1
+                channel[j] = value / 0x8000;
+            }
+        } 
     }
 });
 
@@ -1641,6 +1762,144 @@ var BandRejectFilter = new Class({
     }
 });
 
+/**
+ * @depends ../core/AudioletNode.js
+ */
+
+var BufferPlayer = new Class({
+    Extends: AudioletNode,
+    initialize: function(audiolet, buffer, playbackRate, startPosition, loop) {
+        AudioletNode.prototype.initialize.apply(this, [audiolet, 3, 1]);
+        this.buffer = buffer;
+        this.setNumberOfOutputChannels(0, this.buffer.numberOfChannels);
+        this.position = startPosition || 0;
+        this.playbackRate = new AudioletParameter(this, 0, playbackRate || 1);
+        this.restartTrigger = new AudioletParameter(this, 1, 0);
+        this.startPosition = new AudioletParameter(this, 2, startPosition || 0);
+        this.loop = new AudioletParameter(this, 3, loop || 0);
+
+        this.restartTriggerOn = false;
+        this.playing = true;
+    },
+
+    generate: function(inputBuffers, outputBuffers) {
+        var outputBuffer = outputBuffers[0];
+        
+        // Cache local variables
+        var buffer = this.buffer;
+        var position = this.position;
+        var playing = this.playing;
+        var restartTriggerOn = this.restartTriggerOn;
+
+        // Crap load of parameters
+        var playbackRateParameter = this.playbackRate;
+        var playbackRate, playbackRateChannel;
+        if (playbackRateParameter.isStatic()) {
+            playbackRate = playbackRateParameter.getValue();
+        }
+        else {
+            playbackRateChannel = playbackRateParameter.getChannel();
+        }
+
+        var restartTriggerParameter = this.restartTrigger;
+        var restartTrigger, restartTriggerChannel;
+        if (restartTriggerParameter.isStatic()) {
+            restartTrigger = restartTriggerParameter.getValue();
+        }
+        else {
+            restartTriggerChannel = restartTriggerParameter.getChannel();
+        }
+
+        var startPositionParameter = this.startPosition;
+        var startPosition, startPositionChannel;
+        if (startPositionParameter.isStatic()) {
+            startPosition = startPositionParameter.getValue();
+        }
+        else {
+            startPositionChannel = startPositionParameter.getChannel();
+        }
+
+        var loopParameter = this.loop;
+        var loop, loopChannel;
+        if (loopParameter.isStatic()) {
+            loop = loopParameter.getValue();
+        }
+        else {
+            loopChannel = loopParameter.getChannel();
+        }
+
+
+        if (buffer.length == 0 || (!restartTriggerChannel && !playing)) {
+            // No buffer data, or chance of starting playing in this block, so
+            // we can just send an empty buffer and return
+            outputBuffer.isEmpty = true;
+            return;
+        }
+
+        var numberOfChannels = buffer.numberOfChannels;
+        var bufferLength = outputBuffer.length;
+        for (var i = 0; i < bufferLength; i++) {
+            if (playbackRateChannel) {
+                playbackRate = playbackRateChannel[i];
+            }
+            if (restartTriggerChannel) {
+                restartTrigger = restartTriggerChannel[i];
+            }
+            if (loopChannel) {
+                loop = loopChannel[i];
+            }
+
+            if (restartTrigger > 0 && !restartTriggerOn) {
+                // Trigger moved from <=0 to >0, so we restart playback from
+                // startPosition
+                position = startPosition;
+                restartTriggerOn = true;
+                playing = true;
+            }
+
+            if (restartTrigger <= 0 && restartTriggerOn) {
+                // Trigger moved back to <= 0
+                restartTriggerOn = false;
+            }
+                
+            if (playing) {
+                for (var j = 0; j < numberOfChannels; j++) {
+                    var inputChannel = buffer.channels[j];
+                    var outputChannel = outputBuffer.channels[j];
+                    outputChannel[i] = inputChannel[Math.floor(position)];
+                }
+                position += playbackRate;
+                if (position > buffer.length) {
+                    if (loop) {
+                        // Back to the start
+                        position %= buffer.length;
+                    }
+                    else {
+                        // Finish playing until a new restart trigger
+                        playing = false;
+                    }
+                }
+            }
+            else {
+                // Give zeros until we restart
+                for (var j = 0; j < numberOfChannels; j++) {
+                    var outputChannel = outputBuffer.channels[j];
+                    outputChannel[i] = 0;
+                }
+            }
+        }
+
+        this.playing = playing;
+        this.position = position;
+        this.restartTriggerOn = restartTriggerOn;
+    },
+
+    toString: function() {
+        return ('Buffer player');
+    }
+});
+
+
 
 /**
  * @depends ../core/AudioletNode.js
@@ -1653,7 +1912,7 @@ var Delay = new Class({
         this.maximumDelayTime = maximumDelayTime;
         this.delayTime = new AudioletParameter(this, 1, delayTime || 1);
         var bufferSize = maximumDelayTime * this.audiolet.device.sampleRate;
-        this.buffer = new Float32Array(Math.floor(bufferSize));
+        this.buffers = [];
         this.readWriteIndex = 0;
     },
 
@@ -1667,6 +1926,7 @@ var Delay = new Class({
         }
 
         // Local processing variables
+        var maximumDelayTime = this.maximumDelayTime;
         var sampleRate = this.audiolet.device.sampleRate;
 
         var delayTimeParameter = this.delayTime;
@@ -1678,18 +1938,37 @@ var Delay = new Class({
             delayTimeChannel = delayTimeParameter.getChannel();
         }
 
-        var buffer = this.buffer;
+        var buffers = this.buffers;
         var readWriteIndex = this.readWriteIndex;
+        
+        var inputChannels = [];
+        var outputChannels = [];
+        var numberOfChannels = inputBuffer.numberOfChannels;
+        for (var i = 0; i < numberOfChannels; i++) {
+            inputChannels.push(inputBuffer.getChannelData(i));
+            outputChannels.push(outputBuffer.getChannelData(i));
+            // Create buffer for channel if it doesn't already exist
+            if (i >= buffers.length) {
+                var bufferSize = maximumDelayTime * sampleRate;
+                buffers.push(new Float32Array(bufferSize));
+            }
+        }
 
-        var inputChannel = inputBuffer.getChannelData(0);
-        var outputChannel = outputBuffer.getChannelData(0);
+
         var bufferLength = inputBuffer.length;
         for (var i = 0; i < bufferLength; i++) {
             if (delayTimeChannel) {
                 delayTime = Math.floor(delayTimeChannel[i] * sampleRate);
             }
-            outputChannel[i] = buffer[readWriteIndex];
-            buffer[readWriteIndex] = inputChannel[i];
+
+            for (var j = 0; j < numberOfChannels; j++) {
+                var inputChannel = inputChannels[j];
+                var outputChannel = outputChannels[j];
+                var buffer = buffers[j];
+                outputChannel[i] = buffer[readWriteIndex];
+                buffer[readWriteIndex] = inputChannel[i];
+            }
+
             readWriteIndex += 1;
             if (readWriteIndex >= delayTime) {
                 readWriteIndex = 0;
@@ -2613,6 +2892,16 @@ var MajorScale = new Class({
     Extends: Scale,
     initialize: function() {
         Scale.prototype.initialize.apply(this, [[0, 2, 4, 5, 7, 9, 11]]);
+    }
+});
+
+/**
+ * @depends Scale.js
+ */
+var MinorScale = new Class({
+    Extends: Scale,
+    initialize: function() {
+        Scale.prototype.initialize.apply(this, [[0, 2, 3, 5, 7, 8, 10]]);
     }
 });
 
