@@ -87,11 +87,11 @@ var AudioletNode = new Class({
         // Sane default - pass along any empty flags
         var numberOfInputs = inputBuffers.length;
         var numberOfOutputs = outputBuffers.length;
-        for (var i=0; i<numberOfInputs; i++) {
+        for (var i = 0; i < numberOfInputs; i++) {
             if (i < numberOfOutputs && inputBuffers[i].isEmpty) {
                 outputBuffers[i].isEmpty = true;
             }
-        }   
+        }
     },
 
     createInputBuffers: function(length) {
@@ -478,22 +478,22 @@ var AudioletBuffer = new Class({
             onSuccess: function(data) {
                 // TODO: Maybe should check header, rather than just believing
                 // the extension
-                var splitPath = path.split(".");
+                var splitPath = path.split('.');
                 var extension = splitPath[splitPath.length - 1].toLowerCase();
-                if (extension == "wav") {
+                if (extension == 'wav') {
                     this.loadWAVData(data);
                 }
-                else if (extension == "aiff" || extension == "aif") {
+                else if (extension == 'aiff' || extension == 'aif') {
                     this.loadAIFFData(data);
                 }
                 else {
-                    console.error("Cannot load ." + extension + " files");
+                    console.error('Cannot load .' + extension + ' files');
                 }
-                    
+
             }.bind(this),
 
             onFailure: function(xhr) {
-                console.error("Could not load", path);
+                console.error('Could not load', path);
             }.bind(this)
         });
         request.xhr.overrideMimeType('text/plain; charset=x-user-defined');
@@ -508,7 +508,7 @@ var AudioletBuffer = new Class({
         // Ignore length of fmt - 4 bytes
         // Ignore file encoding
         // Number of channels - 2 bytes
-        var numberOfChannels =   (data.charCodeAt(22) & 0xFF) |
+        var numberOfChannels = (data.charCodeAt(22) & 0xFF) |
                                 ((data.charCodeAt(23) & 0xFF) << 8);
         // Ignore sample rate - 4 bytes
         // Ignore bytes/sec - 4 bytes
@@ -518,8 +518,8 @@ var AudioletBuffer = new Class({
         // data chunk
         // Ignore data - 4 bytes
         // Data size - 4 bytes
-        var length =  (data.charCodeAt(40) & 0xFF)        |
-                     ((data.charCodeAt(41) & 0xFF) << 8)  |
+        var length = (data.charCodeAt(40) & 0xFF) |
+                     ((data.charCodeAt(41) & 0xFF) << 8) |
                      ((data.charCodeAt(42) & 0xFF) << 16) |
                      ((data.charCodeAt(43) & 0xFF) << 24);
         // 2 bytes per sample
@@ -532,7 +532,7 @@ var AudioletBuffer = new Class({
             for (var j = 0; j < length; j++) {
                 var index = offset + (j * numberOfChannels + i) * 2;
                 // Sample - 2 bytes
-                var value =  (data.charCodeAt(index) & 0xFF) |
+                var value = (data.charCodeAt(index) & 0xFF) |
                             ((data.charCodeAt(index + 1) & 0xFF) << 8);
                 // Scale range from 0 to 2**16 -> -2**15 to 2**15
                 if (value >= 0x8000) {
@@ -556,10 +556,10 @@ var AudioletBuffer = new Class({
         // Number of samples - 4 bytes
         var length = ((data.charCodeAt(22) & 0xFF) << 24) |
                      ((data.charCodeAt(23) & 0xFF) << 16) |
-                     ((data.charCodeAt(24) & 0xFF) << 8)  |
+                     ((data.charCodeAt(24) & 0xFF) << 8) |
                       (data.charCodeAt(25) & 0xFF);
         this.resize(numberOfChannels, length, true);
-        
+
         // Ignore bitrate - 2 bytes
         // Ignore sample rate - 10 bytes
 
@@ -584,7 +584,7 @@ var AudioletBuffer = new Class({
                 // Scale range to -1 to 1
                 channel[j] = value / 0x8000;
             }
-        } 
+        }
     }
 });
 
@@ -705,7 +705,7 @@ var AudioletInput = new Class({
     },
 
     toString: function() {
-        return this.node.toString() + "Input #" + this.index;
+        return this.node.toString() + 'Input #' + this.index;
     }
 });
 
@@ -818,7 +818,7 @@ var AudioletOutput = new Class({
     },
 
     toString: function() {
-        return this.node.toString() + "Output #" + this.index + " - ";
+        return this.node.toString() + 'Output #' + this.index + ' - ';
     }
 });
 
@@ -837,12 +837,14 @@ var AudioletParameter = new Class({
 
     isStatic: function() {
         var input = this.input;
-        return (!(input && input.connectedFrom.length));
+        return (!(input &&
+                  input.connectedFrom.length &&
+                  !(input.buffer.isEmpty)));
     },
 
     isDynamic: function() {
         var input = this.input;
-        return (input && input.connectedFrom.length);
+        return (input && input.connectedFrom.length && !(input.buffer.isEmpty));
     },
 
     setValue: function(value) {
@@ -960,6 +962,47 @@ var DummyDevice = new Class({
 
     toString: function() {
         return 'Dummy Device';
+    }
+});
+
+
+/**
+ * @depends ../core/AudioletNode.js
+ */
+
+var ParameterNode = new Class({
+    Extends: AudioletNode,
+    initialize: function(audiolet, value) {
+        AudioletNode.prototype.initialize.apply(this, [audiolet, 1, 1]);
+        this.parameter = new AudioletParameter(this, 0, value);
+    },
+
+    generate: function(inputBuffers, outputBuffers) {
+        var outputBuffer = outputBuffers[0];
+        var outputChannel = outputBuffer.channels[0];
+
+        // Local processing variables
+        var parameterParameter = this.parameter;
+        var parameter, parameterChannel;
+        if (parameterParameter.isStatic()) {
+            parameter = parameterParameter.getValue();
+        }
+        else {
+            parameterChannel = parameterParameter.getChannel();
+        }
+
+
+        var bufferLength = outputBuffer.length;
+        for (var i = 0; i < bufferLength; i++) {
+            if (parameterChannel) {
+                parameter = parameterChannel[i];
+            }
+            outputChannel[i] = parameter;
+        }
+    },
+
+    toString: function() {
+        return 'Parameter Node';
     }
 });
 
@@ -1247,7 +1290,7 @@ var Scheduler = new Class({
             for (var i = 0; i < numberOfPatterns; i++) {
                 var pattern = patterns[i];
                 var value = pattern.next();
-                if (value != null) {                   
+                if (value != null) {
                     args.push(value);
                 }
                 else {
@@ -1605,8 +1648,8 @@ var BiquadFilter = new Class({
         else {
             frequencyChannel = frequencyParameter.getChannel();
         }
-            
-            
+
+
         var lastFrequency = this.lastFrequency;
 
         var a0 = this.a0;
@@ -1784,7 +1827,7 @@ var BufferPlayer = new Class({
 
     generate: function(inputBuffers, outputBuffers) {
         var outputBuffer = outputBuffers[0];
-        
+
         // Cache local variables
         var buffer = this.buffer;
         var position = this.position;
@@ -1861,7 +1904,7 @@ var BufferPlayer = new Class({
                 // Trigger moved back to <= 0
                 restartTriggerOn = false;
             }
-                
+
             if (playing) {
                 for (var j = 0; j < numberOfChannels; j++) {
                     var inputChannel = buffer.channels[j];
@@ -1900,6 +1943,304 @@ var BufferPlayer = new Class({
 });
 
 
+/**
+ * @depends ../core/AudioletNode.js
+ */
+
+var CombFilter = new Class({
+    Extends: AudioletNode,
+    initialize: function(audiolet, maximumDelayTime, delayTime, decayTime) {
+        AudioletNode.prototype.initialize.apply(this, [audiolet, 3, 1]);
+        this.linkNumberOfOutputChannels(0, 0);
+        this.maximumDelayTime = maximumDelayTime;
+        this.delayTime = new AudioletParameter(this, 1, delayTime || 1);
+        this.decayTime = new AudioletParameter(this, 2, decayTime);
+        var bufferSize = maximumDelayTime * this.audiolet.device.sampleRate;
+        this.buffers = [];
+        this.readWriteIndex = 0;
+    },
+
+    generate: function(inputBuffers, outputBuffers) {
+        var inputBuffer = inputBuffers[0];
+        var outputBuffer = outputBuffers[0];
+
+        if (inputBuffer.isEmpty) {
+            outputBuffer.isEmpty = true;
+            return;
+        }
+
+        // Local processing variables
+        var maximumDelayTime = this.maximumDelayTime;
+        var sampleRate = this.audiolet.device.sampleRate;
+
+        var delayTimeParameter = this.delayTime;
+        var delayTime, delayTimeChannel;
+        if (delayTimeParameter.isStatic()) {
+            delayTime = Math.floor(delayTimeParameter.getValue() * sampleRate);
+        }
+        else {
+            delayTimeChannel = delayTimeParameter.getChannel();
+        }
+
+        var decayTimeParameter = this.decayTime;
+        var decayTime, decayTimeChannel;
+        if (decayTimeParameter.isStatic()) {
+            decayTime = Math.floor(decayTimeParameter.getValue() * sampleRate);
+        }
+        else {
+            decayTimeChannel = decayTimeParameter.getChannel();
+        }
+
+
+        var feedback;
+        if (delayTimeParameter.isStatic() && decayTimeParameter.isStatic()) {
+            feedback = Math.exp(-3 * delayTime / decayTime);
+        }
+
+
+
+        var buffers = this.buffers;
+        var readWriteIndex = this.readWriteIndex;
+
+        var inputChannels = inputBuffer.channels;
+        var outputChannels = outputBuffer.channels;
+        var numberOfChannels = inputBuffer.numberOfChannels;
+        var numberOfBuffers = buffers.length;
+        for (var i = numberOfBuffers; i < numberOfChannels; i++) {
+            // Create buffer for channel if it doesn't already exist
+            var bufferSize = maximumDelayTime * sampleRate;
+            buffers.push(new Float32Array(bufferSize));
+        }
+
+
+        var bufferLength = inputBuffer.length;
+        for (var i = 0; i < bufferLength; i++) {
+            if (delayTimeChannel) {
+                delayTime = Math.floor(delayTimeChannel[i] * sampleRate);
+            }
+
+            if (decayTimeChannel) {
+                decayTime = Math.floor(decayTimeChannel[i] * sampleRate);
+            }
+
+            if (delayTimeChannel || decayTimeChannel) {
+                feedback = Math.exp(-3 * delayTime / decayTime);
+            }
+
+            for (var j = 0; j < numberOfChannels; j++) {
+                var inputChannel = inputChannels[j];
+                var outputChannel = outputChannels[j];
+                var buffer = buffers[j];
+                var output = buffer[readWriteIndex];
+                outputChannel[i] = output;
+                buffer[readWriteIndex] = inputChannel[i] +
+                                         feedback * output;
+            }
+
+            readWriteIndex += 1;
+            if (readWriteIndex >= delayTime) {
+                readWriteIndex = 0;
+            }
+        }
+        this.readWriteIndex = readWriteIndex;
+    },
+
+    toString: function() {
+        return 'Comb Filter';
+    }
+});
+
+
+/**
+ * @depends ../core/AudioletNode.js
+ */
+
+var CrossFade = new Class({
+    Extends: AudioletNode,
+    initialize: function(audiolet, position) {
+        AudioletNode.prototype.initialize.apply(this, [audiolet, 3, 1]);
+        this.linkNumberOfOutputChannels(0, 0);
+        this.position = new AudioletParameter(this, 2, position || 0.5);
+    },
+
+    generate: function(inputBuffers, outputBuffers) {
+        var inputBufferA = inputBuffers[0];
+        var inputBufferB = inputBuffers[1];
+        var outputBuffer = outputBuffers[0];
+
+        var inputChannelsA = inputBufferA.channels;
+        var inputChannelsB = inputBufferB.channels;
+        var outputChannels = outputBuffer.channels;
+
+        if (inputBufferA.isEmpty || inputBufferB.isEmpty) {
+            outputBuffer.isEmpty = true;
+            return;
+        }
+
+        // Local processing variables
+        var positionParameter = this.position;
+        var position, positionChannel;
+        if (positionParameter.isStatic()) {
+            position = positionParameter.getValue();
+        }
+        else {
+            positionChannel = positionParameter.getChannel();
+        }
+
+        var bufferLength = outputBuffer.length;
+        for (var i = 0; i < bufferLength; i++) {
+            if (positionChannel) {
+                position = positionChannel[i];
+            }
+            var scaledPosition = position * Math.PI / 2;
+            // TODO: Use sine/cos tables?
+            var gainA = Math.cos(scaledPosition);
+            var gainB = Math.sin(scaledPosition);
+
+            var numberOfChannels = inputBufferA.numberOfChannels;
+            for (var j = 0; j < numberOfChannels; j++) {
+                var inputChannelA = inputChannelsA[j];
+                var inputChannelB = inputChannelsB[j];
+                var outputChannel = outputChannels[j];
+
+                outputChannel[i] = inputChannelA[i] * gainA +
+                                   inputChannelB[i] * gainB;
+            }
+        }
+    },
+
+    toString: function() {
+        return 'Cross Fader';
+    }
+});
+
+/**
+ * @depends ../core/AudioletNode.js
+ */
+
+var DampedCombFilter = new Class({
+    Extends: AudioletNode,
+    initialize: function(audiolet, maximumDelayTime, delayTime, decayTime,
+                         damping) {
+        AudioletNode.prototype.initialize.apply(this, [audiolet, 4, 1]);
+        this.linkNumberOfOutputChannels(0, 0);
+        this.maximumDelayTime = maximumDelayTime;
+        this.delayTime = new AudioletParameter(this, 1, delayTime || 1);
+        this.decayTime = new AudioletParameter(this, 2, decayTime);
+        this.damping = new AudioletParameter(this, 3, damping);
+        var bufferSize = maximumDelayTime * this.audiolet.device.sampleRate;
+        this.buffers = [];
+        this.readWriteIndex = 0;
+        this.filterStore = 0;
+    },
+
+    generate: function(inputBuffers, outputBuffers) {
+        var inputBuffer = inputBuffers[0];
+        var outputBuffer = outputBuffers[0];
+
+        if (inputBuffer.isEmpty) {
+            outputBuffer.isEmpty = true;
+            return;
+        }
+
+        // Local processing variables
+        var maximumDelayTime = this.maximumDelayTime;
+        var sampleRate = this.audiolet.device.sampleRate;
+
+        var delayTimeParameter = this.delayTime;
+        var delayTime, delayTimeChannel;
+        if (delayTimeParameter.isStatic()) {
+            delayTime = Math.floor(delayTimeParameter.getValue() * sampleRate);
+        }
+        else {
+            delayTimeChannel = delayTimeParameter.getChannel();
+        }
+
+        var decayTimeParameter = this.decayTime;
+        var decayTime, decayTimeChannel;
+        if (decayTimeParameter.isStatic()) {
+            decayTime = Math.floor(decayTimeParameter.getValue() * sampleRate);
+        }
+        else {
+            decayTimeChannel = decayTimeParameter.getChannel();
+        }
+
+        var dampingParameter = this.damping;
+        var damping, dampingChannel;
+        if (dampingParameter.isStatic()) {
+            damping = dampingParameter.getValue();
+        }
+        else {
+            dampingChannel = dampingParameter.getChannel();
+        }
+
+
+        var feedback;
+        if (delayTimeParameter.isStatic() && decayTimeParameter.isStatic()) {
+            feedback = Math.exp(-3 * delayTime / decayTime);
+        }
+
+
+
+        var buffers = this.buffers;
+        var readWriteIndex = this.readWriteIndex;
+        var filterStore = this.filterStore;
+
+        var inputChannels = inputBuffer.channels;
+        var outputChannels = outputBuffer.channels;
+        var numberOfChannels = inputBuffer.numberOfChannels;
+        var numberOfBuffers = buffers.length;
+        for (var i = numberOfBuffers; i < numberOfChannels; i++) {
+            // Create buffer for channel if it doesn't already exist
+            var bufferSize = maximumDelayTime * sampleRate;
+            buffers.push(new Float32Array(bufferSize));
+        }
+
+
+        var bufferLength = inputBuffer.length;
+        for (var i = 0; i < bufferLength; i++) {
+            if (delayTimeChannel) {
+                delayTime = Math.floor(delayTimeChannel[i] * sampleRate);
+            }
+
+            if (decayTimeChannel) {
+                decayTime = Math.floor(decayTimeChannel[i] * sampleRate);
+            }
+
+            if (dampingChannel) {
+                damping = dampingChannel[i];
+            }
+
+            if (delayTimeChannel || decayTimeChannel) {
+                feedback = Math.exp(-3 * delayTime / decayTime);
+            }
+
+            for (var j = 0; j < numberOfChannels; j++) {
+                var inputChannel = inputChannels[j];
+                var outputChannel = outputChannels[j];
+                var buffer = buffers[j];
+                var output = buffer[readWriteIndex];
+                filterStore = (output * (1 - damping)) +
+                              (filterStore * damping);
+                outputChannel[i] = output;
+                buffer[readWriteIndex] = inputChannel[i] +
+                                         feedback * filterStore;
+            }
+
+            readWriteIndex += 1;
+            if (readWriteIndex >= delayTime) {
+                readWriteIndex = 0;
+            }
+        }
+        this.readWriteIndex = readWriteIndex;
+        this.filterStore = filterStore;
+    },
+
+    toString: function() {
+        return 'Damped Comb Filter';
+    }
+});
+
 
 /**
  * @depends ../core/AudioletNode.js
@@ -1909,6 +2250,7 @@ var Delay = new Class({
     Extends: AudioletNode,
     initialize: function(audiolet, maximumDelayTime, delayTime) {
         AudioletNode.prototype.initialize.apply(this, [audiolet, 2, 1]);
+        this.linkNumberOfOutputChannels(0, 0);
         this.maximumDelayTime = maximumDelayTime;
         this.delayTime = new AudioletParameter(this, 1, delayTime || 1);
         var bufferSize = maximumDelayTime * this.audiolet.device.sampleRate;
@@ -1940,7 +2282,7 @@ var Delay = new Class({
 
         var buffers = this.buffers;
         var readWriteIndex = this.readWriteIndex;
-        
+
         var inputChannels = [];
         var outputChannels = [];
         var numberOfChannels = inputBuffer.numberOfChannels;
@@ -2124,6 +2466,68 @@ var HighPassFilter = new Class({
 });
 
 /**
+ * @depends ../core/AudioletNode.js
+ */
+
+var LinearCrossFade = new Class({
+    Extends: AudioletNode,
+    initialize: function(audiolet, position) {
+        AudioletNode.prototype.initialize.apply(this, [audiolet, 3, 1]);
+        this.linkNumberOfOutputChannels(0, 0);
+        this.position = new AudioletParameter(this, 2, position || 0.5);
+    },
+
+    generate: function(inputBuffers, outputBuffers) {
+        var inputBufferA = inputBuffers[0];
+        var inputBufferB = inputBuffers[1];
+        var outputBuffer = outputBuffers[0];
+
+        var inputChannelsA = inputBufferA.channels;
+        var inputChannelsB = inputBufferB.channels;
+        var outputChannels = outputBuffer.channels;
+
+        if (inputBufferA.isEmpty || inputBufferB.isEmpty) {
+            outputBuffer.isEmpty = true;
+            return;
+        }
+
+        // Local processing variables
+        var positionParameter = this.position;
+        var position, positionChannel;
+        if (positionParameter.isStatic()) {
+            position = positionParameter.getValue();
+        }
+        else {
+            positionChannel = positionParameter.getChannel();
+        }
+
+        var bufferLength = outputBuffer.length;
+        for (var i = 0; i < bufferLength; i++) {
+            if (positionChannel) {
+                position = positionChannel[i];
+            }
+
+            var gainA = position;
+            var gainB = 1 - position;
+
+            var numberOfChannels = inputBufferA.numberOfChannels;
+            for (var j = 0; j < numberOfChannels; j++) {
+                var inputChannelA = inputChannelsA[j];
+                var inputChannelB = inputChannelsB[j];
+                var outputChannel = outputChannels[j];
+
+                outputChannel[i] = inputChannelA[i] * gainA +
+                                   inputChannelB[i] * gainB;
+            }
+        }
+    },
+
+    toString: function() {
+        return 'Linear Cross Fader';
+    }
+});
+
+/**
  * @depends BiquadFilter.js
  */
 
@@ -2290,6 +2694,152 @@ var PercussiveEnvelope = new Class({
 });
 
 
+
+/**
+ * @depends ../core/AudioletGroup.js
+ */
+
+// Schroder/Moorer Reverb Unit based on Freeverb
+// https://ccrma.stanford.edu/~jos/pasp/Freeverb.html has a good description
+// of how it all works
+
+var Reverb = new Class({
+    Extends: AudioletGroup,
+
+    // Constants
+    initialMix: 0.33,
+    fixedGain: 0.015,
+    initialDamping: 0.5,
+    scaleDamping: 0.4,
+    initialRoom: 0.5,
+    scaleRoom: 0.28,
+    offsetRoom: 0.7,
+
+    // Parameters: for 44.1k or 48k
+    combTuning: [1116, 1188, 1277, 1356, 1422, 1491, 1557, 1617],
+    allPassTuning: [556, 441, 341, 225],
+
+    initialize: function(audiolet, mix, roomSize, damping) {
+        AudioletGroup.prototype.initialize.apply(this, [audiolet, 4, 1]);
+
+        // Controls
+        // Room size control
+        var roomSize = roomSize || this.initialRoomSize;
+        this.roomSizeNode = new ParameterNode(audiolet, roomSize);
+        this.roomSizeMulAdd = new MulAdd(audiolet, this.scaleRoom,
+                                         this.offsetRoom);
+
+        // Damping control
+        var damping = damping || this.initialDamping;
+        this.dampingNode = new ParameterNode(audiolet, damping);
+        this.dampingMulAdd = new MulAdd(audiolet, this.scaleDamping);
+
+        // Access the controls as if this is an AudioletNode, and they are it's
+        // parameters.
+        this.roomSize = this.roomSizeNode.parameter;
+        this.damping = this.dampingNode.parameter;
+
+        // Initial gain control
+        this.gain = new Gain(audiolet, this.fixedGain);
+
+        // Eight comb filters and feedback gain converters
+        this.combFilters = [];
+        this.fgConverters = [];
+        for (var i = 0; i < this.combTuning.length; i++) {
+            var delayTime = this.combTuning[i] /
+                            this.audiolet.device.sampleRate;
+            this.combFilters[i] = new DampedCombFilter(audiolet, delayTime,
+                                                       delayTime);
+
+            this.fgConverters[i] = new FeedbackGainToDecayTime(audiolet,
+                                                               delayTime);
+        }
+
+        // Four allpass filters
+        this.allPassFilters = [];
+        for (var i = 0; i < this.allPassTuning.length; i++) {
+            this.allPassFilters[i] = new AllPassFilter(audiolet,
+                                                       this.allPassTuning[i]);
+        }
+
+        // Mixer
+        var mix = mix || this.initialMix;
+        this.mixer = new LinearCrossFade(audiolet, mix);
+
+        this.mix = this.mixer.position;
+
+        // Connect up the controls
+        this.inputs[1].connect(this.mixer, 0, 1);
+
+        this.inputs[2].connect(this.roomSizeNode);
+        this.roomSizeNode.connect(this.roomSizeMulAdd);
+
+        this.inputs[3].connect(this.dampingNode);
+        this.dampingNode.connect(this.dampingMulAdd);
+
+        // Connect up the gain
+        this.inputs[0].connect(this.gain);
+
+        // Connect up the comb filters
+        for (var i = 0; i < this.combFilters.length; i++) {
+            this.gain.connect(this.combFilters[i]);
+            this.combFilters[i].connect(this.allPassFilters[0]);
+
+            // Controls
+            this.roomSizeMulAdd.connect(this.fgConverters[i]);
+            this.fgConverters[i].connect(this.combFilters[i], 0, 2);
+
+            this.dampingMulAdd.connect(this.combFilters[i], 0, 3);
+        }
+
+        // Connect up the all pass filters
+        var numberOfAllPassFilters = this.allPassFilters.length;
+        for (var i = 0; i < numberOfAllPassFilters - 1; i++) {
+            this.allPassFilters[i].connect(this.allPassFilters[i + 1]);
+        }
+
+        this.inputs[0].connect(this.mixer);
+        var lastAllPassIndex = numberOfAllPassFilters - 1;
+        this.allPassFilters[lastAllPassIndex].connect(this.mixer, 0, 1);
+
+        this.mixer.connect(this.outputs[0]);
+    }
+});
+
+// Converts a feedback gain multiplier to a 60db decay time
+var FeedbackGainToDecayTime = new Class({
+    Extends: AudioletNode,
+    initialize: function(audiolet, delayTime) {
+        AudioletNode.prototype.initialize.apply(this, [audiolet, 1, 1]);
+        this.delayTime = delayTime;
+        this.lastFeedbackGain = null;
+        this.decayTime = null;
+    },
+
+    generate: function(inputBuffers, outputBuffers) {
+        var inputBuffer = inputBuffers[0];
+        var outputBuffer = outputBuffers[0];
+        var inputChannel = inputBuffer.channels[0];
+        var outputChannel = outputBuffer.channels[0];
+
+        var delayTime = this.lastDelayTime;
+        var decayTime = this.decayTime;
+        var lastFeedbackGain = this.lastFeedbackGain;
+
+        var bufferLength = outputBuffer.length;
+        for (var i = 0; i < bufferLength; i++) {
+            var feedbackGain = inputChannel[i];
+            if (feedbackGain != lastFeedbackGain) {
+                decayTime = - 3 * delayTime / Math.log(feedbackGain);
+                lastFeedbackGain = feedbackGain;
+            }
+            outputChannel[i] = feedbackGain;
+        }
+
+        this.decayTime = decayTime;
+        this.lastFeedbackGain = lastFeedbackGain;
+    }
+});
 
 /**
  * @depends ../core/AudioletNode.js
