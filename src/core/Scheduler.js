@@ -156,7 +156,7 @@ var Scheduler = new Class({
             for (var i = 0; i < numberOfPatterns; i++) {
                 var pattern = patterns[i];
                 var value = pattern.next();
-                if (value != null) {                   
+                if (value != null) {
                     args.push(value);
                 }
                 else {

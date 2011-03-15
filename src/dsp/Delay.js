@@ -38,7 +38,7 @@ var Delay = new Class({
 
         var buffers = this.buffers;
         var readWriteIndex = this.readWriteIndex;
-        
+
         var inputChannels = [];
         var outputChannels = [];
         var numberOfChannels = inputBuffer.numberOfChannels;

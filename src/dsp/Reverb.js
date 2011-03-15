@@ -8,7 +8,7 @@
 
 var Reverb = new Class({
     Extends: AudioletGroup,
-    
+
     // Constants
     initialMix: 0.33,
     fixedGain: 0.015,
@@ -21,10 +21,10 @@ var Reverb = new Class({
     // Parameters: for 44.1k or 48k
     combTuning: [1116, 1188, 1277, 1356, 1422, 1491, 1557, 1617],
     allPassTuning: [556, 441, 341, 225],
-    
+
     initialize: function(audiolet, mix, roomSize, damping) {
         AudioletGroup.prototype.initialize.apply(this, [audiolet, 4, 1]);
-        
+
         // Controls
         // Room size control
         var roomSize = roomSize || this.initialRoomSize;
@@ -48,7 +48,7 @@ var Reverb = new Class({
         // Eight comb filters and feedback gain converters
         this.combFilters = [];
         this.fgConverters = [];
-        for (var i=0; i<this.combTuning.length; i++) {
+        for (var i = 0; i < this.combTuning.length; i++) {
             var delayTime = this.combTuning[i] /
                             this.audiolet.device.sampleRate;
             this.combFilters[i] = new DampedCombFilter(audiolet, delayTime,
@@ -57,10 +57,10 @@ var Reverb = new Class({
             this.fgConverters[i] = new FeedbackGainToDecayTime(audiolet,
                                                                delayTime);
         }
-        
+
         // Four allpass filters
         this.allPassFilters = [];
-        for (var i=0; i<this.allPassTuning.length; i++) {
+        for (var i = 0; i < this.allPassTuning.length; i++) {
             this.allPassFilters[i] = new AllPassFilter(audiolet,
                                                        this.allPassTuning[i]);
         }
@@ -73,7 +73,7 @@ var Reverb = new Class({
 
         // Connect up the controls
         this.inputs[1].connect(this.mixer, 0, 1);
-        
+
         this.inputs[2].connect(this.roomSizeNode);
         this.roomSizeNode.connect(this.roomSizeMulAdd);
 
@@ -84,20 +84,20 @@ var Reverb = new Class({
         this.inputs[0].connect(this.gain);
 
         // Connect up the comb filters
-        for (var i=0; i<this.combFilters.length; i++) {
+        for (var i = 0; i < this.combFilters.length; i++) {
             this.gain.connect(this.combFilters[i]);
             this.combFilters[i].connect(this.allPassFilters[0]);
 
             // Controls
             this.roomSizeMulAdd.connect(this.fgConverters[i]);
             this.fgConverters[i].connect(this.combFilters[i], 0, 2);
-            
+
             this.dampingMulAdd.connect(this.combFilters[i], 0, 3);
         }
 
         // Connect up the all pass filters
         var numberOfAllPassFilters = this.allPassFilters.length;
-        for (var i=0; i<numberOfAllPassFilters - 1; i++) {
+        for (var i = 0; i < numberOfAllPassFilters - 1; i++) {
             this.allPassFilters[i].connect(this.allPassFilters[i + 1]);
         }
 
@@ -130,7 +130,7 @@ var FeedbackGainToDecayTime = new Class({
         var lastFeedbackGain = this.lastFeedbackGain;
 
         var bufferLength = outputBuffer.length;
-        for (var i=0; i<bufferLength; i++) {
+        for (var i = 0; i < bufferLength; i++) {
             var feedbackGain = inputChannel[i];
             if (feedbackGain != lastFeedbackGain) {
                 decayTime = - 3 * delayTime / Math.log(feedbackGain);

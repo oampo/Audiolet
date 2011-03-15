@@ -45,11 +45,11 @@ var CrossFade = new Class({
             var gainB = Math.sin(scaledPosition);
 
             var numberOfChannels = inputBufferA.numberOfChannels;
-            for (var j=0; j<numberOfChannels; j++) {
+            for (var j = 0; j < numberOfChannels; j++) {
                 var inputChannelA = inputChannelsA[j];
                 var inputChannelB = inputChannelsB[j];
                 var outputChannel = outputChannels[j];
-                
+
                 outputChannel[i] = inputChannelA[i] * gainA +
                                    inputChannelB[i] * gainB;
             }

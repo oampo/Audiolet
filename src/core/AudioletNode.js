@@ -87,11 +87,11 @@ var AudioletNode = new Class({
         // Sane default - pass along any empty flags
         var numberOfInputs = inputBuffers.length;
         var numberOfOutputs = outputBuffers.length;
-        for (var i=0; i<numberOfInputs; i++) {
+        for (var i = 0; i < numberOfInputs; i++) {
             if (i < numberOfOutputs && inputBuffers[i].isEmpty) {
                 outputBuffers[i].isEmpty = true;
             }
-        }   
+        }
     },
 
     createInputBuffers: function(length) {

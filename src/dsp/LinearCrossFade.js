@@ -44,11 +44,11 @@ var LinearCrossFade = new Class({
             var gainB = 1 - position;
 
             var numberOfChannels = inputBufferA.numberOfChannels;
-            for (var j=0; j<numberOfChannels; j++) {
+            for (var j = 0; j < numberOfChannels; j++) {
                 var inputChannelA = inputChannelsA[j];
                 var inputChannelB = inputChannelsB[j];
                 var outputChannel = outputChannels[j];
-                
+
                 outputChannel[i] = inputChannelA[i] * gainA +
                                    inputChannelB[i] * gainB;
             }

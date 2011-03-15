@@ -61,8 +61,8 @@ var BiquadFilter = new Class({
         else {
             frequencyChannel = frequencyParameter.getChannel();
         }
-            
-            
+
+
         var lastFrequency = this.lastFrequency;
 
         var a0 = this.a0;

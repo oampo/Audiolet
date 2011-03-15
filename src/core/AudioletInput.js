@@ -28,7 +28,7 @@ var AudioletInput = new Class({
     },
 
     toString: function() {
-        return this.node.toString() + "Input #" + this.index;
+        return this.node.toString() + 'Input #' + this.index;
     }
 });
 

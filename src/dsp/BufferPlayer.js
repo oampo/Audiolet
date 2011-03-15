@@ -20,7 +20,7 @@ var BufferPlayer = new Class({
 
     generate: function(inputBuffers, outputBuffers) {
         var outputBuffer = outputBuffers[0];
-        
+
         // Cache local variables
         var buffer = this.buffer;
         var position = this.position;
@@ -97,7 +97,7 @@ var BufferPlayer = new Class({
                 // Trigger moved back to <= 0
                 restartTriggerOn = false;
             }
-                
+
             if (playing) {
                 for (var j = 0; j < numberOfChannels; j++) {
                     var inputChannel = buffer.channels[j];

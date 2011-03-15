@@ -167,22 +167,22 @@ var AudioletBuffer = new Class({
             onSuccess: function(data) {
                 // TODO: Maybe should check header, rather than just believing
                 // the extension
-                var splitPath = path.split(".");
+                var splitPath = path.split('.');
                 var extension = splitPath[splitPath.length - 1].toLowerCase();
-                if (extension == "wav") {
+                if (extension == 'wav') {
                     this.loadWAVData(data);
                 }
-                else if (extension == "aiff" || extension == "aif") {
+                else if (extension == 'aiff' || extension == 'aif') {
                     this.loadAIFFData(data);
                 }
                 else {
-                    console.error("Cannot load ." + extension + " files");
+                    console.error('Cannot load .' + extension + ' files');
                 }
-                    
+
             }.bind(this),
 
             onFailure: function(xhr) {
-                console.error("Could not load", path);
+                console.error('Could not load', path);
             }.bind(this)
         });
         request.xhr.overrideMimeType('text/plain; charset=x-user-defined');
@@ -197,7 +197,7 @@ var AudioletBuffer = new Class({
         // Ignore length of fmt - 4 bytes
         // Ignore file encoding
         // Number of channels - 2 bytes
-        var numberOfChannels =   (data.charCodeAt(22) & 0xFF) |
+        var numberOfChannels = (data.charCodeAt(22) & 0xFF) |
                                 ((data.charCodeAt(23) & 0xFF) << 8);
         // Ignore sample rate - 4 bytes
         // Ignore bytes/sec - 4 bytes
@@ -207,8 +207,8 @@ var AudioletBuffer = new Class({
         // data chunk
         // Ignore data - 4 bytes
         // Data size - 4 bytes
-        var length =  (data.charCodeAt(40) & 0xFF)        |
-                     ((data.charCodeAt(41) & 0xFF) << 8)  |
+        var length = (data.charCodeAt(40) & 0xFF) |
+                     ((data.charCodeAt(41) & 0xFF) << 8) |
                      ((data.charCodeAt(42) & 0xFF) << 16) |
                      ((data.charCodeAt(43) & 0xFF) << 24);
         // 2 bytes per sample
@@ -221,7 +221,7 @@ var AudioletBuffer = new Class({
             for (var j = 0; j < length; j++) {
                 var index = offset + (j * numberOfChannels + i) * 2;
                 // Sample - 2 bytes
-                var value =  (data.charCodeAt(index) & 0xFF) |
+                var value = (data.charCodeAt(index) & 0xFF) |
                             ((data.charCodeAt(index + 1) & 0xFF) << 8);
                 // Scale range from 0 to 2**16 -> -2**15 to 2**15
                 if (value >= 0x8000) {
@@ -245,10 +245,10 @@ var AudioletBuffer = new Class({
         // Number of samples - 4 bytes
         var length = ((data.charCodeAt(22) & 0xFF) << 24) |
                      ((data.charCodeAt(23) & 0xFF) << 16) |
-                     ((data.charCodeAt(24) & 0xFF) << 8)  |
+                     ((data.charCodeAt(24) & 0xFF) << 8) |
                       (data.charCodeAt(25) & 0xFF);
         this.resize(numberOfChannels, length, true);
-        
+
         // Ignore bitrate - 2 bytes
         // Ignore sample rate - 10 bytes
 
@@ -273,6 +273,6 @@ var AudioletBuffer = new Class({
                 // Scale range to -1 to 1
                 channel[j] = value / 0x8000;
             }
-        } 
+        }
     }
 });

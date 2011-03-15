@@ -62,14 +62,14 @@ var DampedCombFilter = new Class({
         var feedback;
         if (delayTimeParameter.isStatic() && decayTimeParameter.isStatic()) {
             feedback = Math.exp(-3 * delayTime / decayTime);
-        };
+        }
 
-        
+
 
         var buffers = this.buffers;
         var readWriteIndex = this.readWriteIndex;
         var filterStore = this.filterStore;
-        
+
         var inputChannels = inputBuffer.channels;
         var outputChannels = outputBuffer.channels;
         var numberOfChannels = inputBuffer.numberOfChannels;

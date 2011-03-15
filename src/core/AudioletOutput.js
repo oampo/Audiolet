@@ -98,7 +98,7 @@ var AudioletOutput = new Class({
     },
 
     toString: function() {
-        return this.node.toString() + "Output #" + this.index + " - ";
+        return this.node.toString() + 'Output #' + this.index + ' - ';
     }
 });
 
