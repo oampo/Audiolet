@@ -2,7 +2,7 @@
  * @depends ../core/AudioletNode.js
  */
 
-var CrossFade = new Class({
+var LinearCrossFade = new Class({
     Extends: AudioletNode,
     initialize: function(audiolet, position) {
         AudioletNode.prototype.initialize.apply(this, [audiolet, 3, 1]);
@@ -39,10 +39,9 @@ var CrossFade = new Class({
             if (positionChannel) {
                 position = positionChannel[i];
             }
-            var scaledPosition = position * Math.PI / 2;
-            // TODO: Use sine/cos tables?
-            var gainA = Math.cos(scaledPosition);
-            var gainB = Math.sin(scaledPosition);
+
+            var gainA = position;
+            var gainB = 1 - position;
 
             var numberOfChannels = inputBufferA.numberOfChannels;
             for (var j=0; j<numberOfChannels; j++) {
@@ -57,6 +56,6 @@ var CrossFade = new Class({
     },
 
     toString: function() {
-        return 'Cross Fader';
+        return 'Linear Cross Fader';
     }
 });
