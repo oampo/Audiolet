@@ -240,7 +240,9 @@ var AudioDataAPIDevice = new Class({
         }
 
         this.output = new Audio();
+        this.baseOverflow = null;
         this.overflow = null;
+        this.overflowOffset = 0;
         this.writePosition = 0;
 
         this.output.mozSetup(this.numberOfChannels, this.sampleRate);
@@ -255,11 +257,18 @@ var AudioDataAPIDevice = new Class({
         var numSamplesWritten;
         if (this.overflow) {
             numSamplesWritten = this.output.mozWriteAudio(this.overflow);
+            if (numSamplesWritten == 0) return;
             this.writePosition += numSamplesWritten;
             if (numSamplesWritten < this.overflow.length) {
                 // Not all the data was written, saving the tail for writing
                 // the next time fillBuffer is called
-                this.overflow = this.overflow.subarray(numSamplesWritten);
+                // Begin broken subarray-of-subarray fix
+                this.overflowOffset += numSamplesWritten;
+                this.overflow = this.baseOverflow.subarray(this.overflowOffset);
+                // End broken subarray-of-subarray fix
+                // Uncomment the following line when subarray-of-subarray is
+                // sorted
+                //this.overflow = this.overflow.subarray(numSamplesWritten);
                 return;
             }
             this.overflow = null;
@@ -290,6 +299,10 @@ var AudioDataAPIDevice = new Class({
             this.writePosition += numSamplesWritten;
             if (numSamplesWritten < buffer.length) {
                 // Not all the data was written, saving the tail.
+                // Begin broken subarray-of-subarray fix
+                this.baseOverflow = buffer;
+                this.overflowOffset = numSamplesWritten;
+                // End broken subarray-of-subarray fix
                 this.overflow = buffer.subarray(numSamplesWritten);
             }
         }
