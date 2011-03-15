@@ -6,6 +6,7 @@ var Delay = new Class({
     Extends: AudioletNode,
     initialize: function(audiolet, maximumDelayTime, delayTime) {
         AudioletNode.prototype.initialize.apply(this, [audiolet, 2, 1]);
+        this.linkNumberOfOutputChannels(0, 0);
         this.maximumDelayTime = maximumDelayTime;
         this.delayTime = new AudioletParameter(this, 1, delayTime || 1);
         var bufferSize = maximumDelayTime * this.audiolet.device.sampleRate;
