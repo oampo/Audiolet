@@ -338,6 +338,7 @@ var AudioletBuffer = new Class({
         }
 
         this.isEmpty = false;
+        this.channelOffset = 0;
     },
 
     getChannelData: function(channel) {
@@ -356,12 +357,25 @@ var AudioletBuffer = new Class({
         outputOffset = outputOffset || 0;
         var numberOfChannels = buffer.numberOfChannels;
         for (var i = 0; i < numberOfChannels; i++) {
+            // Begin subarray-of-subarray fix
+            inputOffset += buffer.channelOffset;
+            outputOffset += this.channelOffset;
+            var channel1 = this.unsliced_channels[i].subarray(outputOffset,
+                                                              outputOffset +
+                                                              length);
+            var channel2 = buffer.unsliced_channels[i].subarray(inputOffset,
+                                                                inputOffset +
+                                                                length);
+            // End subarray-of-subarray fix
+            // Uncomment the following lines when subarray-of-subarray is fixed
+            /*
             var channel1 = this.getChannelData(i).subarray(outputOffset,
                                                            outputOffset +
                                                            length);
             var channel2 = buffer.getChannelData(i).subarray(inputOffset,
                                                              inputOffset +
                                                              length);
+            */
             channel1.set(channel2);
         }
     },
@@ -401,10 +415,20 @@ var AudioletBuffer = new Class({
                     this.channels[i].set(channel, offset);
                 }
                 this.unsliced_channels[i] = this.channels[i];
+                this.channelOffset = 0;
             }
             else {
-                this.channels[i] = this.channels[i].subarray(offset, offset +
-                                                                     length);
+                // Begin subarray-of-subarray fix
+                this.channelOffset += offset;
+                offset = this.channelOffset;
+                this.channels[i] = this.unsliced_channels[i].subarray(offset,
+                                                                      offset +
+                                                                      length);
+                // End subarray-of-subarray fix
+                // Uncomment the following lines when subarray-of-subarray is
+                // fixed
+                //this.channels[i] = this.channels[i].subarray(offset, offset +
+                //                                                     length);
             }
         }
         this.numberOfChannels = numberOfChannels;
