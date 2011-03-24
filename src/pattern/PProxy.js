@@ -14,7 +14,7 @@ var PProxy = new Class({
     next: function() {
         var returnValue;
         if (this.pattern) {
-            var returnValue = pattern.next();
+            var returnValue = this.pattern.next();
         }
         else {
             returnValue = null;
