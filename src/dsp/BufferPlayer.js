@@ -105,7 +105,7 @@ var BufferPlayer = new Class({
                     outputChannel[i] = inputChannel[Math.floor(position)];
                 }
                 position += playbackRate;
-                if (position > buffer.length) {
+                if (position >= buffer.length) {
                     if (loop) {
                         // Back to the start
                         position %= buffer.length;
