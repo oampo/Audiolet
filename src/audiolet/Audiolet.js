@@ -1676,6 +1676,52 @@ var AllPassFilter = new Class({
 });
 
 /**
+ * @depends ../core/PassThroughNode.js
+ */
+
+var BadValueDetector = new Class({
+    Extends: PassThroughNode,
+    initialize: function(audiolet, callback) {
+        PassThroughNode.prototype.initialize.apply(this, [audiolet, 1, 1]);
+        this.linkNumberOfOutputChannels(0, 0);
+
+        if (callback) {
+            this.callback = callback;
+        }
+    },
+
+    // Override me
+    callback: function() {
+    },
+
+    generate: function(inputBuffers, outputBuffers) {
+        var inputBuffer = inputBuffers[0];
+
+        var numberOfChannels = inputBuffer.numberOfChannels;
+        for (var i = 0; i < numberOfChannels; i++) {
+            var channel = inputBuffer.getChannelData(i);
+
+            var bufferLength = inputBuffer.length;
+            for (var j = 0; j < bufferLength; j++) {
+                var value = channel[j];
+                if (typeof value == 'undefined' ||
+                    value == null ||
+                    value == NaN ||
+                    value == Infinity ||
+                    value == -Infinity) {
+                    this.callback();
+                }
+            }
+        }
+    },
+
+    toString: function() {
+        return 'Bad Value Detector';
+    }
+});
+
+
+/**
  * @depends BiquadFilter.js
  */
 
@@ -1844,7 +1890,7 @@ var BufferPlayer = new Class({
                     outputChannel[i] = inputChannel[Math.floor(position)];
                 }
                 position += playbackRate;
-                if (position > buffer.length) {
+                if (position >= buffer.length) {
                     if (loop) {
                         // Back to the start
                         position %= buffer.length;
