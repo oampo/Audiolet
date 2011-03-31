@@ -4,9 +4,9 @@ load('../src/audiofile/audiofile.js');
 load('../src/audiolet/Audiolet.js');
 
 function testInit() {
-    var buffer = new AudioletBuffer(1, 0);
-    Assert.assertEquals(buffer.numberOfChannels, 1, "Recorded channels");
-    Assert.assertEquals(buffer.length, 0, "Recorded length");
+    var buffer = new AudioletBuffer(2, 2);
+    Assert.assertEquals(buffer.numberOfChannels, 2, "Recorded channels");
+    Assert.assertEquals(buffer.length, 2, "Recorded length");
     Assert.assertEquals(buffer.numberOfChannels, buffer.channels.length,
                         "Actual channels");
     Assert.assertEquals(buffer.length, buffer.channels[0].length,
@@ -329,6 +329,65 @@ function testPop() {
 }
 
 test("Pop", testPop);
+
+function testUnshift() {
+    var buffer1 = new AudioletBuffer(2, 2);
+    var buffer2 = new AudioletBuffer(2, 2);
+    buffer1.channels[0][0] = 1;
+    buffer1.channels[0][1] = 2;
+    buffer1.channels[1][0] = 3;
+    buffer1.channels[1][1] = 5;
+    buffer2.channels[0][0] = 8;
+    buffer2.channels[0][1] = 13;
+    buffer2.channels[1][0] = 21;
+    buffer2.channels[1][1] = 34;
+
+    buffer2.unshift(buffer1);
+
+    Assert.assertEquals(buffer2.numberOfChannels, 2, "Recorded channels");
+    Assert.assertEquals(buffer2.length, 4, "Recorded length");
+    Assert.assertEquals(buffer2.numberOfChannels, buffer2.channels.length,
+                        "Actual channels");
+    Assert.assertEquals(buffer2.length, buffer2.channels[0].length,
+                        "Actual length");
+
+    // Before value from each channel
+    Assert.assertEquals(buffer2.channels[0][2], 8, "Before Value 1");
+    Assert.assertEquals(buffer2.channels[1][3], 34, "Before Value 2");
+    // After value from each channel
+    Assert.assertEquals(buffer2.channels[0][1], 2, "After Value 1");
+    Assert.assertEquals(buffer2.channels[1][0], 3, "After Value 2");
+}
+
+test("Unshift", testUnshift);
+
+
+function testShift() {
+    var buffer1 = new AudioletBuffer(2, 2);
+    var buffer2 = new AudioletBuffer(2, 1);
+    buffer1.channels[0][0] = 1;
+    buffer1.channels[0][1] = 2;
+    buffer1.channels[1][0] = 3;
+    buffer1.channels[1][1] = 5;
+    buffer1.shift(buffer2);
+
+
+    Assert.assertEquals(buffer1.numberOfChannels, 2, "Recorded channels");
+    Assert.assertEquals(buffer1.length, 1, "Recorded length");
+    Assert.assertEquals(buffer1.numberOfChannels, buffer1.channels.length,
+                        "Actual channels");
+    Assert.assertEquals(buffer1.length, buffer1.channels[0].length,
+                        "Actual length");
+
+    // Value in buffer 1 from each channel
+    Assert.assertEquals(buffer1.channels[0][0], 2, "Before Value 1");
+    Assert.assertEquals(buffer1.channels[1][0], 5, "Before Value 2");
+    // Value in buffer 2 from each channel
+    Assert.assertEquals(buffer2.channels[0][0], 1, "After Value 1");
+    Assert.assertEquals(buffer2.channels[1][0], 3, "After Value 2");
+}
+
+test("Shift", testShift);
 
 
 
