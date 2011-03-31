@@ -30,6 +30,6 @@ var TriggerControl = new Class({
     },
 
     toString: function() {
-        return 'TriggerControl';
+        return 'Trigger Control';
     }
 });

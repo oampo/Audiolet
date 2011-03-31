@@ -106,7 +106,12 @@ var Reverb = new Class({
         this.allPassFilters[lastAllPassIndex].connect(this.mixer, 0, 1);
 
         this.mixer.connect(this.outputs[0]);
+    },
+
+    toString: function() {
+        return 'Reverb';
     }
+
 });
 
 // Converts a feedback gain multiplier to a 60db decay time
