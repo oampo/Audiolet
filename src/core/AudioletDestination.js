@@ -23,5 +23,9 @@ var AudioletDestination = new Class({
         this.blockSizeLimiter.connect(this.scheduler);
         this.scheduler.connect(this.upMixer);
         this.upMixer.connect(this.device);
+    },
+
+    toString: function() {
+        return "Destination";
     }
 });
