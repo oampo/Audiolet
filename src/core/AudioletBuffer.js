@@ -5,7 +5,7 @@ var AudioletBuffer = new Class({
 
         this.channels = [];
         for (var i = 0; i < this.numberOfChannels; i++) {
-            this.channels.push(new Float32Array(numberOfChannels * length));
+            this.channels.push(new Float32Array(length));
         }
 
         this.unslicedChannels = [];
@@ -88,7 +88,7 @@ var AudioletBuffer = new Class({
         var unslicedChannels = this.unslicedChannels;
 
         var oldLength = this.length;
-        var channelOffset = this.channelOffset;
+        var channelOffset = this.channelOffset + offset;
 
         for (var i=0; i < numberOfChannels; i++) {
             // Get the current channels
@@ -126,7 +126,6 @@ var AudioletBuffer = new Class({
                     unslicedChannel = new Float32Array(unslicedLength);
                 }
                 // Begin subarray-of-subarray fix
-                channelOffset += offset;
                 offset = channelOffset;
                 channel = unslicedChannel.subarray(offset, offset + length);
                 // End subarray-of-subarray fix
