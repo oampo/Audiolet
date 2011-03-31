@@ -111,28 +111,32 @@ test("Add Section", testAddSection);
 
 
 function testLazyResizeMoreSamples() {
-    var buffer = new AudioletBuffer(1, 0);
-    buffer.resize(1, 5, true);
+    var buffer = new AudioletBuffer(2, 0);
+    buffer.resize(2, 5, true);
 
-    Assert.assertEquals(buffer.numberOfChannels, 1, "Recorded channels");
+    Assert.assertEquals(buffer.numberOfChannels, 2, "Recorded channels");
     Assert.assertEquals(buffer.length, 5, "Recorded length");
     Assert.assertEquals(buffer.numberOfChannels, buffer.channels.length,
                         "Actual channels");
     Assert.assertEquals(buffer.length, buffer.channels[0].length,
-                        "Actual length");
+                        "Actual length 1");
+    Assert.assertEquals(buffer.length, buffer.channels[1].length,
+                        "Actual length 2");
 }
 
 test("Lazy resize, increasing length", testLazyResizeMoreSamples);
 
 function testLazyResizeLessSamples() {
-    var buffer = new AudioletBuffer(1, 10);
-    buffer.resize(1, 5, true);
+    var buffer = new AudioletBuffer(2, 10);
+    buffer.resize(2, 5, true);
 
-    Assert.assertEquals(buffer.numberOfChannels, 1, "Recorded channels");
+    Assert.assertEquals(buffer.numberOfChannels, 2, "Recorded channels");
     Assert.assertEquals(buffer.length, 5, "Recorded length");
     Assert.assertEquals(buffer.numberOfChannels, buffer.channels.length,
                         "Actual channels");
     Assert.assertEquals(buffer.length, buffer.channels[0].length,
+                        "Actual length");
+    Assert.assertEquals(buffer.length, buffer.channels[1].length,
                         "Actual length");
 }
 
