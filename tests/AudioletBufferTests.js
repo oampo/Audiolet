@@ -271,3 +271,64 @@ function testResizeLessChannels() {
 }
 
 test("Resize, decreasing channels", testResizeLessChannels);
+
+function testPush() {
+    var buffer1 = new AudioletBuffer(2, 2);
+    var buffer2 = new AudioletBuffer(2, 2);
+    buffer1.channels[0][0] = 1;
+    buffer1.channels[0][1] = 2;
+    buffer1.channels[1][0] = 3;
+    buffer1.channels[1][1] = 5;
+    buffer2.channels[0][0] = 8;
+    buffer2.channels[0][1] = 13;
+    buffer2.channels[1][0] = 21;
+    buffer2.channels[1][1] = 34;
+
+    buffer2.push(buffer1);
+    Assert.assertEquals(buffer2.numberOfChannels, 2, "Recorded channels");
+    Assert.assertEquals(buffer2.length, 4, "Recorded length");
+    Assert.assertEquals(buffer2.numberOfChannels, buffer2.channels.length,
+                        "Actual channels");
+    Assert.assertEquals(buffer2.length, buffer2.channels[0].length,
+                        "Actual length");
+
+    // Before value from each channel
+    Assert.assertEquals(buffer2.channels[0][0], 8, "Before Value 1");
+    Assert.assertEquals(buffer2.channels[1][1], 34, "Before Value 2");
+    // After value from each channel
+    Assert.assertEquals(buffer2.channels[0][3], 2, "After Value 1");
+    Assert.assertEquals(buffer2.channels[1][2], 3, "After Value 2");
+}
+
+test("Push", testPush);
+
+function testPop() {
+    var buffer1 = new AudioletBuffer(2, 2);
+    var buffer2 = new AudioletBuffer(2, 1);
+    buffer1.channels[0][0] = 1;
+    buffer1.channels[0][1] = 2;
+    buffer1.channels[1][0] = 3;
+    buffer1.channels[1][1] = 5;
+    buffer1.pop(buffer2);
+
+
+    Assert.assertEquals(buffer1.numberOfChannels, 2, "Recorded channels");
+    Assert.assertEquals(buffer1.length, 1, "Recorded length");
+    Assert.assertEquals(buffer1.numberOfChannels, buffer1.channels.length,
+                        "Actual channels");
+    Assert.assertEquals(buffer1.length, buffer1.channels[0].length,
+                        "Actual length");
+
+    // Value in buffer 1 from each channel
+    Assert.assertEquals(buffer1.channels[0][0], 1, "Before Value 1");
+    Assert.assertEquals(buffer1.channels[1][0], 3, "Before Value 2");
+    // Value in buffer 2 from each channel
+    Assert.assertEquals(buffer2.channels[0][0], 2, "After Value 1");
+    Assert.assertEquals(buffer2.channels[1][0], 5, "After Value 2");
+
+}
+
+test("Pop", testPop);
+
+
+
