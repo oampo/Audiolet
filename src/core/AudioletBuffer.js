@@ -153,7 +153,7 @@ var AudioletBuffer = new Class({
 
     pop: function(buffer) {
         var bufferLength = buffer.length;
-        var offset = bufferLength - length;
+        var offset = this.length - bufferLength;
         buffer.setSection(this, bufferLength, offset, 0);
         this.resize(this.numberOfChannels, offset);
     },
