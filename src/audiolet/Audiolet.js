@@ -332,9 +332,9 @@ var AudioletBuffer = new Class({
             this.channels.push(new Float32Array(numberOfChannels * length));
         }
 
-        this.unsliced_channels = [];
+        this.unslicedChannels = [];
         for (var i = 0; i < this.numberOfChannels; i++) {
-            this.unsliced_channels.push(this.channels[i]);
+            this.unslicedChannels.push(this.channels[i]);
         }
 
         this.isEmpty = false;
@@ -360,10 +360,10 @@ var AudioletBuffer = new Class({
             // Begin subarray-of-subarray fix
             inputOffset += buffer.channelOffset;
             outputOffset += this.channelOffset;
-            var channel1 = this.unsliced_channels[i].subarray(outputOffset,
+            var channel1 = this.unslicedChannels[i].subarray(outputOffset,
                                                               outputOffset +
                                                               length);
-            var channel2 = buffer.unsliced_channels[i].subarray(inputOffset,
+            var channel2 = buffer.unslicedChannels[i].subarray(inputOffset,
                                                                 inputOffset +
                                                                 length);
             // End subarray-of-subarray fix
@@ -407,32 +407,66 @@ var AudioletBuffer = new Class({
 
     resize: function(numberOfChannels, length, lazy, offset) {
         offset = offset || 0;
-        for (var i = 0; i < numberOfChannels; i++) {
-            if (length > this.length) {
-                var channel = this.channels[i];
-                this.channels[i] = new Float32Array(length);
-                if (!lazy && channel) {
-                    this.channels[i].set(channel, offset);
+        // Local variables
+        var channels = this.channels;
+        var unslicedChannels = this.unslicedChannels;
+
+        var oldLength = this.length;
+        var channelOffset = this.channelOffset;
+
+        for (var i=0; i < numberOfChannels; i++) {
+            // Get the current channels
+            var channel = channels[i];
+            var unslicedChannel = unslicedChannels[i];
+
+            if (length > oldLength) {
+                // We are increasing the size of the buffer
+                var oldChannel = channel;
+
+                if (!lazy ||
+                    !unslicedChannel ||
+                    unslicedChannel.length < length) {
+                    // Unsliced channel is not empty when it needs to be,
+                    // does not exist, or is not large enough, so needs to be
+                    // (re)created
+                    unslicedChannel = new Float32Array(length);
                 }
-                this.unsliced_channels[i] = this.channels[i];
-                this.channelOffset = 0;
+
+                channel = unslicedChannel.subarray(0, length);
+
+                if (!lazy && oldChannel) {
+                    channel.set(oldChannel, offset);
+                }
+
+                channelOffset = 0;
             }
             else {
+                // We are decreasing the size of the buffer
+                if (!unslicedChannel) {
+                    // Unsliced channel does not exist
+                    // We can assume that we always have at least one unsliced
+                    // channel, so we can copy its length
+                    var unslicedLength = unslicedChannels[0].length;
+                    unslicedChannel = new Float32Array(unslicedLength);
+                }
                 // Begin subarray-of-subarray fix
-                this.channelOffset += offset;
-                offset = this.channelOffset;
-                this.channels[i] = this.unsliced_channels[i].subarray(offset,
-                                                                      offset +
-                                                                      length);
+                channelOffset += offset;
+                offset = channelOffset;
+                channel = unslicedChannel.subarray(offset, offset + length);
                 // End subarray-of-subarray fix
                 // Uncomment the following lines when subarray-of-subarray is
-                // fixed
-                //this.channels[i] = this.channels[i].subarray(offset, offset +
-                //                                                     length);
+                // fixed.
+                // TODO: Write version where subarray-of-subarray is used
             }
+            channels[i] = channel;
+            unslicedChannels[i] = unslicedChannel;
         }
-        this.numberOfChannels = numberOfChannels;
+
+        this.channels = channels.slice(0, numberOfChannels);
+        this.unslicedChannels = unslicedChannels.slice(0, numberOfChannels);
         this.length = length;
+        this.numberOfChannels = numberOfChannels;
+        this.channelOffset = channelOffset;
     },
 
     push: function(buffer) {
@@ -508,6 +542,7 @@ var AudioletBuffer = new Class({
         request.onSuccess = function(decoded) {
             this.length = decoded.length;
             this.numberOfChannels = decoded.channels.length;
+            this.unslicedChannels = decoded.channels;
             this.channels = decoded.channels;
             this.channelOffset = 0;
         }.bind(this);
@@ -583,6 +618,10 @@ var AudioletDestination = new Class({
         this.blockSizeLimiter.connect(this.scheduler);
         this.scheduler.connect(this.upMixer);
         this.upMixer.connect(this.device);
+    },
+
+    toString: function() {
+        return "Destination";
     }
 });
 
@@ -2783,7 +2822,12 @@ var Reverb = new Class({
         this.allPassFilters[lastAllPassIndex].connect(this.mixer, 0, 1);
 
         this.mixer.connect(this.outputs[0]);
+    },
+
+    toString: function() {
+        return 'Reverb';
     }
+
 });
 
 // Converts a feedback gain multiplier to a 60db decay time
@@ -2995,7 +3039,7 @@ var TriggerControl = new Class({
     },
 
     toString: function() {
-        return 'TriggerControl';
+        return 'Trigger Control';
     }
 });
 
