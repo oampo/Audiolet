@@ -212,7 +212,7 @@ var AudioletBuffer = new Class({
         return buffer;
     },
 
-    load: function(path, async) {
+    load: function(path, async, callback) {
         var request = new AudioFileRequest(path, async);
         request.onSuccess = function(decoded) {
             this.length = decoded.length;
@@ -220,6 +220,7 @@ var AudioletBuffer = new Class({
             this.unslicedChannels = decoded.channels;
             this.channels = decoded.channels;
             this.channelOffset = 0;
+            callback();
         }.bind(this);
         
         request.onFailure = function() {

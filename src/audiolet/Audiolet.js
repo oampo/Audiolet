@@ -329,7 +329,7 @@ var AudioletBuffer = new Class({
 
         this.channels = [];
         for (var i = 0; i < this.numberOfChannels; i++) {
-            this.channels.push(new Float32Array(numberOfChannels * length));
+            this.channels.push(new Float32Array(length));
         }
 
         this.unslicedChannels = [];
@@ -412,7 +412,7 @@ var AudioletBuffer = new Class({
         var unslicedChannels = this.unslicedChannels;
 
         var oldLength = this.length;
-        var channelOffset = this.channelOffset;
+        var channelOffset = this.channelOffset + offset;
 
         for (var i=0; i < numberOfChannels; i++) {
             // Get the current channels
@@ -450,7 +450,6 @@ var AudioletBuffer = new Class({
                     unslicedChannel = new Float32Array(unslicedLength);
                 }
                 // Begin subarray-of-subarray fix
-                channelOffset += offset;
                 offset = channelOffset;
                 channel = unslicedChannel.subarray(offset, offset + length);
                 // End subarray-of-subarray fix
@@ -477,7 +476,7 @@ var AudioletBuffer = new Class({
 
     pop: function(buffer) {
         var bufferLength = buffer.length;
-        var offset = bufferLength - length;
+        var offset = this.length - bufferLength;
         buffer.setSection(this, bufferLength, offset, 0);
         this.resize(this.numberOfChannels, offset);
     },
@@ -537,7 +536,7 @@ var AudioletBuffer = new Class({
         return buffer;
     },
 
-    load: function(path, async) {
+    load: function(path, async, callback) {
         var request = new AudioFileRequest(path, async);
         request.onSuccess = function(decoded) {
             this.length = decoded.length;
@@ -545,6 +544,7 @@ var AudioletBuffer = new Class({
             this.unslicedChannels = decoded.channels;
             this.channels = decoded.channels;
             this.channelOffset = 0;
+            callback();
         }.bind(this);
         
         request.onFailure = function() {
