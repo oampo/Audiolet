@@ -1164,9 +1164,19 @@ var Scheduler = new Class({
         // TODO: Quantizing start time
         event.time = this.audiolet.device.getWriteTime();
         this.queue.push(event);
+        return event;
     },
 
-    remove: function() {
+    remove: function(event) {
+        this.queue.heap.erase(event); 
+        // Recreate queue with event removed
+        this.queue = new PriorityQueue(this.queue.heap, function(a, b) {
+            return (a.time < b.time);
+        });
+    },
+
+    stop: function(event) {
+        this.remove(event);
     },
 
     tick: function(length, timestamp) {
@@ -2229,7 +2239,6 @@ var DampedCombFilter = new Class({
             }
 
             if (delayTimeChannel || decayTimeChannel) {
-                // TODO: Only calculate exponentials when necessary
                 feedback = Math.exp(-3 * delayTime / decayTime);
             }
 
@@ -2238,7 +2247,6 @@ var DampedCombFilter = new Class({
                 var outputChannel = outputChannels[j];
                 var buffer = buffers[j];
                 var output = buffer[readWriteIndex];
-                // TODO: Precalculate 1 - damping
                 filterStore = (output * (1 - damping)) +
                               (filterStore * damping);
                 outputChannel[i] = output;

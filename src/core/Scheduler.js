@@ -59,9 +59,19 @@ var Scheduler = new Class({
         // TODO: Quantizing start time
         event.time = this.audiolet.device.getWriteTime();
         this.queue.push(event);
+        return event;
     },
 
-    remove: function() {
+    remove: function(event) {
+        this.queue.heap.erase(event); 
+        // Recreate queue with event removed
+        this.queue = new PriorityQueue(this.queue.heap, function(a, b) {
+            return (a.time < b.time);
+        });
+    },
+
+    stop: function(event) {
+        this.remove(event);
     },
 
     tick: function(length, timestamp) {
