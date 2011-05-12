@@ -220,7 +220,9 @@ var AudioletBuffer = new Class({
             this.unslicedChannels = decoded.channels;
             this.channels = decoded.channels;
             this.channelOffset = 0;
-            callback();
+            if (callback) {
+                callback();
+            }
         }.bind(this);
         
         request.onFailure = function() {
