@@ -7,27 +7,35 @@ var WebAudioAPIDevice = new Class({
     initialize: function(audiolet, sampleRate, numberOfChannels, bufferSize) {
         AbstractAudioletDevice.prototype.initialize.apply(this, [audiolet]);
 
-        this.sampleRate = sampleRate || 44100.0;
         this.numberOfChannels = numberOfChannels || 2;
         this.bufferSize = bufferSize || 8192;
 
         // AudioContext is called webkitAudioContext in the current
         // implementation, so look for either
-        var AudioContext, webkitAudioContext;
-        AudioContext = AudioContext || webkitAudioContext;
-        this.context = new AudioContext(this.sampleRate);
+        if (typeof AudioContext != 'undefined') {
+            this.context = new AudioContext();
+        }
+        else {
+            // Must be webkitAudioContext
+            this.context = new webkitAudioContext();
+        }
 
-        this.node = this.context.createJavaScriptAudioNode(this.bufferSize, 1,
+        // Ignore specified sample rate, and use whatever the context gives us
+        this.sampleRate = this.context.sampleRate;
+
+        this.node = this.context.createJavaScriptNode(this.bufferSize, 1,
                                                            1);
 
-        this.node.onprocessaudio = this.tick;
+        this.node.onaudioprocess = this.tick.bind(this);
+        this.node.connect(this.context.destination);
         this.writePosition = 0;
     },
 
     tick: function(event) {
-        var buffer = event.outputBuffer[0];
+        var buffer = event.outputBuffer;
         var samplesNeeded = buffer.length;
-        AudioletNode.prototype.tick.apply(this, [samplesNeeded]);
+        AudioletNode.prototype.tick.apply(this, [samplesNeeded,
+                                                 this.getWriteTime()]);
         var numberOfChannels = buffer.numberOfChannels;
         for (var i = 0; i < numberOfChannels; i++) {
             var channel = buffer.getChannelData(i);

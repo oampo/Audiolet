@@ -8,7 +8,8 @@ function AudioletDevice(audiolet, sampleRate, numberOfChannels, bufferSize) {
                                        bufferSize));
     }
     // Webkit?
-    else if (typeof AudioContext != 'undefined') {
+    else if (typeof AudioContext != 'undefined' ||
+             typeof webkitAudioContext != 'undefined') {
         return (new WebAudioAPIDevice(audiolet, sampleRate, numberOfChannels,
                                       bufferSize));
     }
