@@ -40,7 +40,7 @@ var AudioletNode = new Class({
         }
 
         var outputPin = this.outputs[output || 0];
-        var inputPin = node.inputs[input];
+        var inputPin = node.inputs[input || 0];
         inputPin.disconnect(outputPin);
         outputPin.disconnect(inputPin);
     },
