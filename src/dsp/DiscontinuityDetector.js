@@ -17,11 +17,18 @@ var DiscontinuityDetector = new Class({
     },
 
     // Override me
-    callback: function() {
+    callback: function(size, channel, index) {
+        console.error("Discontinuity of " + size + " detected on channel " +
+                      channel + " index " + index);
     },
 
     generate: function(inputBuffers, outputBuffers) {
         var inputBuffer = inputBuffers[0];
+
+        if (inputBuffer.isEmpty) {
+            this.lastValues = [];
+            return;
+        }
 
         var lastValues = this.lastValues;
         var threshold = this.threshold;
@@ -40,7 +47,7 @@ var DiscontinuityDetector = new Class({
                 var value = channel[j];
                 if (lastValue != null) {
                     if (Math.abs(lastValue - value) > threshold) {
-                        this.callback();
+                        this.callback(Math.abs(lastValue - value), i, j);
                     }
                 }
                 lastValue = value;
