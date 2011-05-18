@@ -1751,11 +1751,17 @@ var BadValueDetector = new Class({
     },
 
     // Override me
-    callback: function() {
+    callback: function(value, channel, index) {
+        console.error(value + " detected at channel " + channel + " index "
+                      + index);
     },
 
     generate: function(inputBuffers, outputBuffers) {
         var inputBuffer = inputBuffers[0];
+
+        if (inputBuffer.isEmpty) {
+            return;
+        }
 
         var numberOfChannels = inputBuffer.numberOfChannels;
         for (var i = 0; i < numberOfChannels; i++) {
@@ -1766,10 +1772,10 @@ var BadValueDetector = new Class({
                 var value = channel[j];
                 if (typeof value == 'undefined' ||
                     value == null ||
-                    value == NaN ||
+                    isNaN(value) ||
                     value == Infinity ||
                     value == -Infinity) {
-                    this.callback();
+                    this.callback(value, i, j);
                 }
             }
         }
@@ -2110,7 +2116,7 @@ var CrossFade = new Class({
         var inputChannelsB = inputBufferB.channels;
         var outputChannels = outputBuffer.channels;
 
-        if (inputBufferA.isEmpty || inputBufferB.isEmpty) {
+        if (inputBufferA.isEmpty && inputBufferB.isEmpty) {
             outputBuffer.isEmpty = true;
             return;
         }
@@ -2141,8 +2147,22 @@ var CrossFade = new Class({
                 var inputChannelB = inputChannelsB[j];
                 var outputChannel = outputChannels[j];
 
-                outputChannel[i] = inputChannelA[i] * gainA +
-                                   inputChannelB[i] * gainB;
+                var valueA, valueB;
+                if (!inputBufferA.isEmpty) {
+                    valueA = inputChannelA[i];
+                }
+                else {
+                    valueA = 0;
+                }
+
+                if (!inputBufferB.isEmpty) {
+                    valueB = inputChannelB[i];
+                }
+                else {
+                    valueB = 0;
+                }
+                outputChannel[i] = valueA * gainA +
+                                   valueB * gainB;
             }
         }
     },
@@ -2300,10 +2320,10 @@ var Delay = new Class({
         var inputBuffer = inputBuffers[0];
         var outputBuffer = outputBuffers[0];
 
-        if (inputBuffer.isEmpty) {
+/*        if (inputBuffer.isEmpty) {
             outputBuffer.isEmpty = true;
             return;
-        }
+        }*/
 
         // Local processing variables
         var maximumDelayTime = this.maximumDelayTime;
@@ -2346,7 +2366,12 @@ var Delay = new Class({
                 var outputChannel = outputChannels[j];
                 var buffer = buffers[j];
                 outputChannel[i] = buffer[readWriteIndex];
-                buffer[readWriteIndex] = inputChannel[i];
+                if (!inputBuffer.isEmpty) {
+                    buffer[readWriteIndex] = inputChannel[i];
+                }
+                else {
+                    buffer[readWriteIndex] = 0;
+                }
             }
 
             readWriteIndex += 1;
@@ -2382,11 +2407,18 @@ var DiscontinuityDetector = new Class({
     },
 
     // Override me
-    callback: function() {
+    callback: function(size, channel, index) {
+        console.error("Discontinuity of " + size + " detected on channel " +
+                      channel + " index " + index);
     },
 
     generate: function(inputBuffers, outputBuffers) {
         var inputBuffer = inputBuffers[0];
+
+        if (inputBuffer.isEmpty) {
+            this.lastValues = [];
+            return;
+        }
 
         var lastValues = this.lastValues;
         var threshold = this.threshold;
@@ -2405,7 +2437,7 @@ var DiscontinuityDetector = new Class({
                 var value = channel[j];
                 if (lastValue != null) {
                     if (Math.abs(lastValue - value) > threshold) {
-                        this.callback();
+                        this.callback(Math.abs(lastValue - value), i, j);
                     }
                 }
                 lastValue = value;
@@ -2502,6 +2534,59 @@ var HighPassFilter = new Class({
         return 'High Pass Filter';
     }
 });
+
+/**
+ * @depends ../core/AudioletNode.js
+ */
+/*
+var Lag = new Class({
+    Extends: AudioletNode,
+    initialize: function(audiolet, value, lagTime) {
+        AudioletNode.prototype.initialize.apply(this, [audiolet, 2, 1]);
+        this.value = new AudioletParameter(this, 0, value || 0);
+        this.lag = new AudioletParameter(this, 1, lagTime || 1);
+    },
+
+    generate: function(inputBuffers, outputBuffers) {
+        var outputBuffer = outputBuffers[0];
+
+        var lagParameter = this.lag;
+        var lag, lagChannel;
+        if (lagParameter.isStatic()) {
+            lag = lagParameter.getValue();
+        }
+        else {
+            lagChannel = lagParameter.getChannel();
+        }
+
+        var bufferLength = outputBuffer.length;
+        for (var i = 0; i < bufferLength; i++) {
+            if (lagChannel) {
+                lag = lagChannel[i];
+            }
+
+            for (var j = 0; j < numberOfChannels; j++) {
+                var inputChannel = inputChannels[j];
+                var outputChannel = outputChannels[j];
+                var buffer = buffers[j];
+                outputChannel[i] = buffer[readWriteIndex];
+                buffer[readWriteIndex] = inputChannel[i];
+            }
+
+            readWriteIndex += 1;
+            if (readWriteIndex >= delayTime) {
+                readWriteIndex = 0;
+            }
+        }
+        this.readWriteIndex = readWriteIndex;
+    },
+
+    toString: function() {
+        return 'Delay';
+    }
+});
+*/
+
 
 /**
  * @depends ../core/AudioletNode.js
