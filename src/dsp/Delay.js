@@ -18,11 +18,6 @@ var Delay = new Class({
         var inputBuffer = inputBuffers[0];
         var outputBuffer = outputBuffers[0];
 
-        if (inputBuffer.isEmpty) {
-            outputBuffer.isEmpty = true;
-            return;
-        }
-
         // Local processing variables
         var maximumDelayTime = this.maximumDelayTime;
         var sampleRate = this.audiolet.device.sampleRate;
@@ -64,7 +59,12 @@ var Delay = new Class({
                 var outputChannel = outputChannels[j];
                 var buffer = buffers[j];
                 outputChannel[i] = buffer[readWriteIndex];
-                buffer[readWriteIndex] = inputChannel[i];
+                if (!inputBuffer.isEmpty) {
+                    buffer[readWriteIndex] = inputChannel[i];
+                }
+                else {
+                    buffer[readWriteIndex] = 0;
+                }
             }
 
             readWriteIndex += 1;
