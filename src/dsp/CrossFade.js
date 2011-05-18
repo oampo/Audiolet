@@ -19,7 +19,7 @@ var CrossFade = new Class({
         var inputChannelsB = inputBufferB.channels;
         var outputChannels = outputBuffer.channels;
 
-        if (inputBufferA.isEmpty || inputBufferB.isEmpty) {
+        if (inputBufferA.isEmpty && inputBufferB.isEmpty) {
             outputBuffer.isEmpty = true;
             return;
         }
@@ -50,8 +50,22 @@ var CrossFade = new Class({
                 var inputChannelB = inputChannelsB[j];
                 var outputChannel = outputChannels[j];
 
-                outputChannel[i] = inputChannelA[i] * gainA +
-                                   inputChannelB[i] * gainB;
+                var valueA, valueB;
+                if (!inputBufferA.isEmpty) {
+                    valueA = inputChannelA[i];
+                }
+                else {
+                    valueA = 0;
+                }
+
+                if (!inputBufferB.isEmpty) {
+                    valueB = inputChannelB[i];
+                }
+                else {
+                    valueB = 0;
+                }
+                outputChannel[i] = valueA * gainA +
+                                   valueB * gainB;
             }
         }
     },
