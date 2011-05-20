@@ -1736,6 +1736,70 @@ var AllPassFilter = new Class({
 });
 
 /**
+ * @depends ../core/AudioletNode.js
+ */
+
+var Amplitude = new Class({
+    Extends: AudioletNode,
+    initialize: function(audiolet, attack, release) {
+        AudioletNode.prototype.initialize.apply(this, [audiolet, 1, 1]);
+        this.linkNumberOfOutputChannels(0, 0);
+
+        this.followers = [];
+        var sampleRate = this.audiolet.device.sampleRate;
+
+        attack = attack || 0.01;
+        this.attack = Math.pow(0.01, 1 / (attack * sampleRate));
+        release = release || 0.01;
+        this.release = Math.pow(0.01, 1 / (release * sampleRate));
+    },
+
+    generate: function(inputBuffers, outputBuffers) {
+        var inputBuffer = inputBuffers[0];
+        var outputBuffer = outputBuffers[0];
+
+        if (inputBuffer.isEmpty) {
+            outputBuffer.isEmpty = true;
+            return;
+        }
+
+        var followers = this.followers;
+        var numberOfFollowers = followers.length;
+
+        var attack = this.attack;
+        var release = this.release;
+
+        var numberOfChannels = inputBuffer.numberOfChannels;
+        for (var i = 0; i < numberOfChannels; i++) {
+            if (i > numberOfFollowers) {
+                followers.push(0);
+            }
+            var follower = followers[i];
+
+            var inputChannel = inputBuffer.getChannelData(i);
+            var outputChannel = outputBuffer.getChannelData(i);
+            var bufferLength = inputBuffer.length;
+            for (var j = 0; j < bufferLength; j++) {
+                var value = inputChannel[j];
+                if (i > follower) {
+                    follower = attack * (follower - value) + value;
+                }
+                else {
+                    follower = release * (follower - value) + value;
+                }
+                outputChannel[j] = follower;
+            }
+            followers[i] = follower;
+        }
+    },
+
+    toString: function() {
+        return ('Amplitude');
+    }
+});
+
+
+/**
  * @depends ../core/PassThroughNode.js
  */
 
@@ -2319,11 +2383,6 @@ var Delay = new Class({
     generate: function(inputBuffers, outputBuffers) {
         var inputBuffer = inputBuffers[0];
         var outputBuffer = outputBuffers[0];
-
-/*        if (inputBuffer.isEmpty) {
-            outputBuffer.isEmpty = true;
-            return;
-        }*/
 
         // Local processing variables
         var maximumDelayTime = this.maximumDelayTime;
@@ -3066,6 +3125,52 @@ for (var i = 0; i < 8192; i++) {
 
 
 /**
+ * @depends ../core/AudioletNode.js
+ */
+
+var SoftClip = new Class({
+    Extends: AudioletNode,
+    initialize: function(audiolet) {
+        AudioletNode.prototype.initialize.apply(this, [audiolet, 1, 1]);
+        this.linkNumberOfOutputChannels(0, 0);
+    },
+
+    generate: function(inputBuffers, outputBuffers) {
+        var inputBuffer = inputBuffers[0];
+        var outputBuffer = outputBuffers[0];
+
+        if (inputBuffer.isEmpty) {
+            outputBuffer.isEmpty = true;
+            return;
+        }
+
+        var numberOfChannels = inputBuffer.numberOfChannels;
+        for (var i = 0; i < numberOfChannels; i++) {
+            var inputChannel = inputBuffer.getChannelData(i);
+            var outputChannel = outputBuffer.getChannelData(i);
+            var bufferLength = inputBuffer.length;
+            for (var j = 0; j < bufferLength; j++) {
+                var value = inputChannel[j];
+                if (value > 0.5) {
+                    outputChannel[j] = (value - 0.25) / value;
+                }
+                else if (value < -0.5) {
+                    outputChannel[j] = (-value - 0.25) / value;
+                }
+                else {
+                    outputChannel[j] = value;
+                }
+            }
+        }
+    },
+
+    toString: function() {
+        return ('SoftClip');
+    }
+});
+
+
+/**
  * @depends TableLookupOscillator.js
  */
 var Square = new Class({
@@ -3086,6 +3191,45 @@ for (var i = 0; i < 8192; i++) {
     Square.TABLE.push(((i - 4096) / 8192) < 0 ? 1 : -1);
 }
 
+
+
+/**
+ * @depends ../core/AudioletNode.js
+ */
+
+var Tanh = new Class({
+    Extends: AudioletNode,
+    initialize: function(audiolet) {
+        AudioletNode.prototype.initialize.apply(this, [audiolet, 1, 1]);
+        this.linkNumberOfOutputChannels(0, 0);
+    },
+
+    generate: function(inputBuffers, outputBuffers) {
+        var inputBuffer = inputBuffers[0];
+        var outputBuffer = outputBuffers[0];
+
+        if (inputBuffer.isEmpty) {
+            outputBuffer.isEmpty = true;
+            return;
+        }
+
+        var numberOfChannels = inputBuffer.numberOfChannels;
+        for (var i = 0; i < numberOfChannels; i++) {
+            var inputChannel = inputBuffer.getChannelData(i);
+            var outputChannel = outputBuffer.getChannelData(i);
+            var bufferLength = inputBuffer.length;
+            for (var j = 0; j < bufferLength; j++) {
+                var value = inputChannel[j];
+                outputChannel[j] = (Math.exp(value) - Math.exp(-value)) /
+                                   (Math.exp(value) + Math.exp(-value));
+            }
+        }
+    },
+
+    toString: function() {
+        return ('Tanh');
+    }
+});
 
 
 /**
@@ -3606,6 +3750,8 @@ var Scale = new Class({
 
     getFrequency: function(degree, rootFrequency, octave) {
         var frequency = rootFrequency;
+        octave += Math.floor(degree / this.degrees.length);
+        degree %= this.degrees.length;
         frequency *= Math.pow(this.tuning.octaveRatio, octave);
         frequency *= this.tuning.ratios[this.degrees[degree]];
         return frequency;
