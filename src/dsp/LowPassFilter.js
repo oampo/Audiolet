@@ -18,7 +18,7 @@ var LowPassFilter = new Class({
 
         this.b0 = (1 - cosw0) / 2;
         this.b1 = 1 - cosw0;
-        this.b2 = this.b1;
+        this.b2 = this.b0;
         this.a0 = 1 + alpha;
         this.a1 = -2 * cosw0;
         this.a2 = 1 - alpha;
