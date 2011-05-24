@@ -27,6 +27,7 @@ var AudioletNode = new Class({
         if (instanceOf(node, AudioletGroup)) {
             // Connect to the pass-through node rather than the group
             node = node.inputs[input || 0];
+            input = 0;
         }
         var outputPin = this.outputs[output || 0];
         var inputPin = node.inputs[input || 0];
