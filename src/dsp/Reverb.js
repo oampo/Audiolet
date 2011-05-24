@@ -72,7 +72,7 @@ var Reverb = new Class({
         this.mix = this.mixer.position;
 
         // Connect up the controls
-        this.inputs[1].connect(this.mixer, 0, 1);
+        this.inputs[1].connect(this.mixer, 0, 2);
 
         this.inputs[2].connect(this.roomSizeNode);
         this.roomSizeNode.connect(this.roomSizeMulAdd);
