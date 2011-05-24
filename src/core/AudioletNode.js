@@ -38,6 +38,7 @@ var AudioletNode = new Class({
     disconnect: function(node, output, input) {
         if (instanceOf(node, AudioletGroup)) {
             node = node.inputs[input || 0];
+            input = 0;
         }
 
         var outputPin = this.outputs[output || 0];
