@@ -1621,15 +1621,18 @@ var BiquadFilter = new Class({
             return;
         }
 
+        var xValueArray = this.xValues;
+        var yValueArray = this.yValues;
+
         var inputChannels = [];
         var outputChannels = [];
         var numberOfChannels = inputBuffer.numberOfChannels;
         for (var i = 0; i < numberOfChannels; i++) {
             inputChannels.push(inputBuffer.getChannelData(i));
             outputChannels.push(outputBuffer.getChannelData(i));
-            if (i >= this.xValues.length) {
-                this.xValues.push([0, 0]);
-                this.yValues.push([0, 0]);
+            if (i >= xValueArray.length) {
+                xValueArray.push([0, 0]);
+                yValueArray.push([0, 0]);
             }
         }
 
@@ -1675,10 +1678,10 @@ var BiquadFilter = new Class({
                 var inputChannel = inputChannels[j];
                 var outputChannel = outputChannels[j];
 
-                var xValues = this.xValues[j];
+                var xValues = xValueArray[j];
                 var x1 = xValues[0];
                 var x2 = xValues[1];
-                var yValues = this.yValues[j];
+                var yValues = yValueArray[j];
                 var y1 = yValues[0];
                 var y2 = yValues[1];
 
@@ -2188,6 +2191,81 @@ var CombFilter = new Class({
 /**
  * @depends ../core/AudioletNode.js
  */
+var TableLookupOscillator = new Class({
+    Extends: AudioletNode,
+    initialize: function(audiolet, table, frequency) {
+        AudioletNode.prototype.initialize.apply(this, [audiolet, 1, 1]);
+        this.table = table;
+        this.frequency = new AudioletParameter(this, 0, frequency || 440);
+        this.phase = 0;
+    },
+
+    generate: function(inputBuffers, outputBuffers) {
+        var buffer = outputBuffers[0];
+        var channel = buffer.getChannelData(0);
+
+        // Make processing variables local
+        var sampleRate = this.audiolet.device.sampleRate;
+        var table = this.table;
+        var tableSize = table.length;
+        var phase = this.phase;
+        var frequencyParameter = this.frequency;
+        var frequency, frequencyChannel;
+        if (frequencyParameter.isStatic()) {
+            frequency = frequencyParameter.getValue();
+        }
+        else {
+            frequencyChannel = frequencyParameter.getChannel();
+        }
+
+        // Processing loop
+        var bufferLength = buffer.length;
+        for (var i = 0; i < bufferLength; i++) {
+            if (frequencyChannel) {
+                frequency = frequencyChannel[i];
+            }
+            var step = frequency * tableSize / sampleRate;
+            phase += step;
+            if (phase >= tableSize) {
+                phase %= tableSize;
+            }
+            channel[i] = table[Math.floor(phase)];
+        }
+        this.phase = phase;
+    },
+
+    toString: function() {
+        return 'Table Lookup Oscillator';
+    }
+});
+
+
+/**
+ * @depends TableLookupOscillator.js
+ */
+var Sine = new Class({
+    Extends: TableLookupOscillator,
+    initialize: function(audiolet, frequency) {
+        TableLookupOscillator.prototype.initialize.apply(this, [audiolet,
+                                                                Sine.TABLE,
+                                                                frequency]);
+    },
+
+    toString: function() {
+        return 'Sine';
+    }
+});
+
+Sine.TABLE = [];
+for (var i = 0; i < 8192; i++) {
+    Sine.TABLE.push(Math.sin(i * 2 * Math.PI / 8192));
+}
+
+
+/**
+ * @depends ../core/AudioletNode.js
+ * @depends Sine.js
+ */
 
 var CrossFade = new Class({
     Extends: AudioletNode,
@@ -2226,10 +2304,12 @@ var CrossFade = new Class({
             if (positionChannel) {
                 position = positionChannel[i];
             }
-            var scaledPosition = position * Math.PI / 2;
+
+            var tableLength = Sine.TABLE.length / 4;
+            var scaledPosition = Math.floor(position * tableLength);
             // TODO: Use sine/cos tables?
-            var gainA = Math.cos(scaledPosition);
-            var gainB = Math.sin(scaledPosition);
+            var gainA = Sine.TABLE[scaledPosition + tableLength];
+            var gainB = Sine.TABLE[scaledPosition];
 
             var numberOfChannels = inputBufferA.numberOfChannels;
             for (var j = 0; j < numberOfChannels; j++) {
@@ -2630,7 +2710,7 @@ var Lag = new Class({
         AudioletNode.prototype.initialize.apply(this, [audiolet, 2, 1]);
         this.value = new AudioletParameter(this, 0, value || 0);
         this.lag = new AudioletParameter(this, 1, lagTime || 1);
-        this.lastValue = 0;
+        this.lastValue = value || 0;
 
         this.log001 = Math.log(0.001);
     },
@@ -3103,58 +3183,6 @@ var FeedbackGainToDecayTime = new Class({
 });
 
 /**
- * @depends ../core/AudioletNode.js
- */
-var TableLookupOscillator = new Class({
-    Extends: AudioletNode,
-    initialize: function(audiolet, table, frequency) {
-        AudioletNode.prototype.initialize.apply(this, [audiolet, 1, 1]);
-        this.table = table;
-        this.frequency = new AudioletParameter(this, 0, frequency || 440);
-        this.phase = 0;
-    },
-
-    generate: function(inputBuffers, outputBuffers) {
-        var buffer = outputBuffers[0];
-        var channel = buffer.getChannelData(0);
-
-        // Make processing variables local
-        var sampleRate = this.audiolet.device.sampleRate;
-        var table = this.table;
-        var tableSize = table.length;
-        var phase = this.phase;
-        var frequencyParameter = this.frequency;
-        var frequency, frequencyChannel;
-        if (frequencyParameter.isStatic()) {
-            frequency = frequencyParameter.getValue();
-        }
-        else {
-            frequencyChannel = frequencyParameter.getChannel();
-        }
-
-        // Processing loop
-        var bufferLength = buffer.length;
-        for (var i = 0; i < bufferLength; i++) {
-            if (frequencyChannel) {
-                frequency = frequencyChannel[i];
-            }
-            var step = frequency * tableSize / sampleRate;
-            phase += step;
-            if (phase >= tableSize) {
-                phase %= tableSize;
-            }
-            channel[i] = table[Math.floor(phase)];
-        }
-        this.phase = phase;
-    },
-
-    toString: function() {
-        return 'Table Lookup Oscillator';
-    }
-});
-
-
-/**
  * @depends TableLookupOscillator.js
  */
 var Saw = new Class({
@@ -3173,28 +3201,6 @@ var Saw = new Class({
 Saw.TABLE = [];
 for (var i = 0; i < 8192; i++) {
     Saw.TABLE.push(((((i - 4096) / 8192) % 1) + 1) % 1 * 2 - 1);
-}
-
-
-/**
- * @depends TableLookupOscillator.js
- */
-var Sine = new Class({
-    Extends: TableLookupOscillator,
-    initialize: function(audiolet, frequency) {
-        TableLookupOscillator.prototype.initialize.apply(this, [audiolet,
-                                                                Sine.TABLE,
-                                                                frequency]);
-    },
-
-    toString: function() {
-        return 'Sine';
-    }
-});
-
-Sine.TABLE = [];
-for (var i = 0; i < 8192; i++) {
-    Sine.TABLE.push(Math.sin(i * 2 * Math.PI / 8192));
 }
 
 
