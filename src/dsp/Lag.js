@@ -8,7 +8,7 @@ var Lag = new Class({
         AudioletNode.prototype.initialize.apply(this, [audiolet, 2, 1]);
         this.value = new AudioletParameter(this, 0, value || 0);
         this.lag = new AudioletParameter(this, 1, lagTime || 1);
-        this.lastValue = 0;
+        this.lastValue = value || 0;
 
         this.log001 = Math.log(0.001);
     },
