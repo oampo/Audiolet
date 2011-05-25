@@ -1,5 +1,6 @@
 /**
  * @depends ../core/AudioletNode.js
+ * @depends Sine.js
  */
 
 var CrossFade = new Class({
@@ -39,10 +40,12 @@ var CrossFade = new Class({
             if (positionChannel) {
                 position = positionChannel[i];
             }
-            var scaledPosition = position * Math.PI / 2;
+
+            var tableLength = Sine.TABLE.length / 4;
+            var scaledPosition = Math.floor(position * tableLength);
             // TODO: Use sine/cos tables?
-            var gainA = Math.cos(scaledPosition);
-            var gainB = Math.sin(scaledPosition);
+            var gainA = Sine.TABLE[scaledPosition + tableLength];
+            var gainB = Sine.TABLE[scaledPosition];
 
             var numberOfChannels = inputBufferA.numberOfChannels;
             for (var j = 0; j < numberOfChannels; j++) {
