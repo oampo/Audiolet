@@ -4,6 +4,39 @@ load('mootools-core-1.3.1.js');
 load('../src/audiofile/audiofile.js');
 load('../src/audiolet/Audiolet.js');
 
+// Simple node for testing purposes
+var TestNode = new Class({
+    Extends: AudioletNode,
+    initialize: function(audiolet, fillValue) {
+        AudioletNode.prototype.initialize.apply(this, [audiolet, 3, 3]);
+        this.timesCalled = 0;
+        this.fillValue = fillValue;
+    },
+
+    generate: function(inputBuffers, outputBuffers) {
+        this.timesCalled += 1;
+        this.inputBuffers = inputBuffers;
+        this.outputBuffers = outputBuffers;
+
+        var fillValue = this.fillValue;
+
+        if (fillValue) {
+            var numberOfBuffers = inputBuffers.length;
+            for (var i=0; i<numberOfBuffers; i++) {
+                var buffer = outputBuffers[i];
+                var numberOfChannels = buffer.numberOfChannels;
+                var bufferLength = buffer.length;
+                for (var j=0; j<numberOfChannels; j++) {
+                    var data = buffer.getChannelData(j);
+                    for (var k=0; k<bufferLength; k++) {
+                        data[k] = fillValue;
+                    }
+                }
+            }
+        }
+    }
+});
+
 function testInit() {
     var audiolet = new Audiolet();
     var node = new AudioletNode(audiolet, 3, 4);
@@ -191,3 +224,273 @@ function testDisconnectGroupArguments() {
 
 test("Disconnect from group with arguments", testDisconnectGroupArguments);
 
+function testTick() {
+    var audiolet = new Audiolet();
+    var node = new TestNode(audiolet);
+    node.tick(1024, 0);
+
+    Assert.assertEquals(node.timesCalled, 1, "Generate called");
+    Assert.assertEquals(node.inputBuffers.length, 3, "Number of input buffers");
+    Assert.assertEquals(node.outputBuffers.length, 3,
+                        "Number of output buffers");
+    Assert.assertEquals(node.inputBuffers[0].length, 1024,
+                        "Input buffer length");
+    Assert.assertEquals(node.outputBuffers[2].length, 1024,
+                        "Output buffer length");
+}
+
+test("Tick", testTick);
+
+function testParentsTicked() {
+    var audiolet = new Audiolet();
+    var nodeA = new TestNode(audiolet);
+    var nodeB = new TestNode(audiolet);
+    var nodeC = new TestNode(audiolet);
+
+    nodeA.connect(nodeB);
+    nodeB.connect(nodeC);
+
+    nodeC.tick(1024, 0);
+
+    Assert.assertEquals(nodeA.timesCalled, 1, "Generate called 1");
+    Assert.assertEquals(nodeB.timesCalled, 1, "Generate called 2");
+    Assert.assertEquals(nodeC.timesCalled, 1, "Generate called 3");
+}
+
+test("Tick parents", testParentsTicked);
+
+function testSingleTickPerTimestamp() {
+    var audiolet = new Audiolet();
+    var nodeA = new TestNode(audiolet);
+    var nodeB = new TestNode(audiolet);
+    var nodeC = new TestNode(audiolet);
+    var nodeD = new TestNode(audiolet);
+
+    nodeA.connect(nodeB);
+    nodeA.connect(nodeC);
+    nodeB.connect(nodeD);
+    nodeC.connect(nodeD);
+
+    nodeD.tick(1024, 0);
+
+    Assert.assertEquals(nodeA.timesCalled, 1, "Generate called 1");
+    Assert.assertEquals(nodeB.timesCalled, 1, "Generate called 2");
+    Assert.assertEquals(nodeC.timesCalled, 1, "Generate called 3");
+    Assert.assertEquals(nodeD.timesCalled, 1, "Generate called 3");
+
+    // Call with different timestamp
+    nodeD.tick(1024, 1);
+    Assert.assertEquals(nodeA.timesCalled, 2, "Second generate called 1");
+    Assert.assertEquals(nodeB.timesCalled, 2, "Second generate called 2");
+    Assert.assertEquals(nodeC.timesCalled, 2, "Second generate called 3");
+    Assert.assertEquals(nodeD.timesCalled, 2, "Second generate called 3");
+}
+
+test("Single click per timestamp", testSingleTickPerTimestamp);
+
+function testInputBufferDisconnected() {
+    var audiolet = new Audiolet();
+    var node = new TestNode(audiolet);
+    var inputBuffers = node.createInputBuffers(1024);
+
+    Assert.assertEquals(inputBuffers.length, 3, "Number of buffers");
+    Assert.assertEquals(inputBuffers[0].length, 1024, "Buffer length 1");
+    Assert.assertEquals(inputBuffers[2].length, 1024, "Buffer length 2");
+
+    Assert.assertEquals(inputBuffers[1].numberOfChannels, 1,
+                        "Number of channels 1");
+    Assert.assertEquals(inputBuffers[2].numberOfChannels, 1,
+                        "Number of channels 2");
+
+    Assert.assertEquals(inputBuffers[0].isEmpty, true, "Buffer empty 1");
+    Assert.assertEquals(inputBuffers[1].isEmpty, true, "Buffer empty 2");
+}
+
+test("Input buffer creation for disconnected node",
+     testInputBufferDisconnected);
+    
+function testInputBufferConnected() {
+    var audiolet = new Audiolet();
+    var nodeA = new TestNode(audiolet, 1);
+    var nodeB = new TestNode(audiolet);
+    nodeA.connect(nodeB, 1, 2);
+
+    // Make sure node A has generated
+    nodeA.tick(1024, 0);
+    var inputBuffers = nodeB.createInputBuffers(1024);
+
+    Assert.assertEquals(inputBuffers.length, 3, "Number of buffers");
+    
+    Assert.assertEquals(inputBuffers[0].length, 1024, "Buffer length 1");
+    Assert.assertEquals(inputBuffers[2].length, 1024, "Buffer length 2");
+
+    Assert.assertEquals(inputBuffers[0].numberOfChannels, 1,
+                        "Number of channels 1");
+    Assert.assertEquals(inputBuffers[2].numberOfChannels, 1,
+                        "Number of channels 2");
+    
+    Assert.assertEquals(inputBuffers[0].isEmpty, true, "Buffer empty");
+    Assert.assertEquals(inputBuffers[2].isEmpty, false, "Buffer not empty");
+
+    var data = inputBuffers[2].getChannelData(0);
+    Assert.assertEquals(data[0], 1, "Start data");
+    Assert.assertEquals(data[512], 1, "Middle data");
+    Assert.assertEquals(data[1023], 1, "End data");
+}
+
+test("Input buffer creation for connected node", testInputBufferConnected);
+
+function testInputBufferMultipleConnections() {
+    var audiolet = new Audiolet();
+    var nodeA = new TestNode(audiolet, 1);
+    var nodeB = new TestNode(audiolet, 2);
+    var nodeC = new TestNode(audiolet);
+    nodeA.connect(nodeC, 1, 2);
+    nodeB.connect(nodeC, 0, 2);
+
+    nodeA.setNumberOfOutputChannels(1, 2);
+
+    // Make sure nodes have has generated
+    nodeA.tick(1024, 0);
+    nodeB.tick(1024, 0);
+    var inputBuffers = nodeC.createInputBuffers(1024);
+
+    Assert.assertEquals(inputBuffers.length, 3, "Number of buffers");
+
+    Assert.assertEquals(inputBuffers[0].length, 1024, "Buffer length 1");
+    Assert.assertEquals(inputBuffers[2].length, 1024, "Buffer length 2");
+
+    Assert.assertEquals(inputBuffers[0].numberOfChannels, 1,
+                        "Number of channels 1");
+    Assert.assertEquals(inputBuffers[2].numberOfChannels, 2,
+                        "Number of channels 2");
+
+    Assert.assertEquals(inputBuffers[0].isEmpty, true, "Buffer empty");
+    Assert.assertEquals(inputBuffers[2].isEmpty, false, "Buffer not empty");
+
+    // Check that the inputs are summed on the first channel
+    var data = inputBuffers[2].getChannelData(0);
+    Assert.assertEquals(data[0], 3, "Start data");
+    Assert.assertEquals(data[512], 3, "Middle data");
+    Assert.assertEquals(data[1023], 3, "End data");
+
+    // But we should just get the output from nodeA on the second channel
+    data = inputBuffers[2].getChannelData(1);
+    Assert.assertEquals(data[0], 1, "Start data");
+    Assert.assertEquals(data[512], 1, "Middle data");
+    Assert.assertEquals(data[1023], 1, "End data");
+}
+
+test("Input buffer creation for node with multiple connections",
+     testInputBufferMultipleConnections);
+
+function testCreateOutputBuffers() {
+    var audiolet = new Audiolet();
+    var node = new TestNode(audiolet);
+
+    var outputBuffers = node.createOutputBuffers(1024);
+
+    Assert.assertEquals(outputBuffers.length, 3, "Number of buffers");
+    Assert.assertEquals(outputBuffers[0].length, 1024, "Buffer length 1");
+    Assert.assertEquals(outputBuffers[2].length, 1024, "Buffer length 2");
+
+    Assert.assertEquals(outputBuffers[1].numberOfChannels, 1,
+                        "Number of channels 1");
+    Assert.assertEquals(outputBuffers[2].numberOfChannels, 1,
+                        "Number of channels 2");
+
+    Assert.assertEquals(outputBuffers[0].isEmpty, false, "Buffer empty 1");
+    Assert.assertEquals(outputBuffers[1].isEmpty, false, "Buffer empty 2");
+}
+
+test("Output buffer creation", testCreateOutputBuffers);
+
+function testSetNumberOfChannels() {
+    var audiolet = new Audiolet();
+    var node = new TestNode(audiolet);
+    node.setNumberOfOutputChannels(1, 2);
+
+    var outputBuffers = node.createOutputBuffers(1024);
+
+    Assert.assertEquals(outputBuffers[0].numberOfChannels, 1,
+                        "Number of channels 1");
+    Assert.assertEquals(outputBuffers[1].numberOfChannels, 2,
+                        "Number of channels 2");
+    Assert.assertEquals(outputBuffers[2].numberOfChannels, 1,
+                        "Number of channels 3");
+}
+
+test("Set number of output channels", testSetNumberOfChannels);
+
+function testLinkNumberOfChannels() {
+    var audiolet = new Audiolet();
+    var nodeA = new TestNode(audiolet, 1);
+    var nodeB = new TestNode(audiolet);
+
+    nodeA.connect(nodeB, 1, 2);
+    // Output 1 should have the same number of channels as input 2, which is
+    // connected from output 1 of nodeA
+    nodeB.linkNumberOfOutputChannels(1, 2);
+
+    nodeA.tick(1024, 0);
+    var inputBuffers = nodeB.createInputBuffers(1024);
+    var outputBuffers = nodeB.createOutputBuffers(1024);
+
+    Assert.assertEquals(outputBuffers[0].numberOfChannels, 1,
+                        "Number of channels 1");
+    Assert.assertEquals(outputBuffers[1].numberOfChannels, 1,
+                        "Number of channels 2");
+    Assert.assertEquals(outputBuffers[2].numberOfChannels, 1,
+                        "Number of channels 3");
+
+    // Change the number of channels coming into nodeB
+    nodeA.setNumberOfOutputChannels(1, 2);
+    nodeA.tick(1024, 1);
+    var inputBuffers = nodeB.createInputBuffers(1024);
+    var outputBuffers = nodeB.createOutputBuffers(1024);
+
+    // Make sure that the linking reflects the change
+    Assert.assertEquals(outputBuffers[0].numberOfChannels, 1,
+                        "Number of channels 1");
+    Assert.assertEquals(outputBuffers[1].numberOfChannels, 2,
+                        "Number of channels 2");        
+    Assert.assertEquals(outputBuffers[2].numberOfChannels, 1,
+                        "Number of channels 3");
+}
+
+test("Link number of output channels", testLinkNumberOfChannels);
+
+function testRemove() {
+    var audiolet = new Audiolet();
+    var nodeA = new AudioletNode(audiolet, 3, 3);
+    var nodeB = new AudioletNode(audiolet, 3, 3);
+    var nodeC = new AudioletNode(audiolet, 3, 3);
+    var nodeD = new AudioletNode(audiolet, 3, 3);
+
+    nodeA.connect(nodeC);
+    nodeB.connect(nodeC, 1, 2);
+    nodeC.connect(nodeD, 2, 1);
+    
+    nodeC.remove();
+    
+    var outputA = nodeA.outputs[0];
+    var outputB = nodeB.outputs[1];
+    var inputA = nodeC.inputs[0];
+    var inputB = nodeC.inputs[2];
+    var outputC = nodeC.outputs[2];
+    var inputC = nodeD.inputs[1];
+
+    Assert.assertEquals(outputA.connectedTo.length, 0, "Connected to length 1");
+    Assert.assertEquals(outputB.connectedTo.length, 0, "Connected to length 2");
+    Assert.assertEquals(outputC.connectedTo.length, 0, "Connected to length 3");
+
+    Assert.assertEquals(inputA.connectedFrom.length, 0,
+                        "Connected from length 1");
+    Assert.assertEquals(inputB.connectedFrom.length, 0,
+                        "Connected from length 2");
+    Assert.assertEquals(inputC.connectedFrom.length, 0,
+                        "Connected from length 3");
+
+}
+
+test("Remove", testRemove);
