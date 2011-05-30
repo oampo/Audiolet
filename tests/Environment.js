@@ -1,0 +1,3 @@
+function Audio() {}
+
+function setInterval() {}
