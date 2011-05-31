@@ -70,3 +70,16 @@ function testPassingHighs() {
 }
 
 test("Is Passing Highs", testPassingHighs);
+
+function testEmpty() {
+    var audiolet = new Audiolet();
+    var hpf = new HighPassFilter(audiolet);
+    var node = new Introspector(audiolet, 1, 0);
+    hpf.connect(node);
+
+    node.tick(8192, 0);
+
+    Assert.assertEquals(node.inputBuffers[0].isEmpty, true, "Buffer empty");
+}
+
+test("Empty input", testEmpty);
