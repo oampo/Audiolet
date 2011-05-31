@@ -1,7 +1,7 @@
-load('../../../audiotest.js/trunk/audiotest.js');
-load('mootools-core-1.3.1.js');
-load('../src/audiofile/audiofile.js');
-load('../src/audiolet/Audiolet.js');
+load('../../../../audiotest.js/trunk/audiotest.js');
+load('../mootools-core-1.3.1.js');
+load('../../src/audiofile/audiofile.js');
+load('../../src/audiolet/Audiolet.js');
 
 function testInit() {
     var buffer = new AudioletBuffer(2, 2);
