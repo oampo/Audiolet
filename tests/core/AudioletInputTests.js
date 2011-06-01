@@ -15,7 +15,6 @@ function testInit() {
 test("Initialization", testInit);
 
 function testConnect() {
-    var audiolet = new Audiolet();
     var input = new AudioletInput(null, 0);
     var outputA = new AudioletOutput(null, 1);
     var outputB = new AudioletOutput(null, 2);
@@ -30,7 +29,6 @@ function testConnect() {
 test("Connection", testConnect);
 
 function testDisconnect() {
-    var audiolet = new Audiolet();
     var input = new AudioletInput(null, 0);
     var outputA = new AudioletOutput(null, 1);
     var outputB = new AudioletOutput(null, 2);
@@ -45,7 +43,6 @@ function testDisconnect() {
 test("Disconnect", testDisconnect);
 
 function testIsConnected() {
-    var audiolet = new Audiolet();
     var input = new AudioletInput(null, 0);
     var output = new AudioletOutput(null, 1);
 
