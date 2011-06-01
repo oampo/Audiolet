@@ -1,0 +1,198 @@
+<html>
+	<head>
+		<title>Audiolet Core</title>
+		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js"></script>
+		<style>body {
+    margin: 0;
+    padding: 0;
+    font: 14px/1.5 'Palatino Linotype', 'Book Antiqua', Palatino, FreeSerif, serif;
+    color: #252519;
+}
+a {
+    color: #252519;
+}
+a:hover {
+    text-decoration: underline;
+    color: #19469D;
+}
+p {
+    margin: 12px 0;
+}
+h1, h2, h3 {
+    margin: 0;
+    padding: 0;
+}
+table#source {
+    width: 100%;
+    border-collapse: collapse;
+}
+table#source td:first-child {
+    padding: 30px 40px 30px 40px;
+    vertical-align: top;
+}
+table#source td:first-child,
+table#source td:first-child pre {
+    width: 450px;
+}
+table#source td:last-child {
+    padding: 30px 0 30px 40px;
+    border-left: 1px solid #E5E5EE;
+    background: #F5F5FF;
+}
+table#source tr {
+    border-bottom: 1px solid #E5E5EE;
+}
+table#source tr.filename {
+    padding-top: 40px;
+    border-top: 1px solid #E5E5EE;
+}
+table#source tr.filename td:first-child {
+    text-transform: capitalize;
+}
+table#source tr.filename td:last-child {
+    font-size: 12px;
+}
+table#source tr.filename h2 {
+    margin: 0;
+    padding: 0;
+    cursor: pointer;
+}
+table#source tr.code h1,
+table#source tr.code h2,
+table#source tr.code h3 {
+    margin-top: 30px;
+    font-family: "Lucida Grande", "Helvetica Nueue", Arial, sans-serif;
+    font-size: 18px;
+}
+table#source tr.code h2 {
+    font-size: 16px;
+}
+table#source tr.code h3 {
+    font-size: 14px;
+}
+table#source tr.code ul {
+    margin: 15px 0 15px 35px;
+    padding: 0;
+}
+table#source tr.code ul li {
+    margin: 0;
+    padding: 1px 0;
+}
+table#source tr.code ul li p {
+    margin: 0;
+    padding: 0;
+}
+table#source tr.code td:first-child pre {
+    padding: 20px;
+}
+#ribbon {
+    position: fixed;
+    top: 0;
+    right: 0;
+}
+code .string { color: #219161; }
+code .regexp { color: #219161; }
+code .keyword { color: #954121; }
+code .number { color: #19469D; }
+code .comment { color: #bbb; }
+code .this { color: #19469D; }</style>
+		<script>
+			$(function(){
+				$('tr.code').hide();
+				$('tr.filename').toggle(function(){
+					$(this).nextUntil('.filename').fadeIn();
+				}, function(){
+					$(this).nextUntil('.filename').fadeOut();
+				});
+			});
+		</script>
+	</head>
+	<body>
+<table id="source"><tbody><tr><td><h1>Audiolet Core</h1><p>Core Audiolet classes</p></td><td></td></tr><tr class="filename"><td><h2 id="../trunk/src/core/AbstractAudioletDevice.js"><a href="#">AbstractAudioletDevice</a></h2></td><td>../trunk/src/core/AbstractAudioletDevice.js</td></tr><tr class="code">
+<td class="docs">
+<p>An abstract base class for audio output devices</p>
+
+<ul><li><p><strong>extends</strong>: <em>AudioletNode</em></p></li></ul>
+</td>
+<td class="code">
+<pre><code><span class="keyword">var</span> <span class="class">AbstractAudioletDevice</span> = <span class="keyword">new</span> <span class="class">Class</span>({
+    <span class="class">Extends</span>: <span class="class">AudioletNode</span>,</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>Constructor</p>
+
+<h2></h2>
+
+<ul><li><p><strong>param</strong>: <em>Object</em>  audiolet The audiolet object</p><p> </p></li></ul>
+</td>
+<td class="code">
+<pre><code><span class="variable">initialize</span>: <span class="keyword">function</span>(<span class="variable">audiolet</span>) {
+        <span class="class">AudioletNode</span>.<span class="variable">prototype</span>.<span class="variable">initialize</span>.<span class="variable">apply</span>(<span class="this">this</span>, [<span class="variable">audiolet</span>, <span class="number integer">1</span>, <span class="number integer">0</span>]);
+        <span class="this">this</span>.<span class="variable">audiolet</span> = <span class="variable">audiolet</span>;
+        <span class="this">this</span>.<span class="variable">buffer</span> = <span class="keyword">null</span>;
+    },</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>Default generate function.  Makes the input buffer available as a
+member.</p>
+
+<h2></h2>
+
+<ul><li><p><strong>param</strong>: <em>Array</em>  inputBuffers An array containing the input buffer</p></li><li><p><strong>param</strong>: <em>Array</em>  outputBuffers An empty array</p><p> </p></li></ul>
+</td>
+<td class="code">
+<pre><code><span class="variable">generate</span>: <span class="keyword">function</span>(<span class="variable">inputBuffers</span>, <span class="variable">outputBuffers</span>) {
+        <span class="this">this</span>.<span class="variable">buffer</span> = <span class="variable">inputBuffers</span>[<span class="number integer">0</span>];
+    },</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>Default playback time function.</p>
+
+<h2></h2>
+
+<ul><li><p><strong>returns</strong>: <em>Number</em>  Zero</p><p> </p></li></ul>
+</td>
+<td class="code">
+<pre><code><span class="variable">getPlaybackTime</span>: <span class="keyword">function</span>() {
+        <span class="keyword">return</span> <span class="number integer">0</span>;
+    },</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>Default write time function.</p>
+
+<h2></h2>
+
+<ul><li><p><strong>returns</strong>: <em>Number</em>  Zero</p><p> </p></li></ul>
+</td>
+<td class="code">
+<pre><code><span class="variable">getWriteTime</span>: <span class="keyword">function</span>() {
+        <span class="keyword">return</span> <span class="number integer">0</span>;
+    },</code></pre>
+</td>
+</tr>
+<tr class="code">
+<td class="docs">
+<p>toString</p>
+
+<h2></h2>
+
+<ul><li><p><strong>returns</strong>: <em>String</em> </p><p> </p></li></ul>
+</td>
+<td class="code">
+<pre><code><span class="variable">toString</span>: <span class="keyword">function</span>() {
+        <span class="keyword">return</span> <span class="string">'Device'</span>;
+    }
+});
+
+</code></pre>
+</td>
+</tr>	</body>
+</html></tbody></table>

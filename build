@@ -1,0 +1,2 @@
+#! /bin/bash
+dox --title 'Audiolet Core' --desc 'Core Audiolet classes' ../trunk/src/core/AbstractAudioletDevice.js > core.html
