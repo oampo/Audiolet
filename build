@@ -1,2 +1,3 @@
 #! /bin/bash
 dox --title 'Audiolet Core' --desc 'Core Audiolet classes' ../trunk/src/core/AbstractAudioletDevice.js > core.html
+dox --title 'Audiolet DSP Nodes' --desc 'AudioletNodes for synthesis and processing of audio' ../trunk/src/dsp/Sine.js > dsp.html
