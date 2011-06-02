@@ -44,6 +44,21 @@ var ConstantSource = new Class({
     }
 });
 
+var EmptySource = new Class({
+    Extends: AudioletNode,
+    initialize: function(audiolet, numberOfOutputs) {
+        AudioletNode.prototype.initialize.apply(this, [audiolet, 0,
+                                                       numberOfOutputs]);
+    },
+
+    generate: function(inputBuffers, outputBuffers) {
+        var numberOfBuffers = outputBuffers.length;
+        for (var i=0; i<numberOfBuffers; i++) {
+            outputBuffers[i].isEmpty = true;
+        }
+    }
+});    
+
 var InputRecorder = new Class({
     Extends: AudioletNode,
     initialize: function(audiolet, numberOfInputs) {
