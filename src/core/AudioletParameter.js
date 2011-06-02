@@ -12,14 +12,16 @@ var AudioletParameter = new Class({
 
     isStatic: function() {
         var input = this.input;
-        return (!(input &&
-                  input.connectedFrom.length &&
-                  !(input.buffer.isEmpty)));
+        return (input == null ||
+                input.connectedFrom.length == 0 ||
+                input.buffer.isEmpty);
     },
 
     isDynamic: function() {
         var input = this.input;
-        return (input && input.connectedFrom.length && !(input.buffer.isEmpty));
+        return (input != null &&
+                input.connectedFrom.length > 0 &&
+                !input.buffer.isEmpty);
     },
 
     setValue: function(value) {
