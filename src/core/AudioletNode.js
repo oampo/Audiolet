@@ -1,4 +1,20 @@
+/**
+ * The basic building block of Audiolet applications.  Nodes are connected
+ * together to create a processing graph which governs the flow of audio data.
+ * AudioletNodes can contain any number of inputs and outputs which send and 
+ * receive one or more channels of audio data.  Audio data is created and
+ * processed using the generate function, which is called whenever new data is
+ * needed.
+ */
 var AudioletNode = new Class({
+    /**
+     * Constructor
+     *
+     * @param {Audiolet} audiolet The audiolet object
+     * @param {Number} numberOfInputs
+     * @param {Number} numberOfOutputs
+     * @param {Function} [generate] A replacement for the generate function
+     */
     initialize: function(audiolet, numberOfInputs, numberOfOutputs, generate) {
         this.audiolet = audiolet;
         this.numberOfInputs = numberOfInputs;
@@ -23,6 +39,13 @@ var AudioletNode = new Class({
         this.timestamp = null;
     },
 
+    /**
+     * Connect the node to another node or group
+     *
+     * @param {AudioletNode} node The node to connect to
+     * @param {Number} [output=0] The index of the output to connect from
+     * @param {Number} [input=0] The index of the input to connect to
+     */
     connect: function(node, output, input) {
         if (instanceOf(node, AudioletGroup)) {
             // Connect to the pass-through node rather than the group
@@ -35,6 +58,14 @@ var AudioletNode = new Class({
         inputPin.connect(outputPin);
     },
 
+    /**
+     * Disconnect the node from another node or group
+     *
+     * @param {AudioletNode} node The node to disconnect from
+     * @param {Number} [output=0] The index of the output to disconnect
+     * @param {Number} [input=0] The index of the input to disconnect
+     */
+
     disconnect: function(node, output, input) {
         if (instanceOf(node, AudioletGroup)) {
             node = node.inputs[input || 0];
@@ -46,15 +77,37 @@ var AudioletNode = new Class({
         inputPin.disconnect(outputPin);
         outputPin.disconnect(inputPin);
     },
-
+    
+    /**
+     * Force an output to contain a fixed number of channels
+     *
+     * @param {Number} output The index of the output
+     * @param {Number} numberOfChannels
+     */
     setNumberOfOutputChannels: function(output, numberOfChannels) {
         this.outputs[output].numberOfChannels = numberOfChannels;
     },
 
+    /**
+     * Link an output to an input, forcing the output to always contain the
+     * same number of channels as the input
+     *
+     * @param {Number} output The index of the output
+     * @param {Number} input The index of the input
+     */
     linkNumberOfOutputChannels: function(output, input) {
         this.outputs[output].linkNumberOfChannels(this.inputs[input]);
     },
 
+    /**
+     * Process a buffer of samples, first pulling any necessary data from
+     * higher up the processing graph.  This function should not be called
+     * manually by users, who should instead rely on automatic ticking from
+     * connections to the AudioletDevice.
+     *
+     * @param {Number} length The number of samples to process
+     * @param {Number} timestamp A timestamp for the block of samples
+     */
     tick: function(length, timestamp) {
         if (timestamp != this.timestamp) {
             // Need to set the timestamp before we tick the parents so we
@@ -70,6 +123,13 @@ var AudioletNode = new Class({
         }
     },
 
+    /**
+     * Call the tick function on nodes which are connected to the inputs.  This
+     * function should not be called manually by users.
+     *
+     * @param {Number} length The number of samples to process
+     * @param {Number} timestamp A timestamp for the block of samples
+     */
     tickParents: function(length, timestamp) {
         var numberOfInputs = this.numberOfInputs;
         for (var i = 0; i < numberOfInputs; i++) {
@@ -84,7 +144,13 @@ var AudioletNode = new Class({
         }
     },
 
-    // Overwrite me!
+    /**
+     * Process a block of samples, reading from the input buffers and putting
+     * new values into the output buffers.  Override me!
+     *
+     * @param {AudioletBuffer[]} inputBuffers Samples received from the inputs
+     * @param {AudioletBuffer[]} outputBuffers Samples to be sent to the outputs
+     */
     generate: function(inputBuffers, outputBuffers) {
         // Sane default - pass along any empty flags
         var numberOfInputs = inputBuffers.length;
@@ -96,6 +162,13 @@ var AudioletNode = new Class({
         }
     },
 
+    /**
+     * Create the input buffers by grabbing data from the outputs of connected
+     * nodes and summing it.  If no nodes are connected to an input, then
+     * give a one channel empty buffer.
+     *
+     * @param {Number} length The number of samples for the resulting buffers
+     */
     createInputBuffers: function(length) {
         var inputBuffers = [];
         var numberOfInputs = this.numberOfInputs;
@@ -151,6 +224,11 @@ var AudioletNode = new Class({
         return inputBuffers;
     },
 
+    /**
+     * Create output buffers of the correct length
+     *
+     * @param {Number} length The number of samples for the resulting buffers
+     */
     createOutputBuffers: function(length) {
         // Create the output buffers
         var outputBuffers = [];
@@ -164,6 +242,10 @@ var AudioletNode = new Class({
         return (outputBuffers);
     },
 
+    /**
+     * Remove the node completely from the processing graph, disconnecting all
+     * of its inputs and outputs
+     */
     remove: function() {
         // Disconnect inputs
         var numberOfInputs = this.inputs.length;
