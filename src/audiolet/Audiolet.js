@@ -192,29 +192,62 @@ var AudioletNode = new Class({
 });
 
 
-/**
+/*!
  * @depends AudioletNode.js
+ */
+
+/**
+ * An abstract base class for audio output devices
+ *
+ * @extends AudioletNode
  */
 var AbstractAudioletDevice = new Class({
     Extends: AudioletNode,
+    /**
+     * Constructor
+     *
+     * @param {Object} audiolet The audiolet object
+     */
     initialize: function(audiolet) {
         AudioletNode.prototype.initialize.apply(this, [audiolet, 1, 0]);
         this.audiolet = audiolet;
         this.buffer = null;
     },
 
+    /**
+     * Default generate function.  Makes the input buffer available as a
+     * member.
+     *
+     * @param {Array} inputBuffers An array containing the input buffer
+     * @param {Array} outputBuffers An empty array
+     */
     generate: function(inputBuffers, outputBuffers) {
         this.buffer = inputBuffers[0];
     },
 
+    /**
+     * Default playback time function.
+     *
+     * @returns {Number} Zero
+     */
     getPlaybackTime: function() {
         return 0;
     },
 
+    /**
+     * Default write time function.
+     *
+     * @returns {Number} Zero
+     */
     getWriteTime: function() {
         return 0;
     },
 
+    /**
+     * toString
+     *
+     * @returns {String}
+     */
     toString: function() {
         return 'Device';
     }
@@ -813,14 +846,16 @@ var AudioletParameter = new Class({
 
     isStatic: function() {
         var input = this.input;
-        return (!(input &&
-                  input.connectedFrom.length &&
-                  !(input.buffer.isEmpty)));
+        return (input == null ||
+                input.connectedFrom.length == 0 ||
+                input.buffer.isEmpty);
     },
 
     isDynamic: function() {
         var input = this.input;
-        return (input && input.connectedFrom.length && !(input.buffer.isEmpty));
+        return (input != null &&
+                input.connectedFrom.length > 0 &&
+                !input.buffer.isEmpty);
     },
 
     setValue: function(value) {
@@ -2240,22 +2275,54 @@ var TableLookupOscillator = new Class({
 });
 
 
-/**
+/*!
  * @depends TableLookupOscillator.js
+ */
+
+/**
+ * Sine wave oscillator using a lookup table
+ *
+ * **Inputs**
+ *
+ * - Frequency
+ *
+ * **Outputs**
+ *
+ * - Sine wave
+ *
+ * **Parameters**
+ *
+ * - frequency The frequency of the oscillator.  Linked to input 0.
+ *
+ * @extends TableLookupOscillator
  */
 var Sine = new Class({
     Extends: TableLookupOscillator,
+    /**
+     * Constructor
+     *
+     * @param {Object} audiolet The audiolet object
+     * @param {Number} [frequency=440] Initial frequency
+     */
     initialize: function(audiolet, frequency) {
         TableLookupOscillator.prototype.initialize.apply(this, [audiolet,
                                                                 Sine.TABLE,
                                                                 frequency]);
     },
 
+    /**
+    * toString
+    *
+    * @return {String}
+    */
     toString: function() {
         return 'Sine';
     }
 });
 
+/**
+ * Sine table
+ */
 Sine.TABLE = [];
 for (var i = 0; i < 8192; i++) {
     Sine.TABLE.push(Math.sin(i * 2 * Math.PI / 8192));
