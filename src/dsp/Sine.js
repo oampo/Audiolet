@@ -24,7 +24,7 @@ var Sine = new Class({
     /**
      * Constructor
      *
-     * @param {Object} audiolet The audiolet object
+     * @param {Audiolet} audiolet The audiolet object
      * @param {Number} [frequency=440] Initial frequency
      */
     initialize: function(audiolet, frequency) {

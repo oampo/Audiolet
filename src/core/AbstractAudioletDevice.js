@@ -12,7 +12,7 @@ var AbstractAudioletDevice = new Class({
     /**
      * Constructor
      *
-     * @param {Object} audiolet The audiolet object
+     * @param {Audiolet} audiolet The audiolet object
      */
     initialize: function(audiolet) {
         AudioletNode.prototype.initialize.apply(this, [audiolet, 1, 0]);
@@ -24,8 +24,8 @@ var AbstractAudioletDevice = new Class({
      * Default generate function.  Makes the input buffer available as a
      * member.
      *
-     * @param {Array} inputBuffers An array containing the input buffer
-     * @param {Array} outputBuffers An empty array
+     * @param {AudioletBuffer[]} inputBuffers An array containing the input buffer
+     * @param {AudioletBuffer[]} outputBuffers An empty array
      */
     generate: function(inputBuffers, outputBuffers) {
         this.buffer = inputBuffers[0];
