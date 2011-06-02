@@ -42,7 +42,7 @@ var AudioletNode = new Class({
     /**
      * Connect the node to another node or group
      *
-     * @param {AudioletNode} node The node to connect to
+     * @param {AudioletNode|AudioletGroup} node The node to connect to
      * @param {Number} [output=0] The index of the output to connect from
      * @param {Number} [input=0] The index of the input to connect to
      */
@@ -61,7 +61,7 @@ var AudioletNode = new Class({
     /**
      * Disconnect the node from another node or group
      *
-     * @param {AudioletNode} node The node to disconnect from
+     * @param {AudioletNode|AudioletGroup} node The node to disconnect from
      * @param {Number} [output=0] The index of the output to disconnect
      * @param {Number} [input=0] The index of the input to disconnect
      */
