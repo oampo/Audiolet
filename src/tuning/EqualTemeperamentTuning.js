@@ -1,13 +1,11 @@
 /**
  * @depends Tuning.js
  */
-var EqualTemperamentTuning = new Class({
-    Extends: Tuning,
-    initialize: function(pitchesPerOctave) {
-        var semitones = [];
-        for (var i=0; i<pitchesPerOctave; i++) {
-            semitones.push(i);
-        }
-        Tuning.prototype.initialize.apply(this, [semitones, 2]);
-    }
-});
+var EqualTemperamentTuning = function(pitchesPerOctave) {
+  var semitones = [];
+  for (var i=0; i<pitchesPerOctave; i++) {
+    semitones.push(i);
+  }
+  EqualTemperamentTuning.superclass.call(this, semitones, 2);
+}
+extend(EqualTemperamentTuning, Tuning);

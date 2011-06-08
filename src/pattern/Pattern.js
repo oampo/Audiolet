@@ -1,21 +1,19 @@
-var Pattern = new Class({
-    initialize: function() {
-    },
+var Pattern = function() {
+}
 
-    next: function() {
-        return null;
-    },
+Pattern.prototype.next = function() {
+  return null;
+}
 
-    valueOf: function(item) {
-        if (instanceOf(item, Pattern)) {
-           return (item.next());
-        }
-        else {
-            return (item);
-        }
-    },
+Pattern.prototype.valueOf = function(item) {
+  if (item instanceof Pattern) {
+    return (item.next());
+  }
+  else {
+    return (item);
+  }
+}
 
-    reset: function() {
-    }
-});
+Pattern.prototype.reset = function() {
+}
 

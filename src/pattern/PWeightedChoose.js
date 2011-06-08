@@ -2,14 +2,12 @@
  * @depends Pattern.js
  */
 
-var PWeightedChoose = new Class({
-    Extends: Pattern,
-    initialize: function() {
-        Pattern.prototype.initialize(this);
-    },
+var PWeightedChoose = function() {
+  PWeightedChoose.superclass.call(this); 
+}
 
-    next: function() {
-    }
-});
+PWeightedChoose.prototype.next = function() {
+}
+extend(PWeightedChoose, Pattern);
 
 Pwrand = PWeightedChoose;

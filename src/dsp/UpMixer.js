@@ -2,35 +2,33 @@
  * @depends ../core/AudioletNode.js
  */
 
-var UpMixer = new Class({
-    Extends: AudioletNode,
-    initialize: function(audiolet, outputChannels) {
-        AudioletNode.prototype.initialize.apply(this, [audiolet, 1, 1]);
-        this.outputChannels = outputChannels;
-        this.outputs[0].numberOfChannels = outputChannels;
-    },
+var UpMixer = function(audiolet, outputChannels) {
+  UpMixer.superclass.call(this, audiolet, 1, 1); 
+  this.outputChannels = outputChannels;
+  this.outputs[0].numberOfChannels = outputChannels;
+}
+extend(UpMixer, AudioletNode);
 
-    generate: function(inputBuffers, outputBuffers) {
-        var inputBuffer = inputBuffers[0];
-        var outputBuffer = outputBuffers[0];
+UpMixer.prototype.generate = function(inputBuffers, outputBuffers) {
+  var inputBuffer = inputBuffers[0];
+  var outputBuffer = outputBuffers[0];
 
-        if (inputBuffer.isEmpty) {
-            outputBuffer.isEmpty = true;
-            return;
-        }
+  if (inputBuffer.isEmpty) {
+    outputBuffer.isEmpty = true;
+    return;
+  }
 
-        var outputChannels = this.outputChannels;
+  var outputChannels = this.outputChannels;
 
-        var numberOfChannels = inputBuffer.numberOfChannels;
-        for (var i = 0; i < outputChannels; i++) {
-            var inputChannel = inputBuffer.getChannelData(i % numberOfChannels);
-            var outputChannel = outputBuffer.getChannelData(i);
-            outputChannel.set(inputChannel);
-        }
-    },
+  var numberOfChannels = inputBuffer.numberOfChannels;
+  for (var i = 0; i < outputChannels; i++) {
+    var inputChannel = inputBuffer.getChannelData(i % numberOfChannels);
+    var outputChannel = outputBuffer.getChannelData(i);
+    outputChannel.set(inputChannel);
+  }
+}
 
-    toString: function() {
-        return 'UpMixer';
-    }
-});
+UpMixer.prototype.toString = function() {
+  return 'UpMixer';
+}
 

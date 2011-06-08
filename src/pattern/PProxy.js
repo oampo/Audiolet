@@ -2,25 +2,23 @@
  * @depends Pattern.js
  */
 
-var PProxy = new Class({
-    Extends: Pattern,
-    initialize: function(pattern) {
-        Pattern.prototype.initialize(this);
-        if (pattern) {
-            this.pattern = pattern;
-        }
-    },
+var PProxy = function(pattern) {
+  PProxy.superclass.call(this); 
+  if (pattern) {
+    this.pattern = pattern;
+  }
+}
+extend(PProxy, Pattern);
 
-    next: function() {
-        var returnValue;
-        if (this.pattern) {
-            var returnValue = this.pattern.next();
-        }
-        else {
-            returnValue = null;
-        }
-        return returnValue;
-    }
-});
+PProxy.prototype.next = function() {
+  var returnValue;
+  if (this.pattern) {
+    var returnValue = this.pattern.next();
+  }
+  else {
+    returnValue = null;
+  }
+  return returnValue;
+}
 var Pp = PProxy;
 
