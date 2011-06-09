@@ -1,72 +1,69 @@
-window.addEvent("domready", function() {
-    var Synth = new Class({
-        Extends: AudioletGroup,
-        initialize: function(audiolet, frequency) {
-            AudioletGroup.prototype.initialize.apply(this, [audiolet, 0, 1]);
-            // Basic wave
-            this.saw = new Saw(audiolet, frequency);
-            
-            // Gain envelope
-            this.gain = new Gain(audiolet);
-            this.env = new PercussiveEnvelope(audiolet, 1, 0.1, 0.1,
-                function() {
-                    this.audiolet.scheduler.addRelative(0,
-                                                        this.remove.bind(this));
-                }.bind(this)
-            );
+window.onload = function() {
+  var Synth = function(audiolet, frequency) {
+    Synth.superclass.call(this, audiolet, 0, 1);
+    // Basic wave
+    this.saw = new Saw(audiolet, frequency);
 
-            // Main signal path
-            this.saw.connect(this.gain);
-            this.gain.connect(this.outputs[0]);
+    // Gain envelope
+    this.gain = new Gain(audiolet);
+    this.env = new PercussiveEnvelope(audiolet, 1, 0.1, 0.1,
+        function() {
+          this.audiolet.scheduler.addRelative(0,
+            this.remove.bind(this));
+        }.bind(this)
+        );
 
-            // Envelope
-            this.env.connect(this.gain, 0, 1);
-        }
-    });
+    // Main signal path
+    this.saw.connect(this.gain);
+    this.gain.connect(this.outputs[0]);
 
-    var SchedulerApp = new Class({
-        initialize: function() {
-            this.audiolet = new Audiolet();
-            
-            // Play one note on beat 0
-            this.audiolet.scheduler.addAbsolute(0, function() {
-                this.playNote(200);
-            }.bind(this));
+    // Envelope
+    this.env.connect(this.gain, 0, 1);
+  }
+  extend(Synth, AudioletGroup);
 
-            // Go to play a lower note on beat 1, but cancel it!
-            var event = this.audiolet.scheduler.addAbsolute(1, function() {
-                this.playNote(100);
-            }.bind(this));
+  var SchedulerApp = function() {
+    this.audiolet = new Audiolet();
 
-            this.audiolet.scheduler.remove(event);
+    // Play one note on beat 0
+    this.audiolet.scheduler.addAbsolute(0, function() {
+      this.playNote(200);
+    }.bind(this));
 
-            // Play two notes one after another on beats 2 and 3
-            this.audiolet.scheduler.addAbsolute(2, function() {
-                // First note
-                this.playNote(300);
-                // Schedule second note for one beat later
-                this.audiolet.scheduler.addRelative(1, function() {
-                    this.playNote(400);
-                }.bind(this));
-            }.bind(this));
+    // Go to play a lower note on beat 1, but cancel it!
+    var event = this.audiolet.scheduler.addAbsolute(1, function() {
+      this.playNote(100);
+    }.bind(this));
 
-            // On beat 4 play a pattern of notes twice through as eighth notes
-            this.audiolet.scheduler.addAbsolute(4, function() {
-                var frequencyPattern = new PSequence([200, 300, 400, 500], 2);
-                this.audiolet.scheduler.play([frequencyPattern], 0.5,
-                    function(frequency) {
-                        this.playNote(frequency);
-                    }.bind(this)
-                );
-            }.bind(this));
-        },
+    this.audiolet.scheduler.remove(event);
 
-        playNote: function(frequency) {
-            var synth = new Synth(this.audiolet, frequency);
-            synth.connect(this.audiolet.output);
-        }
-    });
+    // Play two notes one after another on beats 2 and 3
+    this.audiolet.scheduler.addAbsolute(2, function() {
+      // First note
+      this.playNote(300);
+      // Schedule second note for one beat later
+      this.audiolet.scheduler.addRelative(1, function() {
+        this.playNote(400);
+      }.bind(this));
+    }.bind(this));
 
-    var app = new SchedulerApp();
-});
+    // On beat 4 play a pattern of notes twice through as eighth notes
+    this.audiolet.scheduler.addAbsolute(4, function() {
+      var frequencyPattern = new PSequence([200, 300, 400, 500], 2);
+      this.audiolet.scheduler.play([frequencyPattern], 0.5,
+        function(frequency) {
+          this.playNote(frequency);
+        }.bind(this)
+        );
+    }.bind(this));
+  }
+
+  SchedulerApp.prototype.playNote = function(frequency) {
+    var synth = new Synth(this.audiolet, frequency);
+    synth.connect(this.audiolet.output);
+  }
+
+  var app = new SchedulerApp();
+
+}
 
