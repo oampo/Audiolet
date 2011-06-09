@@ -1,9 +1,36 @@
-/**
+/*!
  * @depends ../core/AudioletNode.js
  */
 
+/**
+ * Amplitude envelope follower
+ *
+ * **Inputs**
+ *
+ * - Audio
+ * - Attack time
+ * - Release time
+ *
+ * **Outputs**
+ *
+ * - Amplitude envelope
+ *
+ * **Parameters**
+ *
+ * - attack The attack time of the envelope follower.  Linked to input 1.
+ * - release The release time of the envelope follower.  Linked to input 2.
+ *
+ * @extends AudioletNode
+ */
 var Amplitude = new Class({
     Extends: AudioletNode,
+    /**
+     * Constructor
+     *
+     * @param {Audiolet} audiolet The audiolet object
+     * @param {Number} [attack=0.01] The initial attack time in seconds
+     * @param {Number} [release=0.01] The initial release time in seconds
+     */
     initialize: function(audiolet, attack, release) {
         AudioletNode.prototype.initialize.apply(this, [audiolet, 3, 1]);
         this.linkNumberOfOutputChannels(0, 0);
@@ -18,6 +45,12 @@ var Amplitude = new Class({
         this.release = new AudioletParameter(this, 2, release || 0.01);
     },
 
+    /**
+     * Process a block of samples
+     *
+     * @param {AudioletBuffer[]} inputBuffers Samples received from the inputs
+     * @param {AudioletBuffer[]} outputBuffers Samples to be sent to the outputs
+     */
     generate: function(inputBuffers, outputBuffers) {
         var inputBuffer = inputBuffers[0];
         var outputBuffer = outputBuffers[0];
@@ -80,6 +113,11 @@ var Amplitude = new Class({
         }
     },
 
+    /**
+     * toString
+     *
+     * @return {String}
+     */
     toString: function() {
         return ('Amplitude');
     }
