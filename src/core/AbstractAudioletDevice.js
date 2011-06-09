@@ -8,14 +8,14 @@
  * @extends AudioletNode
  */
 var AbstractAudioletDevice = function(audiolet){
-  /**
-   * Constructor
-   *
-   * @param {Audiolet} audiolet The audiolet object
-   */
-  AbstractAudioletDevice.superclass.call(this, audiolet, 1 ,0);
-  this.audiolet = audiolet;
-  this.buffer = null;
+    /**
+     * Constructor
+     *
+     * @param {Audiolet} audiolet The audiolet object
+     */
+    AbstractAudioletDevice.superclass.call(this, audiolet, 1 ,0);
+    this.audiolet = audiolet;
+    this.buffer = null;
 }
 extend(AbstractAudioletDevice, AudioletNode);
 
@@ -27,7 +27,7 @@ extend(AbstractAudioletDevice, AudioletNode);
  * @param {AudioletBuffer[]} outputBuffers An empty array
  */
 AbstractAudioletDevice.prototype.generate = function(inputBuffers, outputBuffers) {
-  this.buffer = inputBuffers[0];
+    this.buffer = inputBuffers[0];
 }
 
 /**
@@ -36,7 +36,7 @@ AbstractAudioletDevice.prototype.generate = function(inputBuffers, outputBuffers
  * @returns {Number} Zero
  */
 AbstractAudioletDevice.prototype.getPlaybackTime = function() {
-  return 0;
+    return 0;
 }
 
 /**
@@ -45,7 +45,7 @@ AbstractAudioletDevice.prototype.getPlaybackTime = function() {
  * @returns {Number} Zero
  */
 AbstractAudioletDevice.prototype.getWriteTime = function() {
-  return 0;
+    return 0;
 }
 
 /**
@@ -54,5 +54,5 @@ AbstractAudioletDevice.prototype.getWriteTime = function() {
  * @returns {String}
  */
 AbstractAudioletDevice.prototype.toString = function() {
-  return 'Device';
+    return 'Device';
 }
