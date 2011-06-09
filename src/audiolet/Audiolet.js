@@ -433,6 +433,12 @@ AudioDataAPIDevice.prototype.toString = function() {
     return 'Audio Data API Device';
 }
 
+var Audiolet = function(sampleRate, numberOfChannels, bufferSize) {
+    this.output = new AudioletDestination(this, sampleRate, 
+                                          numberOfChannels, bufferSize);
+}
+
+
 var AudioletBuffer = function(numberOfChannels, length) {
     this.numberOfChannels = numberOfChannels;
     this.length = length;
@@ -785,12 +791,6 @@ AudioletInput.prototype.isConnected = function() {
 
 AudioletInput.prototype.toString = function() {
     return this.node.toString() + 'Input #' + this.index;
-}
-
-
-var Audiolet = function(sampleRate, numberOfChannels, bufferSize) {
-    this.output = new AudioletDestination(this, sampleRate, 
-                                          numberOfChannels, bufferSize);
 }
 
 
@@ -1269,11 +1269,12 @@ Scheduler.prototype.play = function(patterns, durationPattern, callback) {
 }
 
 Scheduler.prototype.remove = function(event) {
-    this.queue.heap.erase(event); 
-    // Recreate queue with event removed
-    this.queue = new PriorityQueue(this.queue.heap, function(a, b) {
-        return (a.time < b.time);
-    });
+  var idx = this.queue.heap.indexOf(event);
+  if(idx != -1) this.queue.heap.splice(idx, 1); 
+  // Recreate queue with event removed
+  this.queue = new PriorityQueue(this.queue.heap, function(a, b) {
+    return (a.time < b.time);
+  });
 }
 
 Scheduler.prototype.stop = function(event) {
