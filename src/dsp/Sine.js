@@ -27,7 +27,7 @@
  * @param {Number} [frequency=440] Initial frequency
  */
 var Sine = function(audiolet, frequency) {
-  Sine.superclass.call(this, audiolet, Sine.TABLE, frequency); 
+    Sine.superclass.call(this, audiolet, Sine.TABLE, frequency); 
 }
 extend(Sine, TableLookupOscillator);
 
@@ -37,7 +37,7 @@ extend(Sine, TableLookupOscillator);
  * @return {String}
  */
 Sine.prototype.toString = function() {
-  return 'Sine';
+    return 'Sine';
 }
 
 /**
@@ -45,6 +45,6 @@ Sine.prototype.toString = function() {
  */
 Sine.TABLE = [];
 for (var i = 0; i < 8192; i++) {
-  Sine.TABLE.push(Math.sin(i * 2 * Math.PI / 8192));
+    Sine.TABLE.push(Math.sin(i * 2 * Math.PI / 8192));
 }
 
