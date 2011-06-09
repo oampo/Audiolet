@@ -62,7 +62,8 @@ Scheduler.prototype.play = function(patterns, durationPattern, callback) {
 }
 
 Scheduler.prototype.remove = function(event) {
-  this.queue.heap.erase(event); 
+  var idx = this.queue.heap.indexOf(event);
+  if(idx != -1) this.queue.heap.splice(idx, 1); 
   // Recreate queue with event removed
   this.queue = new PriorityQueue(this.queue.heap, function(a, b) {
     return (a.time < b.time);
