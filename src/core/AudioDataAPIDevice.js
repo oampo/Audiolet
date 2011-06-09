@@ -26,7 +26,7 @@ var AudioDataAPIDevice = function(audiolet, sampleRate, numberOfChannels, buffer
     this.output.mozSetup(this.numberOfChannels, this.sampleRate);
 
     this.started = new Date().valueOf();
-    this.interval = this.tick.periodical(10, this);
+    this.interval = setInterval(this.tick.bind(this), 10);
 }
 extend(AudioDataAPIDevice, AbstractAudioletDevice);
 

@@ -11,7 +11,7 @@ var DummyDevice = function(audiolet, sampleRate, numberOfChannels, bufferSize) {
 
     this.writePosition = 0;
 
-    this.tick.periodical(1000 * this.bufferSize / this.sampleRate, this);
+    setInterval(this.tick.bind(this), 1000 * this.bufferSize / this.sampleRate);
 }
 extend(DummyDevice, AbstractAudioletDevice);
 
