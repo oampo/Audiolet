@@ -1,5 +1,4 @@
 load('../../../../audiotest.js/trunk/audiotest.js');
-load('../mootools-core-1.3.1.js');
 load('../../src/audiofile/audiofile.js');
 load('../../src/audiolet/Audiolet.js');
 
