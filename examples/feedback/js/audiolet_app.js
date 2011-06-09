@@ -1,24 +1,21 @@
-window.addEvent("domready", function() {
+window.onload = new function() {
     var audiolet = new Audiolet();
 
-    var Synth = new Class({
-        Extends: AudioletGroup,
-        initialize: function(audiolet) {
-            AudioletGroup.prototype.initialize.apply(this, [audiolet, 0, 1]);
-            this.sin = new Sine(audiolet);
-            this.gain = new Gain(audiolet);
-            this.env = new PercussiveEnvelope(audiolet, 0, 0.1, 0.5);
-            this.delay = new Delay(audiolet, 0.2, 0.2);
-            this.feedbackScaler = new Gain(audiolet, 0.5);
+    var Synth = function(audiolet) {
+        Synth.superclass.call(this, audiolet, 0, 1);
+        this.sin = new Sine(audiolet);
+        this.gain = new Gain(audiolet);
+        this.env = new PercussiveEnvelope(audiolet, 0, 0.1, 0.5);
+        this.delay = new Delay(audiolet, 0.2, 0.2);
+        this.feedbackScaler = new Gain(audiolet, 0.5);
 
-            this.sin.connect(this.gain);
-            this.env.connect(this.gain, 0, 1);
-            this.gain.connect(this.delay);
-            this.delay.connect(this.outputs[0]);
-            this.delay.connect(this.feedbackScaler);
-            this.feedbackScaler.connect(this.delay);
-        }
-    });
+        this.sin.connect(this.gain);
+        this.env.connect(this.gain, 0, 1);
+        this.gain.connect(this.delay);
+        this.delay.connect(this.outputs[0]);
+        this.delay.connect(this.feedbackScaler);
+        this.feedbackScaler.connect(this.delay);
+    }
 
     var synth = new Synth(audiolet);
     synth.connect(audiolet.output);
@@ -31,6 +28,4 @@ window.addEvent("domready", function() {
             this.sin.frequency.setValue(frequency);
         }.bind(synth)
     );
-});
-
-
+}
