@@ -175,7 +175,7 @@ Scheduler.prototype.processEvent = function(event) {
                 return;
             }
         }
-        event.callback.call(null, args);
+        event.callback.apply(null, args);
 
         var duration;
         if (durationPattern instanceof Pattern) {
