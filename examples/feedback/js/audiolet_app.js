@@ -16,6 +16,7 @@ window.onload = new function() {
         this.delay.connect(this.feedbackScaler);
         this.feedbackScaler.connect(this.delay);
     }
+    extend(Synth, AudioletGroup);
 
     var synth = new Synth(audiolet);
     synth.connect(audiolet.output);
