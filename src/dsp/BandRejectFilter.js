@@ -5,7 +5,7 @@
 // Maths from http://www.musicdsp.org/files/Audio-EQ-Cookbook.txt
 var BandRejectFilter = function(audiolet, frequency) {
     BiquadFilter.call(this, audiolet, frequency);
-}
+};
 extend(BandRejectFilter, BiquadFilter);
 
 BandRejectFilter.prototype.calculateCoefficients = function(frequency) {
@@ -21,8 +21,8 @@ BandRejectFilter.prototype.calculateCoefficients = function(frequency) {
     this.a0 = 1 + alpha;
     this.a1 = -2 * cosw0;
     this.a2 = 1 - alpha;
-}
+};
 
 BandRejectFilter.prototype.toString = function() {
     return 'Band Reject Filter';
-}
+};

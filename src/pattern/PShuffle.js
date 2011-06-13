@@ -3,7 +3,7 @@
  */
 
 var PShuffle = function(list, repeats) {
-    Pattern.call(this); 
+    Pattern.call(this);
     this.list = [];
     // Shuffle values into new list
     while (list.length) {
@@ -13,7 +13,7 @@ var PShuffle = function(list, repeats) {
     }
     this.repeats = repeats;
     this.position = 0;
-}
+};
 extend(PShuffle, Pattern);
 PShuffle.prototype.next = function() {
     var returnValue;
@@ -39,6 +39,6 @@ PShuffle.prototype.next = function() {
         returnValue = null;
     }
     return (returnValue);
-}
+};
 var Pshuffle = PShuffle;
 

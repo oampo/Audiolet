@@ -27,7 +27,7 @@ var AudioDataAPIDevice = function(audiolet, sampleRate, numberOfChannels,
 
     this.started = new Date().valueOf();
     this.interval = setInterval(this.tick.bind(this), 10);
-}
+};
 extend(AudioDataAPIDevice, AbstractAudioletDevice);
 
 AudioDataAPIDevice.prototype.tick = function() {
@@ -85,16 +85,16 @@ AudioDataAPIDevice.prototype.tick = function() {
             this.overflow = buffer.subarray(numSamplesWritten);
         }
     }
-}
+};
 
 AudioDataAPIDevice.prototype.getPlaybackTime = function() {
     return this.output.mozCurrentSampleOffset() / this.numberOfChannels;
-}
+};
 
 AudioDataAPIDevice.prototype.getWriteTime = function() {
     return this.writePosition / this.numberOfChannels;
-}
+};
 
 AudioDataAPIDevice.prototype.toString = function() {
     return 'Audio Data API Device';
-}
+};

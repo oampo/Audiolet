@@ -3,9 +3,9 @@
  */
 
 var Reciprocal = function(audiolet, value) {
-    AudioletNode.call(this, audiolet, 1, 1); 
+    AudioletNode.call(this, audiolet, 1, 1);
     this.linkNumberOfOutputChannels(0, 0);
-}
+};
 extend(Reciprocal, AudioletNode);
 
 Reciprocal.prototype.generate = function(inputBuffers, outputBuffers) {
@@ -26,9 +26,9 @@ Reciprocal.prototype.generate = function(inputBuffers, outputBuffers) {
             outputChannel[j] = 1 / inputChannel[j];
         }
     }
-}
+};
 
 Reciprocal.prototype.toString = function() {
     return 'Reciprocal';
-}
+};
 

@@ -14,18 +14,18 @@ var AudioletBuffer = function(numberOfChannels, length) {
 
     this.isEmpty = false;
     this.channelOffset = 0;
-}
+};
 
 AudioletBuffer.prototype.getChannelData = function(channel) {
     return (this.channels[channel]);
-}
+};
 
 AudioletBuffer.prototype.set = function(buffer) {
     var numberOfChannels = buffer.numberOfChannels;
     for (var i = 0; i < numberOfChannels; i++) {
         this.channels[i].set(buffer.getChannelData(i));
     }
-}
+};
 
 AudioletBuffer.prototype.setSection = function(buffer, length, inputOffset,
                                                outputOffset) {
@@ -54,7 +54,7 @@ AudioletBuffer.prototype.setSection = function(buffer, length, inputOffset,
          */
         channel1.set(channel2);
     }
-}
+};
 
 AudioletBuffer.prototype.add = function(buffer) {
     var length = this.length;
@@ -66,7 +66,7 @@ AudioletBuffer.prototype.add = function(buffer) {
             channel1[j] += channel2[j];
         }
     }
-}
+};
 
 AudioletBuffer.prototype.addSection = function(buffer, length, inputOffset,
                                                outputOffset) {
@@ -80,7 +80,7 @@ AudioletBuffer.prototype.addSection = function(buffer, length, inputOffset,
             channel1[j + outputOffset] += channel2[j + inputOffset];
         }
     }
-}
+};
 
 AudioletBuffer.prototype.resize = function(numberOfChannels, length, lazy,
                                            offset) {
@@ -92,7 +92,7 @@ AudioletBuffer.prototype.resize = function(numberOfChannels, length, lazy,
     var oldLength = this.length;
     var channelOffset = this.channelOffset + offset;
 
-    for (var i=0; i < numberOfChannels; i++) {
+    for (var i = 0; i < numberOfChannels; i++) {
         // Get the current channels
         var channel = channels[i];
         var unslicedChannel = unslicedChannels[i];
@@ -144,34 +144,34 @@ AudioletBuffer.prototype.resize = function(numberOfChannels, length, lazy,
     this.length = length;
     this.numberOfChannels = numberOfChannels;
     this.channelOffset = channelOffset;
-}
+};
 
 AudioletBuffer.prototype.push = function(buffer) {
     var bufferLength = buffer.length;
     this.resize(this.numberOfChannels, this.length + bufferLength);
     this.setSection(buffer, bufferLength, 0, this.length - bufferLength);
-}
+};
 
 AudioletBuffer.prototype.pop = function(buffer) {
     var bufferLength = buffer.length;
     var offset = this.length - bufferLength;
     buffer.setSection(this, bufferLength, offset, 0);
     this.resize(this.numberOfChannels, offset);
-}
+};
 
 AudioletBuffer.prototype.unshift = function(buffer) {
     var bufferLength = buffer.length;
     this.resize(this.numberOfChannels, this.length + bufferLength, false,
             bufferLength);
     this.setSection(buffer, bufferLength, 0, 0);
-}
+};
 
 AudioletBuffer.prototype.shift = function(buffer) {
     var bufferLength = buffer.length;
     buffer.setSection(this, bufferLength, 0, 0);
     this.resize(this.numberOfChannels, this.length - bufferLength,
             false, bufferLength);
-}
+};
 
 AudioletBuffer.prototype.zero = function() {
     var numberOfChannels = this.numberOfChannels;
@@ -182,7 +182,7 @@ AudioletBuffer.prototype.zero = function() {
             channel[j] = 0;
         }
     }
-}
+};
 
 AudioletBuffer.prototype.combined = function() {
     var channels = this.channels;
@@ -193,7 +193,7 @@ AudioletBuffer.prototype.combined = function() {
         combined.set(channels[i], i * length);
     }
     return combined;
-}
+};
 
 AudioletBuffer.prototype.interleaved = function() {
     var channels = this.channels;
@@ -206,13 +206,13 @@ AudioletBuffer.prototype.interleaved = function() {
         }
     }
     return interleaved;
-}
+};
 
 AudioletBuffer.prototype.copy = function() {
     var buffer = new AudioletBuffer(this.numberOfChannels, this.length);
     buffer.set(this);
     return buffer;
-}
+};
 
 AudioletBuffer.prototype.load = function(path, async, callback) {
     var request = new AudioFileRequest(path, async);
@@ -229,7 +229,7 @@ AudioletBuffer.prototype.load = function(path, async, callback) {
 
     request.onFailure = function() {
         console.error('Could not load', path);
-    }.bind(this)
+    }.bind(this);
 
     request.send();
-}
+};

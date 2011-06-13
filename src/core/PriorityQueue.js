@@ -14,12 +14,12 @@ var PriorityQueue = function(array, compare) {
     else {
         this.heap = [];
     }
-}
+};
 
 PriorityQueue.prototype.push = function(item) {
     this.heap.push(item);
     this.siftDown(0, this.heap.length - 1);
-}
+};
 
 
 PriorityQueue.prototype.pop = function() {
@@ -34,15 +34,15 @@ PriorityQueue.prototype.pop = function() {
         returnItem = lastElement;
     }
     return (returnItem);
-}
+};
 
 PriorityQueue.prototype.peek = function() {
     return (this.heap[0]);
-}
+};
 
 PriorityQueue.prototype.isEmpty = function() {
     return (this.heap.length == 0);
-}
+};
 
 PriorityQueue.prototype.siftDown = function(startPosition, position) {
     var newItem = this.heap[position];
@@ -57,7 +57,7 @@ PriorityQueue.prototype.siftDown = function(startPosition, position) {
         break;
     }
     this.heap[position] = newItem;
-}
+};
 
 PriorityQueue.prototype.siftUp = function(position) {
     var endPosition = this.heap.length;
@@ -77,8 +77,8 @@ PriorityQueue.prototype.siftUp = function(position) {
     }
     this.heap[position] = newItem;
     this.siftDown(startPosition, position);
-}
+};
 
 PriorityQueue.prototype.compare = function(a, b) {
     return (a < b);
-}
+};

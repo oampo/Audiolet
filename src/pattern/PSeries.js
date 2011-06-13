@@ -3,12 +3,12 @@
  */
 
 var PSeries = function(list, repeats, offset) {
-    Pattern.call(this); 
+    Pattern.call(this);
     this.list = list;
     this.repeats = repeats || 1;
     this.position = 0;
     this.offset = offset || 0;
-}
+};
 extend(PSeries, Pattern);
 
 PSeries.prototype.next = function() {
@@ -35,7 +35,7 @@ PSeries.prototype.next = function() {
         returnValue = null;
     }
     return (returnValue);
-}
+};
 
 PSeries.prototype.reset = function() {
     this.position = 0;
@@ -45,6 +45,6 @@ PSeries.prototype.reset = function() {
             item.reset();
         }
     }
-}
+};
 var Pser = PSeries;
 

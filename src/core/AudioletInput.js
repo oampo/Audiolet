@@ -6,11 +6,11 @@ var AudioletInput = function(node, index) {
     this.buffer = new AudioletBuffer(1, 0);
     // Overflow buffer, for feedback loops
     this.overflow = new AudioletBuffer(1, 0);
-}
+};
 
 AudioletInput.prototype.connect = function(output) {
     this.connectedFrom.push(output);
-}
+};
 
 AudioletInput.prototype.disconnect = function(output) {
     var numberOfStreams = this.connectedFrom.length;
@@ -20,13 +20,13 @@ AudioletInput.prototype.disconnect = function(output) {
             break;
         }
     }
-}
+};
 
 AudioletInput.prototype.isConnected = function() {
     return (this.connectedFrom.length > 0);
-}
+};
 
 AudioletInput.prototype.toString = function() {
     return this.node.toString() + 'Input #' + this.index;
-}
+};
 

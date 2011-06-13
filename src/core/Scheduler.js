@@ -21,13 +21,13 @@ var Scheduler = function(audiolet, bpm) {
     this.beatLength = 60 / this.bpm * this.audiolet.device.sampleRate;
 
     this.emptyBuffer = new AudioletBuffer(1, 1);
-}
+};
 extend(Scheduler, AudioletNode);
 
 Scheduler.prototype.setTempo = function(bpm) {
     this.bpm = bpm;
     this.beatLength = 60 / this.bpm * this.audiolet.device.sampleRate;
-}
+};
 
 Scheduler.prototype.addRelative = function(beats, callback) {
     var event = {};
@@ -35,7 +35,7 @@ Scheduler.prototype.addRelative = function(beats, callback) {
     event.time = this.time + beats * this.beatLength;
     this.queue.push(event);
     return event;
-}
+};
 
 Scheduler.prototype.addAbsolute = function(beat, callback) {
     if (beat < this.beat ||
@@ -48,7 +48,7 @@ Scheduler.prototype.addAbsolute = function(beat, callback) {
     event.time = this.lastBeatTime + (beat - this.beat) * this.beatLength;
     this.queue.push(event);
     return event;
-}
+};
 
 Scheduler.prototype.play = function(patterns, durationPattern, callback) {
     var event = {};
@@ -59,7 +59,7 @@ Scheduler.prototype.play = function(patterns, durationPattern, callback) {
     event.time = this.audiolet.device.getWriteTime();
     this.queue.push(event);
     return event;
-}
+};
 
 Scheduler.prototype.remove = function(event) {
     var idx = this.queue.heap.indexOf(event);
@@ -70,11 +70,11 @@ Scheduler.prototype.remove = function(event) {
             return (a.time < b.time);
         });
     }
-}
+};
 
 Scheduler.prototype.stop = function(event) {
     this.remove(event);
-}
+};
 
 Scheduler.prototype.tick = function(length, timestamp) {
     // The time at the beginning of the block
@@ -142,7 +142,7 @@ Scheduler.prototype.tick = function(length, timestamp) {
         var offset = lastEventTime - startTime;
         this.generate(inputBuffers, outputBuffers, offset);
     }
-}
+};
 
 Scheduler.prototype.updateClock = function(time) {
     this.time = time;
@@ -156,7 +156,7 @@ Scheduler.prototype.updateClock = function(time) {
         }
         this.lastBeatTime += this.beatLength;
     }
-}
+};
 
 Scheduler.prototype.processEvent = function(event) {
     var durationPattern = event.durationPattern;
@@ -197,7 +197,7 @@ Scheduler.prototype.processEvent = function(event) {
         // Regular event
         event.callback();
     }
-}
+};
 
 Scheduler.prototype.generate = function(inputBuffers, outputBuffers, offset) {
     var inputBuffer = inputBuffers[0];
@@ -219,8 +219,8 @@ Scheduler.prototype.generate = function(inputBuffers, outputBuffers, offset) {
         var outputChannel = outputBuffer.getChannelData(i);
         outputChannel.set(inputChannel, offset);
     }
-}
+};
 
 Scheduler.prototype.toString = function() {
     return 'Scheduler';
-}
+};

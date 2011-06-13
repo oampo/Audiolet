@@ -5,7 +5,7 @@
 var ParameterNode = function(audiolet, value) {
     AudioletNode.call(this, audiolet, 1, 1);
     this.parameter = new AudioletParameter(this, 0, value);
-}
+};
 extend(ParameterNode, AudioletNode);
 
 ParameterNode.prototype.generate = function(inputBuffers, outputBuffers) {
@@ -30,8 +30,8 @@ ParameterNode.prototype.generate = function(inputBuffers, outputBuffers) {
         }
         outputChannel[i] = parameter;
     }
-}
+};
 
 ParameterNode.prototype.toString = function() {
     return 'Parameter Node';
-}
+};

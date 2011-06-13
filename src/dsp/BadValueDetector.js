@@ -9,14 +9,14 @@ var BadValueDetector = function(audiolet, callback) {
     if (callback) {
         this.callback = callback;
     }
-}
+};
 extend(BadValueDetector, PassThroughNode);
 
 // Override me
 BadValueDetector.prototype.callback = function(value, channel, index) {
-    console.error(value + " detected at channel " + channel + " index "
-                  + index);
-}
+    console.error(value + ' detected at channel ' + channel + ' index ' +
+                  index);
+};
 
 BadValueDetector.prototype.generate = function(inputBuffers, outputBuffers) {
     var inputBuffer = inputBuffers[0];
@@ -41,8 +41,8 @@ BadValueDetector.prototype.generate = function(inputBuffers, outputBuffers) {
             }
         }
     }
-}
+};
 
 BadValueDetector.prototype.toString = function() {
     return 'Bad Value Detector';
-}
+};

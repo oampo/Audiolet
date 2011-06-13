@@ -3,12 +3,12 @@
  */
 
 var PRandom = function(low, high, repeats) {
-    Pattern.call(this); 
+    Pattern.call(this);
     this.low = low;
     this.high = high;
     this.repeats = repeats;
     this.position = 0;
-}
+};
 extend(PRandom, Pattern);
 
 PRandom.prototype.next = function() {
@@ -29,10 +29,10 @@ PRandom.prototype.next = function() {
         returnValue = null;
     }
     return (returnValue);
-}
+};
 
 PRandom.prototype.reset = function() {
     this.position = 0;
-}
+};
 var Pwhite = PRandom;
 

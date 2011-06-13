@@ -14,23 +14,23 @@ var DummyDevice = function(audiolet, sampleRate, numberOfChannels,
 
     setInterval(this.tick.bind(this),
                 1000 * this.bufferSize / this.sampleRate);
-}
+};
 extend(DummyDevice, AbstractAudioletDevice);
 
 DummyDevice.prototype.tick = function() {
     AudioletNode.prototype.tick.call(this, this.bufferSize,
                                      this.writePosition);
     this.writePosition += this.bufferSize;
-}
+};
 
 DummyDevice.prototype.getPlaybackTime = function() {
     return this.writePosition - this.bufferSize;
-}
+};
 
 DummyDevice.prototype.getWriteTime = function() {
     return this.writePosition;
-}
+};
 
 DummyDevice.prototype.toString = function() {
     return 'Dummy Device';
-}
+};

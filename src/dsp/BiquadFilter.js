@@ -23,12 +23,12 @@ var BiquadFilter = function(audiolet, frequency) {
     this.a0 = 0;
     this.a1 = 0;
     this.a2 = 0;
-}
+};
 extend(BiquadFilter, AudioletNode);
 
 // Overwrite me
 BiquadFilter.prototype.calculateCoefficients = function(frequency) {
-}
+};
 
 BiquadFilter.prototype.generate = function(inputBuffers, outputBuffers) {
     var inputBuffer = inputBuffers[0];
@@ -120,8 +120,8 @@ BiquadFilter.prototype.generate = function(inputBuffers, outputBuffers) {
         }
     }
     this.lastFrequency = lastFrequency;
-}
+};
 
 BiquadFilter.prototype.toString = function() {
     return 'Biquad Filter';
-}
+};

@@ -3,11 +3,11 @@
  */
 
 var PProxy = function(pattern) {
-    Pattern.call(this); 
+    Pattern.call(this);
     if (pattern) {
         this.pattern = pattern;
     }
-}
+};
 extend(PProxy, Pattern);
 
 PProxy.prototype.next = function() {
@@ -19,6 +19,6 @@ PProxy.prototype.next = function() {
         returnValue = null;
     }
     return returnValue;
-}
+};
 var Pp = PProxy;
 

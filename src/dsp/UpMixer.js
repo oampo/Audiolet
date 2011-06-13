@@ -3,10 +3,10 @@
  */
 
 var UpMixer = function(audiolet, outputChannels) {
-    AudioletNode.call(this, audiolet, 1, 1); 
+    AudioletNode.call(this, audiolet, 1, 1);
     this.outputChannels = outputChannels;
     this.outputs[0].numberOfChannels = outputChannels;
-}
+};
 extend(UpMixer, AudioletNode);
 
 UpMixer.prototype.generate = function(inputBuffers, outputBuffers) {
@@ -26,9 +26,9 @@ UpMixer.prototype.generate = function(inputBuffers, outputBuffers) {
         var outputChannel = outputBuffer.getChannelData(i);
         outputChannel.set(inputChannel);
     }
-}
+};
 
 UpMixer.prototype.toString = function() {
     return 'UpMixer';
-}
+};
 

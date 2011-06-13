@@ -3,14 +3,14 @@
  */
 
 var Delay = function(audiolet, maximumDelayTime, delayTime) {
-    AudioletNode.call(this, audiolet, 2, 1); 
+    AudioletNode.call(this, audiolet, 2, 1);
     this.linkNumberOfOutputChannels(0, 0);
     this.maximumDelayTime = maximumDelayTime;
     this.delayTime = new AudioletParameter(this, 1, delayTime || 1);
     var bufferSize = maximumDelayTime * this.audiolet.device.sampleRate;
     this.buffers = [];
     this.readWriteIndex = 0;
-}
+};
 extend(Delay, AudioletNode);
 
 Delay.prototype.generate = function(inputBuffers, outputBuffers) {
@@ -72,8 +72,8 @@ Delay.prototype.generate = function(inputBuffers, outputBuffers) {
         }
     }
     this.readWriteIndex = readWriteIndex;
-}
+};
 
 Delay.prototype.toString = function() {
     return 'Delay';
-}
+};

@@ -4,7 +4,7 @@
 
 var PassThroughNode = function(audiolet, numberOfInputs, numberOfOutputs) {
     AudioletNode.call(this, audiolet, numberOfInputs, numberOfOutputs);
-}
+};
 extend(PassThroughNode, AudioletNode);
 
 PassThroughNode.prototype.createOutputBuffers = function(length) {
@@ -25,8 +25,8 @@ PassThroughNode.prototype.createOutputBuffers = function(length) {
         outputBuffers.push(output.buffer);
     }
     return (outputBuffers);
-}
+};
 
 PassThroughNode.prototype.toString = function() {
     return 'Pass Through Node';
-}
+};

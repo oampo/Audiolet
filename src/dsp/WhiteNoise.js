@@ -2,8 +2,8 @@
  * @depends ../core/AudioletNode.js
  */
 var WhiteNoise = function(audiolet) {
-    AudioletNode.call(this, audiolet, 0, 1); 
-}
+    AudioletNode.call(this, audiolet, 0, 1);
+};
 extend(WhiteNoise, AudioletNode);
 
 WhiteNoise.prototype.generate = function(inputBuffers, outputBuffers) {
@@ -15,9 +15,9 @@ WhiteNoise.prototype.generate = function(inputBuffers, outputBuffers) {
     for (var i = 0; i < bufferLength; i++) {
         channel[i] = Math.random() * 2 - 1;
     }
-}
+};
 
 WhiteNoise.prototype.toString = function() {
     return 'White Noise';
-}
+};
 

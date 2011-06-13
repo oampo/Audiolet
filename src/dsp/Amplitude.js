@@ -14,7 +14,7 @@ var Amplitude = function(audiolet, attack, release) {
 
     //        release = Math.pow(0.01, 1 / (release * sampleRate));
     this.release = new AudioletParameter(this, 2, release || 0.01);
-}
+};
 extend(Amplitude, AudioletNode);
 
 Amplitude.prototype.generate = function(inputBuffers, outputBuffers) {
@@ -77,8 +77,8 @@ Amplitude.prototype.generate = function(inputBuffers, outputBuffers) {
         }
         followers[i] = follower;
     }
-}
+};
 
 Amplitude.prototype.toString = function() {
     return ('Amplitude');
-}
+};

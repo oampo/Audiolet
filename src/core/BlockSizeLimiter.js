@@ -6,7 +6,7 @@ var BlockSizeLimiter = function(audiolet, maximumBlockSize) {
     AudioletNode.call(this, audiolet, 1, 1);
     this.maximumBlockSize = maximumBlockSize;
     this.linkNumberOfOutputChannels(0, 0);
-}
+};
 extend(BlockSizeLimiter, AudioletNode);
 
 BlockSizeLimiter.prototype.tick = function(length, timestamp) {
@@ -45,7 +45,7 @@ BlockSizeLimiter.prototype.tick = function(length, timestamp) {
             samplesGenerated += samplesNeeded;
         }
     }
-}
+};
 
 BlockSizeLimiter.prototype.generate = function(inputBuffers, outputBuffers,
                                                offset) {
@@ -58,8 +58,8 @@ BlockSizeLimiter.prototype.generate = function(inputBuffers, outputBuffers,
     }
     outputBuffer.setSection(inputBuffer, inputBuffer.length,
                             0, offset);
-}
+};
 
 BlockSizeLimiter.prototype.toString = function() {
     return 'Block Size Limiter';
-}
+};

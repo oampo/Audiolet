@@ -2,11 +2,11 @@
  * @depends ../core/AudioletNode.js
  */
 var TableLookupOscillator = function(audiolet, table, frequency) {
-    AudioletNode.call(this, audiolet, 1, 1); 
+    AudioletNode.call(this, audiolet, 1, 1);
     this.table = table;
     this.frequency = new AudioletParameter(this, 0, frequency || 440);
     this.phase = 0;
-}
+};
 extend(TableLookupOscillator, AudioletNode);
 
 TableLookupOscillator.prototype.generate = function(inputBuffers,
@@ -42,9 +42,9 @@ TableLookupOscillator.prototype.generate = function(inputBuffers,
         channel[i] = table[Math.floor(phase)];
     }
     this.phase = phase;
-}
+};
 
 TableLookupOscillator.prototype.toString = function() {
     return 'Table Lookup Oscillator';
-}
+};
 

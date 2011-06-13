@@ -3,9 +3,9 @@
  */
 
 var TriggerControl = function(audiolet, trigger) {
-    AudioletNode.call(this, audiolet, 0, 1); 
+    AudioletNode.call(this, audiolet, 0, 1);
     this.trigger = new AudioletParameter(this, null, trigger || 0);
-}
+};
 extend(TriggerControl, AudioletNode);
 
 TriggerControl.prototype.generate = function(inputBuffers, outputBuffers) {
@@ -26,8 +26,8 @@ TriggerControl.prototype.generate = function(inputBuffers, outputBuffers) {
             channel[i] = 0;
         }
     }
-}
+};
 
 TriggerControl.prototype.toString = function() {
     return 'Trigger Control';
-}
+};

@@ -4,7 +4,7 @@
 
 var DampedCombFilter = function(audiolet, maximumDelayTime, delayTime,
                                 decayTime, damping) {
-    AudioletNode.call(this, audiolet, 4, 1); 
+    AudioletNode.call(this, audiolet, 4, 1);
     this.linkNumberOfOutputChannels(0, 0);
     this.maximumDelayTime = maximumDelayTime;
     this.delayTime = new AudioletParameter(this, 1, delayTime || 1);
@@ -14,7 +14,7 @@ var DampedCombFilter = function(audiolet, maximumDelayTime, delayTime,
     this.buffers = [];
     this.readWriteIndex = 0;
     this.filterStore = 0;
-}
+};
 extend(DampedCombFilter, AudioletNode);
 
 DampedCombFilter.prototype.generate = function(inputBuffers, outputBuffers) {
@@ -117,8 +117,8 @@ DampedCombFilter.prototype.generate = function(inputBuffers, outputBuffers) {
     }
     this.readWriteIndex = readWriteIndex;
     this.filterStore = filterStore;
-}
+};
 
 DampedCombFilter.prototype.toString = function() {
     return 'Damped Comb Filter';
-}
+};

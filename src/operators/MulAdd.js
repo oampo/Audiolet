@@ -3,11 +3,11 @@
  */
 
 var MulAdd = function(audiolet, mul, add) {
-    AudioletNode.call(this, audiolet, 3, 1); 
+    AudioletNode.call(this, audiolet, 3, 1);
     this.linkNumberOfOutputChannels(0, 0);
     this.mul = new AudioletParameter(this, 1, mul || 1);
     this.add = new AudioletParameter(this, 2, add || 0);
-}
+};
 extend(MulAdd, AudioletNode);
 
 MulAdd.prototype.generate = function(inputBuffers, outputBuffers) {
@@ -53,9 +53,9 @@ MulAdd.prototype.generate = function(inputBuffers, outputBuffers) {
             outputChannel[j] = inputChannel[j] * mul + add;
         }
     }
-}
+};
 
 MulAdd.prototype.toString = function() {
     return 'Multiplier/Adder';
-}
+};
 

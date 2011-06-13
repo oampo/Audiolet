@@ -3,7 +3,7 @@
  */
 var Envelope = function(audiolet, gate, levels, times, releaseStage,
                         onComplete) {
-    AudioletNode.call(this, audiolet, 1, 1); 
+    AudioletNode.call(this, audiolet, 1, 1);
     this.gate = new AudioletParameter(this, 0, gate || 1);
 
     this.levels = levels;
@@ -18,7 +18,7 @@ var Envelope = function(audiolet, gate, levels, times, releaseStage,
     this.level = 0;
     this.delta = 0;
     this.gateOn = false;
-}
+};
 extend(Envelope, AudioletNode);
 
 Envelope.prototype.generate = function(inputBuffers, outputBuffers) {
@@ -121,19 +121,19 @@ Envelope.prototype.generate = function(inputBuffers, outputBuffers) {
     this.level = level;
     this.delta = delta;
     this.gateOn = gateOn;
-}
+};
 
 Envelope.prototype.calculateDelta = function(stage, level) {
     var delta = this.levels[stage + 1] - level;
     var stageTime = this.times[stage] * this.audiolet.device.sampleRate;
     return (delta / stageTime);
-}
+};
 
 Envelope.prototype.calculateChangeTime = function(stage, time) {
     var stageTime = this.times[stage] * this.audiolet.device.sampleRate;
     return (time + stageTime);
-}
+};
 
 Envelope.prototype.toString = function() {
     return 'Envelope';
-}
+};

@@ -3,9 +3,9 @@
  */
 
 var SoftClip = function(audiolet) {
-    AudioletNode.call(this, audiolet, 1, 1); 
+    AudioletNode.call(this, audiolet, 1, 1);
     this.linkNumberOfOutputChannels(0, 0);
-}
+};
 extend(SoftClip, AudioletNode);
 
 SoftClip.prototype.generate = function(inputBuffers, outputBuffers) {
@@ -35,9 +35,9 @@ SoftClip.prototype.generate = function(inputBuffers, outputBuffers) {
             }
         }
     }
-}
+};
 
 SoftClip.prototype.toString = function() {
     return ('SoftClip');
-}
+};
 

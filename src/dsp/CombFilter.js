@@ -3,7 +3,7 @@
  */
 
 var CombFilter = function(audiolet, maximumDelayTime, delayTime, decayTime) {
-    AudioletNode.call(this, audiolet, 3, 1); 
+    AudioletNode.call(this, audiolet, 3, 1);
     this.linkNumberOfOutputChannels(0, 0);
     this.maximumDelayTime = maximumDelayTime;
     this.delayTime = new AudioletParameter(this, 1, delayTime || 1);
@@ -11,7 +11,7 @@ var CombFilter = function(audiolet, maximumDelayTime, delayTime, decayTime) {
     var bufferSize = maximumDelayTime * this.audiolet.device.sampleRate;
     this.buffers = [];
     this.readWriteIndex = 0;
-}
+};
 extend(CombFilter, AudioletNode);
 
 CombFilter.prototype.generate = function(inputBuffers, outputBuffers) {
@@ -97,8 +97,8 @@ CombFilter.prototype.generate = function(inputBuffers, outputBuffers) {
         }
     }
     this.readWriteIndex = readWriteIndex;
-}
+};
 
 CombFilter.prototype.toString = function() {
     return 'Comb Filter';
-}
+};

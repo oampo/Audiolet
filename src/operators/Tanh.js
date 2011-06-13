@@ -3,9 +3,9 @@
  */
 
 var Tanh = function(audiolet) {
-    AudioletNode.call(this, audiolet, 1, 1); 
+    AudioletNode.call(this, audiolet, 1, 1);
     this.linkNumberOfOutputChannels(0, 0);
-}
+};
 extend(Tanh, AudioletNode);
 
 Tanh.prototype.generate = function(inputBuffers, outputBuffers) {
@@ -28,9 +28,9 @@ Tanh.prototype.generate = function(inputBuffers, outputBuffers) {
                 (Math.exp(value) + Math.exp(-value));
         }
     }
-}
+};
 
 Tanh.prototype.toString = function() {
     return ('Tanh');
-}
+};
 

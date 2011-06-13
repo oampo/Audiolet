@@ -14,11 +14,11 @@ var AudioletOutput = function(node, index) {
 
     this.suppliesFeedbackLoop = false;
     this.timestamp = null;
-}
+};
 
 AudioletOutput.prototype.connect = function(input) {
     this.connectedTo.push(input);
-}
+};
 
 AudioletOutput.prototype.disconnect = function(input) {
     var numberOfStreams = this.connectedTo.length;
@@ -28,26 +28,26 @@ AudioletOutput.prototype.disconnect = function(input) {
             break;
         }
     }
-}
+};
 
 AudioletOutput.prototype.isConnected = function() {
     return (this.connectedTo.length > 0);
-}
+};
 
 AudioletOutput.prototype.linkNumberOfChannels = function(input) {
     this.linkedInput = input;
-}
+};
 
 AudioletOutput.prototype.unlinkNumberOfChannels = function() {
     this.linkedInput = null;
-}
+};
 
 AudioletOutput.prototype.getNumberOfChannels = function() {
     if (this.linkedInput && this.linkedInput.isConnected()) {
         return (this.linkedInput.buffer.numberOfChannels);
     }
     return (this.numberOfChannels);
-}
+};
 
 AudioletOutput.prototype.getBuffer = function(length) {
     var buffer = this.buffer;
@@ -94,9 +94,9 @@ AudioletOutput.prototype.getBuffer = function(length) {
             return outputBuffer;
         }
     }
-}
+};
 
 AudioletOutput.prototype.toString = function() {
     return this.node.toString() + 'Output #' + this.index + ' - ';
-}
+};
 

@@ -103,20 +103,20 @@ var Reverb = function(audiolet, mix, roomSize, damping) {
     this.allPassFilters[lastAllPassIndex].connect(this.mixer, 0, 1);
 
     this.mixer.connect(this.outputs[0]);
-}
+};
 extend(Reverb, AudioletGroup);
 
 Reverb.prototype.toString = function() {
     return 'Reverb';
-}
+};
 
 // Converts a feedback gain multiplier to a 60db decay time
 var FeedbackGainToDecayTime = function(audiolet, delayTime) {
-    AudioletNode.call(this, audiolet, 1, 1); 
+    AudioletNode.call(this, audiolet, 1, 1);
     this.delayTime = delayTime;
     this.lastFeedbackGain = null;
     this.decayTime = null;
-}
+};
 extend(FeedbackGainToDecayTime, AudioletNode);
 
 FeedbackGainToDecayTime.prototype.generate = function(inputBuffers,
@@ -142,4 +142,4 @@ FeedbackGainToDecayTime.prototype.generate = function(inputBuffers,
 
     this.decayTime = decayTime;
     this.lastFeedbackGain = lastFeedbackGain;
-}
+};

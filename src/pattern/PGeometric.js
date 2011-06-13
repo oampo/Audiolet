@@ -3,13 +3,13 @@
  */
 
 var PGeometric = function(start, step, repeats) {
-    Pattern.call(this); 
+    Pattern.call(this);
     this.start = start;
     this.value = start;
     this.step = step;
     this.repeats = repeats;
     this.position = 0;
-}
+};
 extend(PGeometric, Pattern);
 
 PGeometric.prototype.next = function() {
@@ -33,7 +33,7 @@ PGeometric.prototype.next = function() {
         returnValue = null;
     }
     return (returnValue);
-}
+};
 
 PGeometric.prototype.reset = function() {
     this.value = this.start;
@@ -41,6 +41,6 @@ PGeometric.prototype.reset = function() {
     if (this.step instanceof Pattern) {
         this.step.reset();
     }
-}
+};
 var Pgeom = PGeometric;
 

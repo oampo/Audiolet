@@ -4,8 +4,8 @@
 
 // Maths from http://www.musicdsp.org/files/Audio-EQ-Cookbook.txt
 var LowPassFilter = function(audiolet, frequency) {
-    BiquadFilter.call(this, audiolet, frequency); 
-}
+    BiquadFilter.call(this, audiolet, frequency);
+};
 extend(LowPassFilter, BiquadFilter);
 
 LowPassFilter.prototype.calculateCoefficients = function(frequency) {
@@ -21,8 +21,8 @@ LowPassFilter.prototype.calculateCoefficients = function(frequency) {
     this.a0 = 1 + alpha;
     this.a1 = -2 * cosw0;
     this.a2 = 1 - alpha;
-}
+};
 
 LowPassFilter.prototype.toString = function() {
     return 'Low Pass Filter';
-}
+};

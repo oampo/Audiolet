@@ -2,13 +2,13 @@
  * @depends TableLookupOscillator.js
  */
 var Triangle = function(audiolet, frequency) {
-    TableLookupOscillator.call(this, audiolet, Triangle.TABLE, frequency); 
-}
+    TableLookupOscillator.call(this, audiolet, Triangle.TABLE, frequency);
+};
 extend(Triangle, TableLookupOscillator);
 
 Triangle.prototype.toString = function() {
     return 'Triangle';
-}
+};
 
 Triangle.TABLE = [];
 for (var i = 0; i < 8192; i++) {

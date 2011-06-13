@@ -4,7 +4,7 @@
 
 var BufferPlayer = function(audiolet, buffer, playbackRate, startPosition,
                             loop) {
-    AudioletNode.call(this, audiolet, 3, 1); 
+    AudioletNode.call(this, audiolet, 3, 1);
     this.buffer = buffer;
     this.setNumberOfOutputChannels(0, this.buffer.numberOfChannels);
     this.position = startPosition || 0;
@@ -15,7 +15,7 @@ var BufferPlayer = function(audiolet, buffer, playbackRate, startPosition,
 
     this.restartTriggerOn = false;
     this.playing = true;
-}
+};
 extend(BufferPlayer, AudioletNode);
 
 BufferPlayer.prototype.generate = function(inputBuffers, outputBuffers) {
@@ -128,8 +128,8 @@ BufferPlayer.prototype.generate = function(inputBuffers, outputBuffers) {
     this.playing = playing;
     this.position = position;
     this.restartTriggerOn = restartTriggerOn;
-}
+};
 
 BufferPlayer.prototype.toString = function() {
     return ('Buffer player');
-}
+};

@@ -3,11 +3,11 @@
  */
 
 var PChoose = function(list, repeats) {
-    Pattern.call(this); 
+    Pattern.call(this);
     this.list = list;
     this.repeats = repeats || 1;
     this.position = 0;
-}
+};
 extend(PChoose, Pattern);
 
 PChoose.prototype.next = function() {
@@ -34,7 +34,7 @@ PChoose.prototype.next = function() {
         returnValue = null;
     }
     return (returnValue);
-}
+};
 
 PChoose.prototype.reset = function() {
     this.position = 0;
@@ -44,6 +44,6 @@ PChoose.prototype.reset = function() {
             item.reset();
         }
     }
-}
+};
 var Prand = PChoose;
 

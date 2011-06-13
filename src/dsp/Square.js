@@ -2,13 +2,13 @@
  * @depends TableLookupOscillator.js
  */
 var Square = function(audiolet, frequency) {
-    TableLookupOscillator.call(this, audiolet, Square.TABLE, frequency); 
-}
+    TableLookupOscillator.call(this, audiolet, Square.TABLE, frequency);
+};
 extend(Square, TableLookupOscillator);
 
 Square.prototype.toString = function() {
     return 'Square';
-}
+};
 
 Square.TABLE = [];
 for (var i = 0; i < 8192; i++) {

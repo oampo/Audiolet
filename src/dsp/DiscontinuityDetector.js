@@ -3,7 +3,7 @@
  */
 
 var DiscontinuityDetector = function(audiolet, threshold, callback) {
-    AudioletNode.call(this, audiolet, 1, 1); 
+    AudioletNode.call(this, audiolet, 1, 1);
     this.linkNumberOfOutputChannels(0, 0);
 
     this.threshold = threshold || 0.2;
@@ -12,14 +12,14 @@ var DiscontinuityDetector = function(audiolet, threshold, callback) {
     }
     this.lastValues = [];
 
-}
+};
 extend(DiscontinuityDetector, AudioletNode);
 
 // Override me
 DiscontinuityDetector.prototype.callback = function(size, channel, index) {
-    console.error("Discontinuity of " + size + " detected on channel " +
-                  channel + " index " + index);
-}
+    console.error('Discontinuity of ' + size + ' detected on channel ' +
+                  channel + ' index ' + index);
+};
 
 DiscontinuityDetector.prototype.generate = function(inputBuffers,
                                                     outputBuffers) {
@@ -55,9 +55,9 @@ DiscontinuityDetector.prototype.generate = function(inputBuffers,
 
         lastValues[i] = lastValue;
     }
-}
+};
 
 DiscontinuityDetector.prototype.toString = function() {
     return 'Discontinuity Detector';
-}
+};
 

@@ -3,13 +3,13 @@
  */
 
 var Lag = function(audiolet, value, lagTime) {
-    AudioletNode.call(this, audiolet, 2, 1); 
+    AudioletNode.call(this, audiolet, 2, 1);
     this.value = new AudioletParameter(this, 0, value || 0);
     this.lag = new AudioletParameter(this, 1, lagTime || 1);
     this.lastValue = value || 0;
 
     this.log001 = Math.log(0.001);
-}
+};
 extend(Lag, AudioletNode);
 
 Lag.prototype.generate = function(inputBuffers, outputBuffers) {
@@ -56,9 +56,9 @@ Lag.prototype.generate = function(inputBuffers, outputBuffers) {
         lastValue = output;
     }
     this.lastValue = lastValue;
-}
+};
 
 Lag.prototype.toString = function() {
     return 'Lag';
-}
+};
 

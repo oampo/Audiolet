@@ -9,7 +9,7 @@ var PArithmetic = function(start, step, repeats) {
     this.step = step;
     this.repeats = repeats;
     this.position = 0;
-}
+};
 extend(PArithmetic, Pattern);
 
 PArithmetic.prototype.next = function() {
@@ -33,7 +33,7 @@ PArithmetic.prototype.next = function() {
         returnValue = null;
     }
     return (returnValue);
-}
+};
 
 PArithmetic.prototype.reset = function() {
     this.value = this.start;
@@ -41,7 +41,7 @@ PArithmetic.prototype.reset = function() {
     if (this.step instanceof Pattern) {
         this.step.reset();
     }
-}
+};
 
 var Pseries = PArithmetic;
 

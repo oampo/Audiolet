@@ -1,9 +1,9 @@
 var Pattern = function() {
-}
+};
 
 Pattern.prototype.next = function() {
     return null;
-}
+};
 
 Pattern.prototype.valueOf = function(item) {
     if (item instanceof Pattern) {
@@ -12,8 +12,8 @@ Pattern.prototype.valueOf = function(item) {
     else {
         return (item);
     }
-}
+};
 
 Pattern.prototype.reset = function() {
-}
+};
 

@@ -4,10 +4,10 @@
  */
 
 var CrossFade = function(audiolet, position) {
-    AudioletNode.call(this, audiolet, 3, 1); 
+    AudioletNode.call(this, audiolet, 3, 1);
     this.linkNumberOfOutputChannels(0, 0);
     this.position = new AudioletParameter(this, 2, position || 0.5);
-}
+};
 extend(CrossFade, AudioletNode);
 
 CrossFade.prototype.generate = function(inputBuffers, outputBuffers) {
@@ -70,8 +70,8 @@ CrossFade.prototype.generate = function(inputBuffers, outputBuffers) {
                 valueB * gainB;
         }
     }
-}
+};
 
 CrossFade.prototype.toString = function() {
     return 'Cross Fader';
-}
+};

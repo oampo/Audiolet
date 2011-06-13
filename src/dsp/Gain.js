@@ -3,10 +3,10 @@
  */
 
 var Gain = function(audiolet, gain) {
-    AudioletNode.call(this, audiolet, 2, 1); 
+    AudioletNode.call(this, audiolet, 2, 1);
     this.linkNumberOfOutputChannels(0, 0);
     this.gain = new AudioletParameter(this, 1, gain || 1);
-}
+};
 extend(Gain, AudioletNode);
 
 Gain.prototype.generate = function(inputBuffers, outputBuffers) {
@@ -40,8 +40,8 @@ Gain.prototype.generate = function(inputBuffers, outputBuffers) {
             outputChannel[j] = inputChannel[j] * gain;
         }
     }
-}
+};
 
 Gain.prototype.toString = function() {
     return ('Gain');
-}
+};

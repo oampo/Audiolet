@@ -12,15 +12,15 @@ var AudioletGroup = function(audiolet, numberOfInputs, numberOfOutputs) {
     for (var i = 0; i < numberOfOutputs; i++) {
         this.outputs.push(new PassThroughNode(this.audiolet, 1, 1));
     }
-}
+};
 
 AudioletGroup.prototype.connect = function(node, output, input) {
     this.outputs[output || 0].connect(node, 0, input);
-}
+};
 
 AudioletGroup.prototype.disconnect = function(node, output, input) {
     this.outputs[output || 0].disconnect(node, 0, input);
-}
+};
 
 AudioletGroup.prototype.remove = function() {
     var numberOfInputs = this.inputs.length;
@@ -32,4 +32,4 @@ AudioletGroup.prototype.remove = function() {
     for (var i = 0; i < numberOfOutputs; i++) {
         this.outputs[i].remove();
     }
-}
+};

@@ -22,9 +22,9 @@ var AudioletDestination = function(audiolet, sampleRate, numberOfChannels,
     this.blockSizeLimiter.connect(this.scheduler);
     this.scheduler.connect(this.upMixer);
     this.upMixer.connect(this.device);
-}
+};
 extend(AudioletDestination, AudioletGroup);
 
 AudioletDestination.prototype.toString = function() {
-    return "Destination";
-}
+    return 'Destination';
+};

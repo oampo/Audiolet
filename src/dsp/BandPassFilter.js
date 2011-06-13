@@ -5,7 +5,7 @@
 // Maths from http://www.musicdsp.org/files/Audio-EQ-Cookbook.txt
 var BandPassFilter = function(audiolet, frequency) {
     BiquadFilter.call(this, audiolet, frequency);
-}
+};
 extend(BandPassFilter, BiquadFilter);
 
 BandPassFilter.prototype.calculateCoefficients = function(frequency) {
@@ -20,8 +20,8 @@ BandPassFilter.prototype.calculateCoefficients = function(frequency) {
     this.a0 = 1 + alpha;
     this.a1 = -2 * cosw0;
     this.a2 = 1 - alpha;
-}
+};
 
 BandPassFilter.prototype.toString = function() {
     return 'Band Pass Filter';
-}
+};

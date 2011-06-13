@@ -3,10 +3,10 @@
  */
 
 var Divide = function(audiolet, value) {
-    AudioletNode.call(this, audiolet, 2, 1); 
+    AudioletNode.call(this, audiolet, 2, 1);
     this.linkNumberOfOutputChannels(0, 0);
     this.value = new AudioletParameter(this, 1, value || 1);
-}
+};
 extend(Divide, AudioletNode);
 
 Divide.prototype.generate = function(inputBuffers, outputBuffers) {
@@ -40,9 +40,9 @@ Divide.prototype.generate = function(inputBuffers, outputBuffers) {
             outputChannel[j] = inputChannel[j] / value;
         }
     }
-}
+};
 
 Divide.prototype.toString = function() {
     return 'Divide';
-}
+};
 

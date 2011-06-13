@@ -29,7 +29,7 @@ var WebAudioAPIDevice = function(audiolet, sampleRate, numberOfChannels,
     this.node.onaudioprocess = this.tick.bind(this);
     this.node.connect(this.context.destination);
     this.writePosition = 0;
-}
+};
 extend(WebAudioAPIDevice, AbstractAudioletDevice);
 
 WebAudioAPIDevice.prototype.tick = function(event) {
@@ -42,16 +42,16 @@ WebAudioAPIDevice.prototype.tick = function(event) {
         channel.set(this.buffer.getChannelData(i));
     }
     this.writePosition += samplesNeeded;
-}
+};
 
 WebAudioAPIDevice.prototype.getPlaybackTime = function() {
     return this.context.currentTime * this.sampleRate;
-}
+};
 
 WebAudioAPIDevice.prototype.getWriteTime = function() {
     return this.writePosition;
-}
+};
 
 WebAudioAPIDevice.prototype.toString = function() {
     return 'Web Audio API Device';
-}
+};
