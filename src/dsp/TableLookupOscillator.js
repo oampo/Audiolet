@@ -9,7 +9,8 @@ var TableLookupOscillator = function(audiolet, table, frequency) {
 }
 extend(TableLookupOscillator, AudioletNode);
 
-TableLookupOscillator.prototype.generate = function(inputBuffers, outputBuffers) {
+TableLookupOscillator.prototype.generate = function(inputBuffers,
+                                                    outputBuffers) {
     var buffer = outputBuffers[0];
     var channel = buffer.getChannelData(0);
 

@@ -2,7 +2,8 @@
  * @depends ../core/AudioletNode.js
  */
 
-var DampedCombFilter = function(audiolet, maximumDelayTime, delayTime, decayTime, damping) {
+var DampedCombFilter = function(audiolet, maximumDelayTime, delayTime,
+                                decayTime, damping) {
     AudioletNode.call(this, audiolet, 4, 1); 
     this.linkNumberOfOutputChannels(0, 0);
     this.maximumDelayTime = maximumDelayTime;

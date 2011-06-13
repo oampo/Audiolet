@@ -1526,7 +1526,8 @@ WebAudioAPIDevice.prototype.toString = function() {
 /**
  * @depends ../core/AudioletNode.js
  */
-var Envelope = function(audiolet, gate, levels, times, releaseStage, onComplete) {
+var Envelope = function(audiolet, gate, levels, times, releaseStage,
+                        onComplete) {
     AudioletNode.call(this, audiolet, 1, 1); 
     this.gate = new AudioletParameter(this, 0, gate || 1);
 
@@ -2029,7 +2030,8 @@ BandRejectFilter.prototype.toString = function() {
  * @depends ../core/AudioletNode.js
  */
 
-var BufferPlayer = function(audiolet, buffer, playbackRate, startPosition, loop) {
+var BufferPlayer = function(audiolet, buffer, playbackRate, startPosition,
+                            loop) {
     AudioletNode.call(this, audiolet, 3, 1); 
     this.buffer = buffer;
     this.setNumberOfOutputChannels(0, this.buffer.numberOfChannels);
@@ -2276,7 +2278,8 @@ var TableLookupOscillator = function(audiolet, table, frequency) {
 }
 extend(TableLookupOscillator, AudioletNode);
 
-TableLookupOscillator.prototype.generate = function(inputBuffers, outputBuffers) {
+TableLookupOscillator.prototype.generate = function(inputBuffers,
+                                                    outputBuffers) {
     var buffer = outputBuffers[0];
     var channel = buffer.getChannelData(0);
 
@@ -2448,7 +2451,8 @@ CrossFade.prototype.toString = function() {
  * @depends ../core/AudioletNode.js
  */
 
-var DampedCombFilter = function(audiolet, maximumDelayTime, delayTime, decayTime, damping) {
+var DampedCombFilter = function(audiolet, maximumDelayTime, delayTime,
+                                decayTime, damping) {
     AudioletNode.call(this, audiolet, 4, 1); 
     this.linkNumberOfOutputChannels(0, 0);
     this.maximumDelayTime = maximumDelayTime;
@@ -2671,7 +2675,8 @@ DiscontinuityDetector.prototype.callback = function(size, channel, index) {
                   channel + " index " + index);
 }
 
-DiscontinuityDetector.prototype.generate = function(inputBuffers, outputBuffers) {
+DiscontinuityDetector.prototype.generate = function(inputBuffers,
+                                                    outputBuffers) {
     var inputBuffer = inputBuffers[0];
 
     if (inputBuffer.isEmpty) {
@@ -3090,7 +3095,8 @@ Pan.prototype.toString = function() {
 /**
  * @depends Envelope.js
  */
-var PercussiveEnvelope = function(audiolet, gate, attack, release, onComplete) {
+var PercussiveEnvelope = function(audiolet, gate, attack, release,
+                                  onComplete) {
     var levels = [0, 1, 0];
     var times = [attack, release];
     Envelope.call(this, audiolet, gate, levels, times, null, onComplete); 
@@ -3222,7 +3228,8 @@ var FeedbackGainToDecayTime = function(audiolet, delayTime) {
 }
 extend(FeedbackGainToDecayTime, AudioletNode);
 
-FeedbackGainToDecayTime.prototype.generate = function(inputBuffers, outputBuffers) {
+FeedbackGainToDecayTime.prototype.generate = function(inputBuffers,
+                                                      outputBuffers) {
     var inputBuffer = inputBuffers[0];
     var outputBuffer = outputBuffers[0];
     var inputChannel = inputBuffer.channels[0];

@@ -119,7 +119,8 @@ var FeedbackGainToDecayTime = function(audiolet, delayTime) {
 }
 extend(FeedbackGainToDecayTime, AudioletNode);
 
-FeedbackGainToDecayTime.prototype.generate = function(inputBuffers, outputBuffers) {
+FeedbackGainToDecayTime.prototype.generate = function(inputBuffers,
+                                                      outputBuffers) {
     var inputBuffer = inputBuffers[0];
     var outputBuffer = outputBuffers[0];
     var inputChannel = inputBuffer.channels[0];

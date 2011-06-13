@@ -2,7 +2,8 @@
  * @depends ../core/AudioletNode.js
  */
 
-var BufferPlayer = function(audiolet, buffer, playbackRate, startPosition, loop) {
+var BufferPlayer = function(audiolet, buffer, playbackRate, startPosition,
+                            loop) {
     AudioletNode.call(this, audiolet, 3, 1); 
     this.buffer = buffer;
     this.setNumberOfOutputChannels(0, this.buffer.numberOfChannels);

@@ -21,7 +21,8 @@ DiscontinuityDetector.prototype.callback = function(size, channel, index) {
                   channel + " index " + index);
 }
 
-DiscontinuityDetector.prototype.generate = function(inputBuffers, outputBuffers) {
+DiscontinuityDetector.prototype.generate = function(inputBuffers,
+                                                    outputBuffers) {
     var inputBuffer = inputBuffers[0];
 
     if (inputBuffer.isEmpty) {
