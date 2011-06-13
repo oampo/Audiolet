@@ -15,7 +15,8 @@
  * @param {Number} numberOfOutputs
  * @param {Function} [generate] A replacement for the generate function
  */
-var AudioletNode = function(audiolet, numberOfInputs, numberOfOutputs, generate) {
+var AudioletNode = function(audiolet, numberOfInputs, numberOfOutputs,
+                            generate) {
     this.audiolet = audiolet;
     this.numberOfInputs = numberOfInputs;
     this.numberOfOutputs = numberOfOutputs;
@@ -84,7 +85,8 @@ AudioletNode.prototype.disconnect = function(node, output, input) {
  * @param {Number} output The index of the output
  * @param {Number} numberOfChannels
  */
-AudioletNode.prototype.setNumberOfOutputChannels = function(output, numberOfChannels) {
+AudioletNode.prototype.setNumberOfOutputChannels = function(output,
+                                                            numberOfChannels) {
     this.outputs[output].numberOfChannels = numberOfChannels;
 }
 

@@ -27,7 +27,8 @@ AudioletBuffer.prototype.set = function(buffer) {
     }
 }
 
-AudioletBuffer.prototype.setSection = function(buffer, length, inputOffset, outputOffset) {
+AudioletBuffer.prototype.setSection = function(buffer, length, inputOffset,
+                                               outputOffset) {
     inputOffset = inputOffset || 0;
     outputOffset = outputOffset || 0;
     var numberOfChannels = buffer.numberOfChannels;
@@ -67,7 +68,8 @@ AudioletBuffer.prototype.add = function(buffer) {
     }
 }
 
-AudioletBuffer.prototype.addSection = function(buffer, length, inputOffset, outputOffset) {
+AudioletBuffer.prototype.addSection = function(buffer, length, inputOffset,
+                                               outputOffset) {
     inputOffset = inputOffset || 0;
     outputOffset = outputOffset || 0;
     var numberOfChannels = buffer.numberOfChannels;
@@ -80,7 +82,8 @@ AudioletBuffer.prototype.addSection = function(buffer, length, inputOffset, outp
     }
 }
 
-AudioletBuffer.prototype.resize = function(numberOfChannels, length, lazy, offset) {
+AudioletBuffer.prototype.resize = function(numberOfChannels, length, lazy,
+                                           offset) {
     offset = offset || 0;
     // Local variables
     var channels = this.channels;

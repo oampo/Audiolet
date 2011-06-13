@@ -47,7 +47,8 @@ BlockSizeLimiter.prototype.tick = function(length, timestamp) {
     }
 }
 
-BlockSizeLimiter.prototype.generate = function(inputBuffers, outputBuffers, offset) {
+BlockSizeLimiter.prototype.generate = function(inputBuffers, outputBuffers,
+                                               offset) {
     offset = offset || 0;
     var inputBuffer = inputBuffers[0];
     var outputBuffer = outputBuffers[0];

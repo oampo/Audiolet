@@ -2,7 +2,8 @@
  * @depends AbstractAudioletDevice.js
  */
 
-var AudioDataAPIDevice = function(audiolet, sampleRate, numberOfChannels, bufferSize) {
+var AudioDataAPIDevice = function(audiolet, sampleRate, numberOfChannels,
+                                  bufferSize) {
     AbstractAudioletDevice.call(this, audiolet);
 
     this.sampleRate = sampleRate || 44100.0;

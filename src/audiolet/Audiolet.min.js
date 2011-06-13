@@ -15,7 +15,8 @@
  * @param {Number} numberOfOutputs
  * @param {Function} [generate] A replacement for the generate function
  */
-var AudioletNode = function(audiolet, numberOfInputs, numberOfOutputs, generate) {
+var AudioletNode = function(audiolet, numberOfInputs, numberOfOutputs,
+                            generate) {
     this.audiolet = audiolet;
     this.numberOfInputs = numberOfInputs;
     this.numberOfOutputs = numberOfOutputs;
@@ -84,7 +85,8 @@ AudioletNode.prototype.disconnect = function(node, output, input) {
  * @param {Number} output The index of the output
  * @param {Number} numberOfChannels
  */
-AudioletNode.prototype.setNumberOfOutputChannels = function(output, numberOfChannels) {
+AudioletNode.prototype.setNumberOfOutputChannels = function(output,
+                                                            numberOfChannels) {
     this.outputs[output].numberOfChannels = numberOfChannels;
 }
 
@@ -301,7 +303,8 @@ extend(AbstractAudioletDevice, AudioletNode);
  * @param {AudioletBuffer[]} inputBuffers An array containing the input buffer
  * @param {AudioletBuffer[]} outputBuffers An empty array
  */
-AbstractAudioletDevice.prototype.generate = function(inputBuffers, outputBuffers) {
+AbstractAudioletDevice.prototype.generate = function(inputBuffers,
+                                                     outputBuffers) {
     this.buffer = inputBuffers[0];
 }
 
@@ -336,7 +339,8 @@ AbstractAudioletDevice.prototype.toString = function() {
  * @depends AbstractAudioletDevice.js
  */
 
-var AudioDataAPIDevice = function(audiolet, sampleRate, numberOfChannels, bufferSize) {
+var AudioDataAPIDevice = function(audiolet, sampleRate, numberOfChannels,
+                                  bufferSize) {
     AbstractAudioletDevice.call(this, audiolet);
 
     this.sampleRate = sampleRate || 44100.0;
@@ -461,7 +465,8 @@ AudioletBuffer.prototype.set = function(buffer) {
     }
 }
 
-AudioletBuffer.prototype.setSection = function(buffer, length, inputOffset, outputOffset) {
+AudioletBuffer.prototype.setSection = function(buffer, length, inputOffset,
+                                               outputOffset) {
     inputOffset = inputOffset || 0;
     outputOffset = outputOffset || 0;
     var numberOfChannels = buffer.numberOfChannels;
@@ -501,7 +506,8 @@ AudioletBuffer.prototype.add = function(buffer) {
     }
 }
 
-AudioletBuffer.prototype.addSection = function(buffer, length, inputOffset, outputOffset) {
+AudioletBuffer.prototype.addSection = function(buffer, length, inputOffset,
+                                               outputOffset) {
     inputOffset = inputOffset || 0;
     outputOffset = outputOffset || 0;
     var numberOfChannels = buffer.numberOfChannels;
@@ -514,7 +520,8 @@ AudioletBuffer.prototype.addSection = function(buffer, length, inputOffset, outp
     }
 }
 
-AudioletBuffer.prototype.resize = function(numberOfChannels, length, lazy, offset) {
+AudioletBuffer.prototype.resize = function(numberOfChannels, length, lazy,
+                                           offset) {
     offset = offset || 0;
     // Local variables
     var channels = this.channels;
@@ -705,7 +712,8 @@ AudioletGroup.prototype.remove = function() {
  * @depends AudioletGroup.js
  */
 
-var AudioletDestination = function(audiolet, sampleRate, numberOfChannels, bufferSize) {
+var AudioletDestination = function(audiolet, sampleRate, numberOfChannels,
+                                   bufferSize) {
     AudioletGroup.call(this, audiolet, 1, 0);
 
     this.device = new AudioletDevice(audiolet, sampleRate,
@@ -981,7 +989,8 @@ BlockSizeLimiter.prototype.tick = function(length, timestamp) {
     }
 }
 
-BlockSizeLimiter.prototype.generate = function(inputBuffers, outputBuffers, offset) {
+BlockSizeLimiter.prototype.generate = function(inputBuffers, outputBuffers,
+                                               offset) {
     offset = offset || 0;
     var inputBuffer = inputBuffers[0];
     var outputBuffer = outputBuffers[0];
@@ -1001,7 +1010,8 @@ BlockSizeLimiter.prototype.toString = function() {
  * @depends AbstractAudioletDevice.js
  */
 
-var DummyDevice = function(audiolet, sampleRate, numberOfChannels, bufferSize) {
+var DummyDevice = function(audiolet, sampleRate, numberOfChannels,
+                           bufferSize) {
     AbstractAudioletDevice.call(this, audiolet);
 
     this.sampleRate = sampleRate || 44100.0;
@@ -1010,12 +1020,14 @@ var DummyDevice = function(audiolet, sampleRate, numberOfChannels, bufferSize) {
 
     this.writePosition = 0;
 
-    setInterval(this.tick.bind(this), 1000 * this.bufferSize / this.sampleRate);
+    setInterval(this.tick.bind(this),
+                1000 * this.bufferSize / this.sampleRate);
 }
 extend(DummyDevice, AbstractAudioletDevice);
 
 DummyDevice.prototype.tick = function() {
-    AudioletNode.prototype.tick.call(this, this.bufferSize, this.writePosition);
+    AudioletNode.prototype.tick.call(this, this.bufferSize,
+                                     this.writePosition);
     this.writePosition += this.bufferSize;
 }
 
@@ -1457,7 +1469,8 @@ for (var i = 0; i < types.length; ++i) {
  * @depends AbstractAudioletDevice.js
  */
 
-var WebAudioAPIDevice = function(audiolet, sampleRate, numberOfChannels, bufferSize) {
+var WebAudioAPIDevice = function(audiolet, sampleRate, numberOfChannels,
+                                 bufferSize) {
     // Call Super class contructor
     AbstractAudioletDevice.call(this, audiolet);
 
@@ -1489,8 +1502,7 @@ extend(WebAudioAPIDevice, AbstractAudioletDevice);
 WebAudioAPIDevice.prototype.tick = function(event) {
     var buffer = event.outputBuffer;
     var samplesNeeded = buffer.length;
-    AudioletNode.prototype.tick.call(this, samplesNeeded, 
-                                     this.getWriteTime());
+    AudioletNode.prototype.tick.call(this, samplesNeeded, this.getWriteTime());
     var numberOfChannels = buffer.numberOfChannels;
     for (var i = 0; i < numberOfChannels; i++) {
         var channel = buffer.getChannelData(i);

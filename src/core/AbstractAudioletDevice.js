@@ -26,7 +26,8 @@ extend(AbstractAudioletDevice, AudioletNode);
  * @param {AudioletBuffer[]} inputBuffers An array containing the input buffer
  * @param {AudioletBuffer[]} outputBuffers An empty array
  */
-AbstractAudioletDevice.prototype.generate = function(inputBuffers, outputBuffers) {
+AbstractAudioletDevice.prototype.generate = function(inputBuffers,
+                                                     outputBuffers) {
     this.buffer = inputBuffers[0];
 }
 

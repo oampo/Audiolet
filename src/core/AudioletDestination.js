@@ -2,7 +2,8 @@
  * @depends AudioletGroup.js
  */
 
-var AudioletDestination = function(audiolet, sampleRate, numberOfChannels, bufferSize) {
+var AudioletDestination = function(audiolet, sampleRate, numberOfChannels,
+                                   bufferSize) {
     AudioletGroup.call(this, audiolet, 1, 0);
 
     this.device = new AudioletDevice(audiolet, sampleRate,
