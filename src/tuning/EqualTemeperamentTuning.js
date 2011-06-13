@@ -6,6 +6,6 @@ var EqualTemperamentTuning = function(pitchesPerOctave) {
     for (var i=0; i<pitchesPerOctave; i++) {
         semitones.push(i);
     }
-    EqualTemperamentTuning.superclass.call(this, semitones, 2);
+    Tuning.call(this, semitones, 2);
 }
 extend(EqualTemperamentTuning, Tuning);

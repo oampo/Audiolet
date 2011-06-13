@@ -3,7 +3,7 @@
  */
 
 var BufferPlayer = function(audiolet, buffer, playbackRate, startPosition, loop) {
-    BufferPlayer.superclass.call(this, audiolet, 3, 1); 
+    AudioletNode.call(this, audiolet, 3, 1); 
     this.buffer = buffer;
     this.setNumberOfOutputChannels(0, this.buffer.numberOfChannels);
     this.position = startPosition || 0;

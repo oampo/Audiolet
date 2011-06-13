@@ -3,7 +3,7 @@
  */
 
 var MulAdd = function(audiolet, mul, add) {
-    MulAdd.superclass.call(this, audiolet, 3, 1); 
+    AudioletNode.call(this, audiolet, 3, 1); 
     this.linkNumberOfOutputChannels(0, 0);
     this.mul = new AudioletParameter(this, 1, mul || 1);
     this.add = new AudioletParameter(this, 2, add || 0);

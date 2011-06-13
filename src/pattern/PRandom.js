@@ -3,7 +3,7 @@
  */
 
 var PRandom = function(low, high, repeats) {
-    PRandom.superclass.call(this); 
+    Pattern.call(this); 
     this.low = low;
     this.high = high;
     this.repeats = repeats;

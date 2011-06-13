@@ -4,7 +4,7 @@
 
 // Maths from http://www.musicdsp.org/files/Audio-EQ-Cookbook.txt
 var BandPassFilter = function(audiolet, frequency) {
-    BandPassFilter.superclass.call(this, audiolet, frequency);
+    BiquadFilter.call(this, audiolet, frequency);
 }
 extend(BandPassFilter, BiquadFilter);
 

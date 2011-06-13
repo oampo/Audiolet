@@ -3,8 +3,7 @@ function Audio() {}
 function setInterval() {}
 
 var Introspector = function(audiolet, numberOfInputs, numberOfOutputs) {
-    Introspector.superclass.call(this, audiolet, numberOfInputs,
-            numberOfOutputs);
+    AudioletNode.call(this, audiolet, numberOfInputs, numberOfOutputs);
     this.timesCalled = 0;
 }
 extend(Introspector, AudioletNode); 
@@ -17,7 +16,7 @@ Introspector.prototype.generate = function(inputBuffers, outputBuffers) {
 
 
 var ConstantSource = function(audiolet, numberOfOutputs, fillValue) {
-    ConstantSource.superclass.call(this, audiolet, 0, numberOfOutputs);
+    AudioletNode.call(this, audiolet, 0, numberOfOutputs);
     this.fillValue = fillValue || 1;
 }
 extend(ConstantSource, AudioletNode); 
@@ -40,7 +39,7 @@ ConstantSource.prototype.generate = function(inputBuffers, outputBuffers) {
 
 
 var EmptySource = function(audiolet, numberOfOutputs) {
-    EmptySource.superclass.call(this, audiolet, 0, numberOfOutputs);
+    AudioletNode.call(this, audiolet, 0, numberOfOutputs);
 }
 extend(EmptySource, AudioletNode); 
 
@@ -53,7 +52,7 @@ EmptySource.prototype.generate = function(inputBuffers, outputBuffers) {
 
 
 var InputRecorder = function(audiolet, numberOfInputs) {
-    InputRecorder.superclass.call(this, audiolet, numberOfInputs, 0);
+    AudioletNode.call(this, audiolet, numberOfInputs, 0);
     this.buffers = [];
     for (var i=0; i<numberOfInputs; i++) {
         this.buffers.push(new AudioletBuffer(1, 0));

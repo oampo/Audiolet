@@ -3,7 +3,7 @@
  */
 
 var PWeightedChoose = function() {
-    PWeightedChoose.superclass.call(this); 
+    Pattern.call(this); 
 }
 
 PWeightedChoose.prototype.next = function() {

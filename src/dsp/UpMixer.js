@@ -3,7 +3,7 @@
  */
 
 var UpMixer = function(audiolet, outputChannels) {
-    UpMixer.superclass.call(this, audiolet, 1, 1); 
+    AudioletNode.call(this, audiolet, 1, 1); 
     this.outputChannels = outputChannels;
     this.outputs[0].numberOfChannels = outputChannels;
 }

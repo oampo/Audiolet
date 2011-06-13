@@ -1,6 +1,6 @@
 window.onload = function() {
     var HighSynth = function(audiolet) {
-        HighSynth.superclass.call(this, audiolet, 0, 1);
+        AudioletGroup.call(this, audiolet, 0, 1);
 
         // Triangle base oscillator
         this.triangle = new Triangle(audiolet);
@@ -44,7 +44,7 @@ window.onload = function() {
     extend(HighSynth, AudioletGroup);
 
     var BassSynth = function(audiolet) {
-        BassSynth.superclass.call(this, audiolet, 0, 1);
+        AudioletGroup.call(this, audiolet, 0, 1);
         // Basic wave
         this.sine = new Sine(audiolet, 100);
 
@@ -84,7 +84,7 @@ window.onload = function() {
     extend(BassSynth, AudioletGroup);
 
     var Kick = function(audiolet) {
-        Kick.superclass.call(this, audiolet, 0, 1);
+        AudioletGroup.call(this, audiolet, 0, 1);
         // Main sine oscillator
         this.sine = new Sine(audiolet, 80);
 
@@ -121,7 +121,7 @@ window.onload = function() {
     extend(Kick, AudioletGroup);
 
     var Shaker = function(audiolet) {
-        Shaker.superclass.call(this, audiolet, 0, 1);
+        AudioletGroup.call(this, audiolet, 0, 1);
         // White noise source
         this.white = new WhiteNoise(audiolet);
 

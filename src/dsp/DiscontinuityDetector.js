@@ -3,7 +3,7 @@
  */
 
 var DiscontinuityDetector = function(audiolet, threshold, callback) {
-    DiscontinuityDetector.superclass.call(this, audiolet, 1, 1); 
+    AudioletNode.call(this, audiolet, 1, 1); 
     this.linkNumberOfOutputChannels(0, 0);
 
     this.threshold = threshold || 0.2;

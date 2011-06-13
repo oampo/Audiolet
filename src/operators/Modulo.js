@@ -3,7 +3,7 @@
  */
 
 var Modulo = function(audiolet, value) {
-    Modulo.superclass.call(this, audiolet, 2, 1); 
+    AudioletNode.call(this, audiolet, 2, 1); 
     this.linkNumberOfOutputChannels(0, 0);
     this.value = new AudioletParameter(this, 1, value || 1);
 }

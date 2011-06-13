@@ -3,7 +3,7 @@
  */
 
 var Gain = function(audiolet, gain) {
-    Gain.superclass.call(this, audiolet, 2, 1); 
+    AudioletNode.call(this, audiolet, 2, 1); 
     this.linkNumberOfOutputChannels(0, 0);
     this.gain = new AudioletParameter(this, 1, gain || 1);
 }

@@ -3,7 +3,7 @@
  */
 
 var PassThroughNode = function(audiolet, numberOfInputs, numberOfOutputs) {
-    PassThroughNode.superclass.call(this, audiolet, numberOfInputs, numberOfOutputs);
+    AudioletNode.call(this, audiolet, numberOfInputs, numberOfOutputs);
 }
 extend(PassThroughNode, AudioletNode);
 

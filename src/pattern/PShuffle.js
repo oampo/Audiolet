@@ -3,7 +3,7 @@
  */
 
 var PShuffle = function(list, repeats) {
-    PShuffle.superclass.call(this); 
+    Pattern.call(this); 
     this.list = [];
     // Shuffle values into new list
     while (list.length) {

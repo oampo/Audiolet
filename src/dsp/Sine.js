@@ -27,7 +27,7 @@
  * @param {Number} [frequency=440] Initial frequency
  */
 var Sine = function(audiolet, frequency) {
-    Sine.superclass.call(this, audiolet, Sine.TABLE, frequency); 
+    TableLookupOscillator.call(this, audiolet, Sine.TABLE, frequency); 
 }
 extend(Sine, TableLookupOscillator);
 

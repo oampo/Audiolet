@@ -3,7 +3,7 @@
  */
 
 var CombFilter = function(audiolet, maximumDelayTime, delayTime, decayTime) {
-    CombFilter.superclass.call(this, audiolet, 3, 1); 
+    AudioletNode.call(this, audiolet, 3, 1); 
     this.linkNumberOfOutputChannels(0, 0);
     this.maximumDelayTime = maximumDelayTime;
     this.delayTime = new AudioletParameter(this, 1, delayTime || 1);

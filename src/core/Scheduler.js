@@ -3,7 +3,7 @@
  */
 
 var Scheduler = function(audiolet, bpm) {
-    Scheduler.superclass.call(this, audiolet, 1, 1);
+    AudioletNode.call(this, audiolet, 1, 1);
     this.linkNumberOfOutputChannels(0, 0);
     this.bpm = bpm || 120;
     this.queue = new PriorityQueue(null, function(a, b) {

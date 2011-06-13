@@ -3,7 +3,7 @@
  */
 
 var Limiter = function(audiolet, threshold, attack, release) {
-    Limiter.superclass.call(this, audiolet, 4, 1); 
+    AudioletGroup.call(this, audiolet, 4, 1); 
 
     // Parameters
     var attack = attack || 0.01;
@@ -37,7 +37,7 @@ Limiter.prototype.toString = function() {
 }
 
 var LimitFromAmplitude = function(audiolet, threshold) {
-    LimitFromAmplitude.superclass.call(this, audiolet, 3, 1); 
+    AudioletNode.call(this, audiolet, 3, 1); 
     this.linkNumberOfOutputChannels(0, 0);
     this.threshold = new AudioletParameter(this, 2, threshold || 0.95);
 }

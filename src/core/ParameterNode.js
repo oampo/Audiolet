@@ -3,7 +3,7 @@
  */
 
 var ParameterNode = function(audiolet, value) {
-    ParameterNode.superclass.call(this, audiolet, 1, 1);
+    AudioletNode.call(this, audiolet, 1, 1);
     this.parameter = new AudioletParameter(this, 0, value);
 }
 extend(ParameterNode, AudioletNode);

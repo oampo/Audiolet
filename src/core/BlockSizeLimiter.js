@@ -3,7 +3,7 @@
  */
 
 var BlockSizeLimiter = function(audiolet, maximumBlockSize) {
-    BlockSizeLimiter.superclass.call(this, audiolet, 1, 1);
+    AudioletNode.call(this, audiolet, 1, 1);
     this.maximumBlockSize = maximumBlockSize;
     this.linkNumberOfOutputChannels(0, 0);
 }
@@ -14,7 +14,7 @@ BlockSizeLimiter.prototype.tick = function(length, timestamp) {
     if (length < maximumBlockSize) {
         // Enough samples from the last tick and buffered, so just tick
         // and recalculate any overflow
-        BlockSizeLimiter.superproto.tick.call(this, length, timestamp);
+        AudioletNode.prototype.tick.call(this, length, timestamp);
     }
     else {
         // Not enough samples available, so we will have to do it in blocks

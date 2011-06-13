@@ -3,7 +3,7 @@
  */
 
 var Delay = function(audiolet, maximumDelayTime, delayTime) {
-    Delay.superclass.call(this, audiolet, 2, 1); 
+    AudioletNode.call(this, audiolet, 2, 1); 
     this.linkNumberOfOutputChannels(0, 0);
     this.maximumDelayTime = maximumDelayTime;
     this.delayTime = new AudioletParameter(this, 1, delayTime || 1);

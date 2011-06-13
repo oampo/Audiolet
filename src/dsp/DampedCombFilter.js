@@ -3,7 +3,7 @@
  */
 
 var DampedCombFilter = function(audiolet, maximumDelayTime, delayTime, decayTime, damping) {
-    DampedCombFilter.superclass.call(this, audiolet, 4, 1); 
+    AudioletNode.call(this, audiolet, 4, 1); 
     this.linkNumberOfOutputChannels(0, 0);
     this.maximumDelayTime = maximumDelayTime;
     this.delayTime = new AudioletParameter(this, 1, delayTime || 1);

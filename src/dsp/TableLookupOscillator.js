@@ -2,7 +2,7 @@
  * @depends ../core/AudioletNode.js
  */
 var TableLookupOscillator = function(audiolet, table, frequency) {
-    TableLookupOscillator.superclass.call(this, audiolet, 1, 1); 
+    AudioletNode.call(this, audiolet, 1, 1); 
     this.table = table;
     this.frequency = new AudioletParameter(this, 0, frequency || 440);
     this.phase = 0;

@@ -3,7 +3,7 @@
  */
 
 var Lag = function(audiolet, value, lagTime) {
-    Lag.superclass.call(this, audiolet, 2, 1); 
+    AudioletNode.call(this, audiolet, 2, 1); 
     this.value = new AudioletParameter(this, 0, value || 0);
     this.lag = new AudioletParameter(this, 1, lagTime || 1);
     this.lastValue = value || 0;

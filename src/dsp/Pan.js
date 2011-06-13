@@ -3,7 +3,7 @@
  */
 
 var Pan = function(audiolet) {
-    Pan.superclass.call(this, audiolet, 2, 1); 
+    AudioletNode.call(this, audiolet, 2, 1); 
     // Hardcode two output channels
     this.setNumberOfOutputChannels(0, 2);
     this.pan = new AudioletParameter(this, 1, 0.5);

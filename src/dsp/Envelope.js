@@ -2,7 +2,7 @@
  * @depends ../core/AudioletNode.js
  */
 var Envelope = function(audiolet, gate, levels, times, releaseStage, onComplete) {
-    Envelope.superclass.call(this, audiolet, 1, 1); 
+    AudioletNode.call(this, audiolet, 1, 1); 
     this.gate = new AudioletParameter(this, 0, gate || 1);
 
     this.levels = levels;

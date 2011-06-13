@@ -3,7 +3,7 @@
  */
 
 var PGeometric = function(start, step, repeats) {
-    PGeometric.superclass.call(this); 
+    Pattern.call(this); 
     this.start = start;
     this.value = start;
     this.step = step;

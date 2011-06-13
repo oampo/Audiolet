@@ -2,7 +2,7 @@ window.onload = new function() {
     var audiolet = new Audiolet();
 
     var Synth = function(audiolet) {
-        Synth.superclass.call(this, audiolet, 0, 1);
+        AudioletGroup.call(this, audiolet, 0, 1);
         this.sin = new Sine(audiolet);
         this.gain = new Gain(audiolet);
         this.env = new PercussiveEnvelope(audiolet, 0, 0.1, 0.5);

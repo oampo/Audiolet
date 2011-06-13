@@ -3,7 +3,7 @@
  */
 
 var TriggerControl = function(audiolet, trigger) {
-    TriggerControl.superclass.call(this, audiolet, 0, 1); 
+    AudioletNode.call(this, audiolet, 0, 1); 
     this.trigger = new AudioletParameter(this, null, trigger || 0);
 }
 extend(TriggerControl, AudioletNode);

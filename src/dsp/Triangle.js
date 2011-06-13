@@ -2,7 +2,7 @@
  * @depends TableLookupOscillator.js
  */
 var Triangle = function(audiolet, frequency) {
-    Triangle.superclass.call(this, audiolet, Triangle.TABLE, frequency); 
+    TableLookupOscillator.call(this, audiolet, Triangle.TABLE, frequency); 
 }
 extend(Triangle, TableLookupOscillator);
 

@@ -288,7 +288,7 @@ var AbstractAudioletDevice = function(audiolet){
      *
      * @param {Audiolet} audiolet The audiolet object
      */
-    AbstractAudioletDevice.superclass.call(this, audiolet, 1 ,0);
+    AudioletNode.call(this, audiolet, 1 ,0);
     this.audiolet = audiolet;
     this.buffer = null;
 }
@@ -337,8 +337,7 @@ AbstractAudioletDevice.prototype.toString = function() {
  */
 
 var AudioDataAPIDevice = function(audiolet, sampleRate, numberOfChannels, bufferSize) {
-    // Call super class contructer
-    AudioDataAPIDevice.superclass.call(this, audiolet);
+    AbstractAudioletDevice.call(this, audiolet);
 
     this.sampleRate = sampleRate || 44100.0;
     this.numberOfChannels = numberOfChannels || 2;
@@ -403,8 +402,8 @@ AudioDataAPIDevice.prototype.tick = function() {
         // Samples needed per channel
         samplesNeeded = Math.floor(samplesNeeded / this.numberOfChannels);
         // Request some sound data from the callback function.
-        AudioDataAPIDevice.superproto.tick.call(this, samplesNeeded, 
-                this.getWriteTime());
+        AudioletNode.prototype.tick.call(this, samplesNeeded,
+                                         this.getWriteTime());
         var buffer = this.buffer.interleaved();
 
         // Writing the data.
@@ -707,8 +706,7 @@ AudioletGroup.prototype.remove = function() {
  */
 
 var AudioletDestination = function(audiolet, sampleRate, numberOfChannels, bufferSize) {
-    // Call superclass contrctor
-    AudioletDestination.superclass.call(this, audiolet, 1, 0);
+    AudioletGroup.call(this, audiolet, 1, 0);
 
     this.device = new AudioletDevice(audiolet, sampleRate,
             numberOfChannels, bufferSize);
@@ -939,7 +937,7 @@ AudioletParameter.prototype.getChannel = function() {
  */
 
 var BlockSizeLimiter = function(audiolet, maximumBlockSize) {
-    BlockSizeLimiter.superclass.call(this, audiolet, 1, 1);
+    AudioletNode.call(this, audiolet, 1, 1);
     this.maximumBlockSize = maximumBlockSize;
     this.linkNumberOfOutputChannels(0, 0);
 }
@@ -950,7 +948,7 @@ BlockSizeLimiter.prototype.tick = function(length, timestamp) {
     if (length < maximumBlockSize) {
         // Enough samples from the last tick and buffered, so just tick
         // and recalculate any overflow
-        BlockSizeLimiter.superproto.tick.call(this, length, timestamp);
+        AudioletNode.prototype.tick.call(this, length, timestamp);
     }
     else {
         // Not enough samples available, so we will have to do it in blocks
@@ -1004,7 +1002,7 @@ BlockSizeLimiter.prototype.toString = function() {
  */
 
 var DummyDevice = function(audiolet, sampleRate, numberOfChannels, bufferSize) {
-    DummyDevice.superclass.call(this, audiolet);
+    AbstractAudioletDevice.call(this, audiolet);
 
     this.sampleRate = sampleRate || 44100.0;
     this.numberOfChannels = numberOfChannels || 2;
@@ -1017,7 +1015,7 @@ var DummyDevice = function(audiolet, sampleRate, numberOfChannels, bufferSize) {
 extend(DummyDevice, AbstractAudioletDevice);
 
 DummyDevice.prototype.tick = function() {
-    DummyDevice.superproto.tick.call(this, this.bufferSize, this.writePosition);
+    AudioletNode.prototype.tick.call(this, this.bufferSize, this.writePosition);
     this.writePosition += this.bufferSize;
 }
 
@@ -1034,8 +1032,9 @@ DummyDevice.prototype.toString = function() {
 }
 
 /* 
- * A method for extending a javascript sudo-class
- * Taken from http://peter.michaux.ca/articles/class-based-inheritance-in-javascript
+ * A method for extending a javascript pseudo-class
+ * Taken from
+ * http://peter.michaux.ca/articles/class-based-inheritance-in-javascript
  *
  * @param {Object} subclass The class to extend
  * @param {Object} superclass The class to be extended
@@ -1045,8 +1044,6 @@ function extend(subclass, superclass) {
     Dummy.prototype = superclass.prototype;
     subclass.prototype = new Dummy();
     subclass.prototype.constructor = subclass;
-    subclass.superclass = superclass;
-    subclass.superproto = superclass.prototype;
 }
 
 /**
@@ -1054,7 +1051,7 @@ function extend(subclass, superclass) {
  */
 
 var ParameterNode = function(audiolet, value) {
-    ParameterNode.superclass.call(this, audiolet, 1, 1);
+    AudioletNode.call(this, audiolet, 1, 1);
     this.parameter = new AudioletParameter(this, 0, value);
 }
 extend(ParameterNode, AudioletNode);
@@ -1092,7 +1089,7 @@ ParameterNode.prototype.toString = function() {
  */
 
 var PassThroughNode = function(audiolet, numberOfInputs, numberOfOutputs) {
-    PassThroughNode.superclass.call(this, audiolet, numberOfInputs, numberOfOutputs);
+    AudioletNode.call(this, audiolet, numberOfInputs, numberOfOutputs);
 }
 extend(PassThroughNode, AudioletNode);
 
@@ -1210,7 +1207,7 @@ PriorityQueue.prototype.compare = function(a, b) {
  */
 
 var Scheduler = function(audiolet, bpm) {
-    Scheduler.superclass.call(this, audiolet, 1, 1);
+    AudioletNode.call(this, audiolet, 1, 1);
     this.linkNumberOfOutputChannels(0, 0);
     this.bpm = bpm || 120;
     this.queue = new PriorityQueue(null, function(a, b) {
@@ -1460,7 +1457,7 @@ for (var i = 0; i < types.length; ++i) {
 
 var WebAudioAPIDevice = function(audiolet, sampleRate, numberOfChannels, bufferSize) {
     // Call Super class contructor
-    WebAudioAPIDevice.superclass.call(this, audiolet);
+    AbstractAudioletDevice.call(this, audiolet);
 
     this.numberOfChannels = numberOfChannels || 2;
     this.bufferSize = bufferSize || 8192;
@@ -1490,8 +1487,8 @@ extend(WebAudioAPIDevice, AbstractAudioletDevice);
 WebAudioAPIDevice.prototype.tick = function(event) {
     var buffer = event.outputBuffer;
     var samplesNeeded = buffer.length;
-    WebAudioAPIDevice.superproto.tick.call(this, samplesNeeded, 
-                                           this.getWriteTime());
+    AudioletNode.prototype.tick.call(this, samplesNeeded, 
+                                     this.getWriteTime());
     var numberOfChannels = buffer.numberOfChannels;
     for (var i = 0; i < numberOfChannels; i++) {
         var channel = buffer.getChannelData(i);
@@ -1516,7 +1513,7 @@ WebAudioAPIDevice.prototype.toString = function() {
  * @depends ../core/AudioletNode.js
  */
 var Envelope = function(audiolet, gate, levels, times, releaseStage, onComplete) {
-    Envelope.superclass.call(this, audiolet, 1, 1); 
+    AudioletNode.call(this, audiolet, 1, 1); 
     this.gate = new AudioletParameter(this, 0, gate || 1);
 
     this.levels = levels;
@@ -1658,7 +1655,7 @@ var ADSREnvelope = function(audiolet, gate, attack, decay, sustain, release,
                             onComplete) {
     var levels = [0, 1, sustain, 0];
     var times = [attack, decay, release];
-    ADSREnvelope.superclass.call(this, audiolet, gate, levels, times, 2, onComplete);
+    Envelope.call(this, audiolet, gate, levels, times, 2, onComplete);
 }
 extend(ADSREnvelope, Envelope);
 
@@ -1672,7 +1669,7 @@ ADSREnvelope.prototype.toString = function() {
 
 // Maths from http://www.musicdsp.org/files/Audio-EQ-Cookbook.txt
 var BiquadFilter = function(audiolet, frequency) {
-    BiquadFilter.superclass.call(this, audiolet, 2, 1);
+    AudioletNode.call(this, audiolet, 2, 1);
 
     // Same number of output channels as input channels
     this.linkNumberOfOutputChannels(0, 0);
@@ -1800,7 +1797,7 @@ BiquadFilter.prototype.toString = function() {
 
 // Maths from http://www.musicdsp.org/files/Audio-EQ-Cookbook.txt
 var AllPassFilter = function(audiolet, frequency) {
-    AllPassFilter.superclass.call(this, audiolet, frequency);
+    BiquadFilter.call(this, audiolet, frequency);
 }
 extend(AllPassFilter, BiquadFilter);
 
@@ -1828,7 +1825,7 @@ AllPassFilter.prototype.toString = function() {
  */
 
 var Amplitude = function(audiolet, attack, release) {
-    Amplitude.superclass.call(this, audiolet, 3, 1);
+    AudioletNode.call(this, audiolet, 3, 1);
     this.linkNumberOfOutputChannels(0, 0);
 
     this.followers = [];
@@ -1913,7 +1910,7 @@ Amplitude.prototype.toString = function() {
  */
 
 var BadValueDetector = function(audiolet, callback) {
-    BadValueDetector.superclass.call(this, audiolet, 1, 1);
+    PassThroughNode.call(this, audiolet, 1, 1);
     this.linkNumberOfOutputChannels(0, 0);
 
     if (callback) {
@@ -1963,7 +1960,7 @@ BadValueDetector.prototype.toString = function() {
 
 // Maths from http://www.musicdsp.org/files/Audio-EQ-Cookbook.txt
 var BandPassFilter = function(audiolet, frequency) {
-    BandPassFilter.superclass.call(this, audiolet, frequency);
+    BiquadFilter.call(this, audiolet, frequency);
 }
 extend(BandPassFilter, BiquadFilter);
 
@@ -1991,7 +1988,7 @@ BandPassFilter.prototype.toString = function() {
 
 // Maths from http://www.musicdsp.org/files/Audio-EQ-Cookbook.txt
 var BandRejectFilter = function(audiolet, frequency) {
-    BandRejectFilter.superclass.call(this, audiolet, frequency);
+    BiquadFilter.call(this, audiolet, frequency);
 }
 extend(BandRejectFilter, BiquadFilter);
 
@@ -2019,7 +2016,7 @@ BandRejectFilter.prototype.toString = function() {
  */
 
 var BufferPlayer = function(audiolet, buffer, playbackRate, startPosition, loop) {
-    BufferPlayer.superclass.call(this, audiolet, 3, 1); 
+    AudioletNode.call(this, audiolet, 3, 1); 
     this.buffer = buffer;
     this.setNumberOfOutputChannels(0, this.buffer.numberOfChannels);
     this.position = startPosition || 0;
@@ -2154,7 +2151,7 @@ BufferPlayer.prototype.toString = function() {
  */
 
 var CombFilter = function(audiolet, maximumDelayTime, delayTime, decayTime) {
-    CombFilter.superclass.call(this, audiolet, 3, 1); 
+    AudioletNode.call(this, audiolet, 3, 1); 
     this.linkNumberOfOutputChannels(0, 0);
     this.maximumDelayTime = maximumDelayTime;
     this.delayTime = new AudioletParameter(this, 1, delayTime || 1);
@@ -2258,7 +2255,7 @@ CombFilter.prototype.toString = function() {
  * @depends ../core/AudioletNode.js
  */
 var TableLookupOscillator = function(audiolet, table, frequency) {
-    TableLookupOscillator.superclass.call(this, audiolet, 1, 1); 
+    AudioletNode.call(this, audiolet, 1, 1); 
     this.table = table;
     this.frequency = new AudioletParameter(this, 0, frequency || 440);
     this.phase = 0;
@@ -2333,7 +2330,7 @@ TableLookupOscillator.prototype.toString = function() {
  * @param {Number} [frequency=440] Initial frequency
  */
 var Sine = function(audiolet, frequency) {
-    Sine.superclass.call(this, audiolet, Sine.TABLE, frequency); 
+    TableLookupOscillator.call(this, audiolet, Sine.TABLE, frequency); 
 }
 extend(Sine, TableLookupOscillator);
 
@@ -2361,7 +2358,7 @@ for (var i = 0; i < 8192; i++) {
  */
 
 var CrossFade = function(audiolet, position) {
-    CrossFade.superclass.call(this, audiolet, 3, 1); 
+    AudioletNode.call(this, audiolet, 3, 1); 
     this.linkNumberOfOutputChannels(0, 0);
     this.position = new AudioletParameter(this, 2, position || 0.5);
 }
@@ -2438,7 +2435,7 @@ CrossFade.prototype.toString = function() {
  */
 
 var DampedCombFilter = function(audiolet, maximumDelayTime, delayTime, decayTime, damping) {
-    DampedCombFilter.superclass.call(this, audiolet, 4, 1); 
+    AudioletNode.call(this, audiolet, 4, 1); 
     this.linkNumberOfOutputChannels(0, 0);
     this.maximumDelayTime = maximumDelayTime;
     this.delayTime = new AudioletParameter(this, 1, delayTime || 1);
@@ -2562,7 +2559,7 @@ DampedCombFilter.prototype.toString = function() {
  */
 
 var Delay = function(audiolet, maximumDelayTime, delayTime) {
-    Delay.superclass.call(this, audiolet, 2, 1); 
+    AudioletNode.call(this, audiolet, 2, 1); 
     this.linkNumberOfOutputChannels(0, 0);
     this.maximumDelayTime = maximumDelayTime;
     this.delayTime = new AudioletParameter(this, 1, delayTime || 1);
@@ -2642,7 +2639,7 @@ Delay.prototype.toString = function() {
  */
 
 var DiscontinuityDetector = function(audiolet, threshold, callback) {
-    DiscontinuityDetector.superclass.call(this, audiolet, 1, 1); 
+    AudioletNode.call(this, audiolet, 1, 1); 
     this.linkNumberOfOutputChannels(0, 0);
 
     this.threshold = threshold || 0.2;
@@ -2705,7 +2702,7 @@ DiscontinuityDetector.prototype.toString = function() {
  */
 
 var Gain = function(audiolet, gain) {
-    Gain.superclass.call(this, audiolet, 2, 1); 
+    AudioletNode.call(this, audiolet, 2, 1); 
     this.linkNumberOfOutputChannels(0, 0);
     this.gain = new AudioletParameter(this, 1, gain || 1);
 }
@@ -2754,7 +2751,7 @@ Gain.prototype.toString = function() {
 
 // Maths from http://www.musicdsp.org/files/Audio-EQ-Cookbook.txt
 var HighPassFilter = function(audiolet, frequency) {
-    HighPassFilter.superclass.call(this, audiolet, frequency); 
+    BiquadFilter.call(this, audiolet, frequency); 
 }
 extend(HighPassFilter, BiquadFilter);
 
@@ -2782,7 +2779,7 @@ HighPassFilter.prototype.toString = function() {
  */
 
 var Lag = function(audiolet, value, lagTime) {
-    Lag.superclass.call(this, audiolet, 2, 1); 
+    AudioletNode.call(this, audiolet, 2, 1); 
     this.value = new AudioletParameter(this, 0, value || 0);
     this.lag = new AudioletParameter(this, 1, lagTime || 1);
     this.lastValue = value || 0;
@@ -2847,7 +2844,7 @@ Lag.prototype.toString = function() {
  */
 
 var Limiter = function(audiolet, threshold, attack, release) {
-    Limiter.superclass.call(this, audiolet, 4, 1); 
+    AudioletGroup.call(this, audiolet, 4, 1); 
 
     // Parameters
     var attack = attack || 0.01;
@@ -2881,7 +2878,7 @@ Limiter.prototype.toString = function() {
 }
 
 var LimitFromAmplitude = function(audiolet, threshold) {
-    LimitFromAmplitude.superclass.call(this, audiolet, 3, 1); 
+    AudioletNode.call(this, audiolet, 3, 1); 
     this.linkNumberOfOutputChannels(0, 0);
     this.threshold = new AudioletParameter(this, 2, threshold || 0.95);
 }
@@ -2940,7 +2937,7 @@ LimitFromAmplitude.prototype.toString = function() {
  */
 
 var LinearCrossFade = function(audiolet, position) {
-    LinearCrossFade.superclass.call(this, audiolet, 3, 1); 
+    AudioletNode.call(this, audiolet, 3, 1); 
     this.linkNumberOfOutputChannels(0, 0);
     this.position = new AudioletParameter(this, 2, position || 0.5);
 }
@@ -3001,7 +2998,7 @@ LinearCrossFade.prototype.toString = function() {
 
 // Maths from http://www.musicdsp.org/files/Audio-EQ-Cookbook.txt
 var LowPassFilter = function(audiolet, frequency) {
-    LowPassFilter.superclass.call(this, audiolet, frequency); 
+    BiquadFilter.call(this, audiolet, frequency); 
 }
 extend(LowPassFilter, BiquadFilter);
 
@@ -3029,7 +3026,7 @@ LowPassFilter.prototype.toString = function() {
  */
 
 var Pan = function(audiolet) {
-    Pan.superclass.call(this, audiolet, 2, 1); 
+    AudioletNode.call(this, audiolet, 2, 1); 
     // Hardcode two output channels
     this.setNumberOfOutputChannels(0, 2);
     this.pan = new AudioletParameter(this, 1, 0.5);
@@ -3082,7 +3079,7 @@ Pan.prototype.toString = function() {
 var PercussiveEnvelope = function(audiolet, gate, attack, release, onComplete) {
     var levels = [0, 1, 0];
     var times = [attack, release];
-    PercussiveEnvelope.superclass.call(this, audiolet, gate, levels, times, null, onComplete); 
+    Envelope.call(this, audiolet, gate, levels, times, null, onComplete); 
 }
 extend(PercussiveEnvelope, Envelope);
 
@@ -3114,7 +3111,7 @@ var Reverb = function(audiolet, mix, roomSize, damping) {
         allPassTuning = [556, 441, 341, 225];
 
 
-    Reverb.superclass.call(this, audiolet, 4, 1);
+    AudioletGroup.call(this, audiolet, 4, 1);
 
     // Controls
     // Room size control
@@ -3206,7 +3203,7 @@ Reverb.prototype.toString = function() {
 
 // Converts a feedback gain multiplier to a 60db decay time
 var FeedbackGainToDecayTime = function(audiolet, delayTime) {
-    FeedbackGainToDecayTime.superclass.call(this, audiolet, 1, 1); 
+    AudioletNode.call(this, audiolet, 1, 1); 
     this.delayTime = delayTime;
     this.lastFeedbackGain = null;
     this.decayTime = null;
@@ -3241,7 +3238,7 @@ FeedbackGainToDecayTime.prototype.generate = function(inputBuffers, outputBuffer
  * @depends TableLookupOscillator.js
  */
 var Saw = function(audiolet, frequency) {
-    Saw.superclass.call(this, audiolet, Saw.TABLE, frequency); 
+    TableLookupOscillator.call(this, audiolet, Saw.TABLE, frequency); 
 }
 extend(Saw, TableLookupOscillator);
 
@@ -3260,7 +3257,7 @@ for (var i = 0; i < 8192; i++) {
  */
 
 var SoftClip = function(audiolet) {
-    SoftClip.superclass.call(this, audiolet, 1, 1); 
+    AudioletNode.call(this, audiolet, 1, 1); 
     this.linkNumberOfOutputChannels(0, 0);
 }
 extend(SoftClip, AudioletNode);
@@ -3303,7 +3300,7 @@ SoftClip.prototype.toString = function() {
  * @depends TableLookupOscillator.js
  */
 var Square = function(audiolet, frequency) {
-    Square.superclass.call(this, audiolet, Square.TABLE, frequency); 
+    TableLookupOscillator.call(this, audiolet, Square.TABLE, frequency); 
 }
 extend(Square, TableLookupOscillator);
 
@@ -3322,7 +3319,7 @@ for (var i = 0; i < 8192; i++) {
  * @depends TableLookupOscillator.js
  */
 var Triangle = function(audiolet, frequency) {
-    Triangle.superclass.call(this, audiolet, Triangle.TABLE, frequency); 
+    TableLookupOscillator.call(this, audiolet, Triangle.TABLE, frequency); 
 }
 extend(Triangle, TableLookupOscillator);
 
@@ -3342,7 +3339,7 @@ for (var i = 0; i < 8192; i++) {
  */
 
 var TriggerControl = function(audiolet, trigger) {
-    TriggerControl.superclass.call(this, audiolet, 0, 1); 
+    AudioletNode.call(this, audiolet, 0, 1); 
     this.trigger = new AudioletParameter(this, null, trigger || 0);
 }
 extend(TriggerControl, AudioletNode);
@@ -3376,7 +3373,7 @@ TriggerControl.prototype.toString = function() {
  */
 
 var UpMixer = function(audiolet, outputChannels) {
-    UpMixer.superclass.call(this, audiolet, 1, 1); 
+    AudioletNode.call(this, audiolet, 1, 1); 
     this.outputChannels = outputChannels;
     this.outputs[0].numberOfChannels = outputChannels;
 }
@@ -3410,7 +3407,7 @@ UpMixer.prototype.toString = function() {
  * @depends ../core/AudioletNode.js
  */
 var WhiteNoise = function(audiolet) {
-    WhiteNoise.superclass.call(this, audiolet, 0, 1); 
+    AudioletNode.call(this, audiolet, 0, 1); 
 }
 extend(WhiteNoise, AudioletNode);
 
@@ -3435,7 +3432,7 @@ WhiteNoise.prototype.toString = function() {
  */
 
 var Add = function(audiolet, value) {
-    Add.superclass.call(this, audiolet, 2, 1); 
+    AudioletNode.call(this, audiolet, 2, 1); 
     this.linkNumberOfOutputChannels(0, 0);
     this.value = new AudioletParameter(this, 1, value || 1);
 }
@@ -3484,7 +3481,7 @@ Add.prototype.toString = function() {
  */
 
 var Divide = function(audiolet, value) {
-    Divide.superclass.call(this, audiolet, 2, 1); 
+    AudioletNode.call(this, audiolet, 2, 1); 
     this.linkNumberOfOutputChannels(0, 0);
     this.value = new AudioletParameter(this, 1, value || 1);
 }
@@ -3533,7 +3530,7 @@ Divide.prototype.toString = function() {
  */
 
 var Modulo = function(audiolet, value) {
-    Modulo.superclass.call(this, audiolet, 2, 1); 
+    AudioletNode.call(this, audiolet, 2, 1); 
     this.linkNumberOfOutputChannels(0, 0);
     this.value = new AudioletParameter(this, 1, value || 1);
 }
@@ -3582,7 +3579,7 @@ Modulo.prototype.toString = function() {
  */
 
 var MulAdd = function(audiolet, mul, add) {
-    MulAdd.superclass.call(this, audiolet, 3, 1); 
+    AudioletNode.call(this, audiolet, 3, 1); 
     this.linkNumberOfOutputChannels(0, 0);
     this.mul = new AudioletParameter(this, 1, mul || 1);
     this.add = new AudioletParameter(this, 2, add || 0);
@@ -3644,7 +3641,7 @@ MulAdd.prototype.toString = function() {
  */
 
 var Multiply = function(audiolet, value) {
-    Multiply.superclass.call(this, audiolet, 2, 1); 
+    AudioletNode.call(this, audiolet, 2, 1); 
     this.linkNumberOfOutputChannels(0, 0);
     this.value = new AudioletParameter(this, 1, value || 1);
 }
@@ -3693,7 +3690,7 @@ Multiply.prototype.toString = function() {
  */
 
 var Reciprocal = function(audiolet, value) {
-    Reciprocal.superclass.call(this, audiolet, 1, 1); 
+    AudioletNode.call(this, audiolet, 1, 1); 
     this.linkNumberOfOutputChannels(0, 0);
 }
 extend(Reciprocal, AudioletNode);
@@ -3728,7 +3725,7 @@ Reciprocal.prototype.toString = function() {
  */
 
 var Subtract = function(audiolet, value) {
-    Subtract.superclass.call(this, audiolet, 2, 1); 
+    AudioletNode.call(this, audiolet, 2, 1); 
     this.linkNumberOfOutputChannels(0, 0);
     this.value = new AudioletParameter(this, 1, value || 1);
 }
@@ -3777,7 +3774,7 @@ Subtract.prototype.toString = function() {
  */
 
 var Tanh = function(audiolet) {
-    Tanh.superclass.call(this, audiolet, 1, 1); 
+    AudioletNode.call(this, audiolet, 1, 1); 
     this.linkNumberOfOutputChannels(0, 0);
 }
 extend(Tanh, AudioletNode);
@@ -3834,7 +3831,7 @@ Pattern.prototype.reset = function() {
  */
 
 var PArithmetic = function(start, step, repeats) {
-    PArithmetic.superclass.call(this);
+    Pattern.call(this);
     this.start = start;
     this.value = start;
     this.step = step;
@@ -3882,7 +3879,7 @@ var Pseries = PArithmetic;
  */
 
 var PChoose = function(list, repeats) {
-    PChoose.superclass.call(this); 
+    Pattern.call(this); 
     this.list = list;
     this.repeats = repeats || 1;
     this.position = 0;
@@ -3932,7 +3929,7 @@ var Prand = PChoose;
  */
 
 var PGeometric = function(start, step, repeats) {
-    PGeometric.superclass.call(this); 
+    Pattern.call(this); 
     this.start = start;
     this.value = start;
     this.step = step;
@@ -3979,7 +3976,7 @@ var Pgeom = PGeometric;
  */
 
 var PProxy = function(pattern) {
-    PProxy.superclass.call(this); 
+    Pattern.call(this); 
     if (pattern) {
         this.pattern = pattern;
     }
@@ -4004,7 +4001,7 @@ var Pp = PProxy;
  */
 
 var PRandom = function(low, high, repeats) {
-    PRandom.superclass.call(this); 
+    Pattern.call(this); 
     this.low = low;
     this.high = high;
     this.repeats = repeats;
@@ -4043,7 +4040,7 @@ var Pwhite = PRandom;
  */
 
 var PSequence = function(list, repeats, offset) {
-    PSequence.superclass.call(this); 
+    Pattern.call(this); 
     this.list = list;
     this.repeats = repeats || 1;
     this.position = 0;
@@ -4094,7 +4091,7 @@ var Pseq = PSequence;
  */
 
 var PSeries = function(list, repeats, offset) {
-    PSeries.superclass.call(this); 
+    Pattern.call(this); 
     this.list = list;
     this.repeats = repeats || 1;
     this.position = 0;
@@ -4145,7 +4142,7 @@ var Pser = PSeries;
  */
 
 var PShuffle = function(list, repeats) {
-    PShuffle.superclass.call(this); 
+    Pattern.call(this); 
     this.list = [];
     // Shuffle values into new list
     while (list.length) {
@@ -4190,7 +4187,7 @@ var Pshuffle = PShuffle;
  */
 
 var PWeightedChoose = function() {
-    PWeightedChoose.superclass.call(this); 
+    Pattern.call(this); 
 }
 
 PWeightedChoose.prototype.next = function() {
@@ -4217,7 +4214,7 @@ Scale.prototype.getFrequency = function(degree, rootFrequency, octave) {
  * @depends Scale.js
  */
 var MajorScale = function() {
-    MajorScale.superclass.call(this, [0, 2, 4, 5, 7, 9, 11]); 
+    Scale.call(this, [0, 2, 4, 5, 7, 9, 11]); 
 }
 extend(MajorScale, Scale);
 
@@ -4225,7 +4222,7 @@ extend(MajorScale, Scale);
  * @depends Scale.js
  */
 var MinorScale = function() {
-    MinorScale.superclass.call(this, [0, 2, 3, 5, 7, 8, 10]); 
+    Scale.call(this, [0, 2, 3, 5, 7, 8, 10]); 
 }
 extend(MinorScale, Scale);
 
@@ -4247,7 +4244,7 @@ var EqualTemperamentTuning = function(pitchesPerOctave) {
     for (var i=0; i<pitchesPerOctave; i++) {
         semitones.push(i);
     }
-    EqualTemperamentTuning.superclass.call(this, semitones, 2);
+    Tuning.call(this, semitones, 2);
 }
 extend(EqualTemperamentTuning, Tuning);
 

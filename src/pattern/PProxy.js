@@ -3,7 +3,7 @@
  */
 
 var PProxy = function(pattern) {
-    PProxy.superclass.call(this); 
+    Pattern.call(this); 
     if (pattern) {
         this.pattern = pattern;
     }

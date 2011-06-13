@@ -3,7 +3,7 @@
  */
 
 var SoftClip = function(audiolet) {
-    SoftClip.superclass.call(this, audiolet, 1, 1); 
+    AudioletNode.call(this, audiolet, 1, 1); 
     this.linkNumberOfOutputChannels(0, 0);
 }
 extend(SoftClip, AudioletNode);

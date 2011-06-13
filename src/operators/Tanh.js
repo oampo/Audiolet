@@ -3,7 +3,7 @@
  */
 
 var Tanh = function(audiolet) {
-    Tanh.superclass.call(this, audiolet, 1, 1); 
+    AudioletNode.call(this, audiolet, 1, 1); 
     this.linkNumberOfOutputChannels(0, 0);
 }
 extend(Tanh, AudioletNode);

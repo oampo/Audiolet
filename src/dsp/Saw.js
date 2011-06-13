@@ -2,7 +2,7 @@
  * @depends TableLookupOscillator.js
  */
 var Saw = function(audiolet, frequency) {
-    Saw.superclass.call(this, audiolet, Saw.TABLE, frequency); 
+    TableLookupOscillator.call(this, audiolet, Saw.TABLE, frequency); 
 }
 extend(Saw, TableLookupOscillator);
 

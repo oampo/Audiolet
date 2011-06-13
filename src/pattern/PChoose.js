@@ -3,7 +3,7 @@
  */
 
 var PChoose = function(list, repeats) {
-    PChoose.superclass.call(this); 
+    Pattern.call(this); 
     this.list = list;
     this.repeats = repeats || 1;
     this.position = 0;

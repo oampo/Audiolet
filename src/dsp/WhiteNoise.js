@@ -2,7 +2,7 @@
  * @depends ../core/AudioletNode.js
  */
 var WhiteNoise = function(audiolet) {
-    WhiteNoise.superclass.call(this, audiolet, 0, 1); 
+    AudioletNode.call(this, audiolet, 0, 1); 
 }
 extend(WhiteNoise, AudioletNode);
 

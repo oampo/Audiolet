@@ -13,7 +13,7 @@ var AbstractAudioletDevice = function(audiolet){
      *
      * @param {Audiolet} audiolet The audiolet object
      */
-    AbstractAudioletDevice.superclass.call(this, audiolet, 1 ,0);
+    AudioletNode.call(this, audiolet, 1 ,0);
     this.audiolet = audiolet;
     this.buffer = null;
 }

@@ -3,7 +3,7 @@
  */
 
 var LinearCrossFade = function(audiolet, position) {
-    LinearCrossFade.superclass.call(this, audiolet, 3, 1); 
+    AudioletNode.call(this, audiolet, 3, 1); 
     this.linkNumberOfOutputChannels(0, 0);
     this.position = new AudioletParameter(this, 2, position || 0.5);
 }

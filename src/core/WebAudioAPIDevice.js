@@ -4,7 +4,7 @@
 
 var WebAudioAPIDevice = function(audiolet, sampleRate, numberOfChannels, bufferSize) {
     // Call Super class contructor
-    WebAudioAPIDevice.superclass.call(this, audiolet);
+    AbstractAudioletDevice.call(this, audiolet);
 
     this.numberOfChannels = numberOfChannels || 2;
     this.bufferSize = bufferSize || 8192;
@@ -34,8 +34,8 @@ extend(WebAudioAPIDevice, AbstractAudioletDevice);
 WebAudioAPIDevice.prototype.tick = function(event) {
     var buffer = event.outputBuffer;
     var samplesNeeded = buffer.length;
-    WebAudioAPIDevice.superproto.tick.call(this, samplesNeeded, 
-                                           this.getWriteTime());
+    AudioletNode.prototype.tick.call(this, samplesNeeded, 
+                                     this.getWriteTime());
     var numberOfChannels = buffer.numberOfChannels;
     for (var i = 0; i < numberOfChannels; i++) {
         var channel = buffer.getChannelData(i);

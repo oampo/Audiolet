@@ -3,7 +3,7 @@
  */
 
 var PArithmetic = function(start, step, repeats) {
-    PArithmetic.superclass.call(this);
+    Pattern.call(this);
     this.start = start;
     this.value = start;
     this.step = step;

@@ -4,7 +4,7 @@
 
 // Maths from http://www.musicdsp.org/files/Audio-EQ-Cookbook.txt
 var HighPassFilter = function(audiolet, frequency) {
-    HighPassFilter.superclass.call(this, audiolet, frequency); 
+    BiquadFilter.call(this, audiolet, frequency); 
 }
 extend(HighPassFilter, BiquadFilter);
 

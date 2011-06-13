@@ -4,7 +4,7 @@
 
 // Maths from http://www.musicdsp.org/files/Audio-EQ-Cookbook.txt
 var BiquadFilter = function(audiolet, frequency) {
-    BiquadFilter.superclass.call(this, audiolet, 2, 1);
+    AudioletNode.call(this, audiolet, 2, 1);
 
     // Same number of output channels as input channels
     this.linkNumberOfOutputChannels(0, 0);

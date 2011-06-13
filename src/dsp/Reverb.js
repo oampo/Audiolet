@@ -22,7 +22,7 @@ var Reverb = function(audiolet, mix, roomSize, damping) {
         allPassTuning = [556, 441, 341, 225];
 
 
-    Reverb.superclass.call(this, audiolet, 4, 1);
+    AudioletGroup.call(this, audiolet, 4, 1);
 
     // Controls
     // Room size control
@@ -114,7 +114,7 @@ Reverb.prototype.toString = function() {
 
 // Converts a feedback gain multiplier to a 60db decay time
 var FeedbackGainToDecayTime = function(audiolet, delayTime) {
-    FeedbackGainToDecayTime.superclass.call(this, audiolet, 1, 1); 
+    AudioletNode.call(this, audiolet, 1, 1); 
     this.delayTime = delayTime;
     this.lastFeedbackGain = null;
     this.decayTime = null;

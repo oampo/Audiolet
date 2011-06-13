@@ -3,7 +3,7 @@
  */
 
 var DummyDevice = function(audiolet, sampleRate, numberOfChannels, bufferSize) {
-    DummyDevice.superclass.call(this, audiolet);
+    AbstractAudioletDevice.call(this, audiolet);
 
     this.sampleRate = sampleRate || 44100.0;
     this.numberOfChannels = numberOfChannels || 2;
@@ -16,7 +16,7 @@ var DummyDevice = function(audiolet, sampleRate, numberOfChannels, bufferSize) {
 extend(DummyDevice, AbstractAudioletDevice);
 
 DummyDevice.prototype.tick = function() {
-    DummyDevice.superproto.tick.call(this, this.bufferSize, this.writePosition);
+    AudioletNode.prototype.tick.call(this, this.bufferSize, this.writePosition);
     this.writePosition += this.bufferSize;
 }
 

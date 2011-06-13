@@ -1,6 +1,6 @@
 window.onload = function() {
     var Synth = function(audiolet, frequency) {
-        Synth.superclass.call(this, audiolet, 0, 1);
+        AudioletGroup.call(this, audiolet, 0, 1);
         // Basic wave
         this.saw = new Saw(audiolet, frequency);
 

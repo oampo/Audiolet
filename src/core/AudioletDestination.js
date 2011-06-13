@@ -3,8 +3,7 @@
  */
 
 var AudioletDestination = function(audiolet, sampleRate, numberOfChannels, bufferSize) {
-    // Call superclass contrctor
-    AudioletDestination.superclass.call(this, audiolet, 1, 0);
+    AudioletGroup.call(this, audiolet, 1, 0);
 
     this.device = new AudioletDevice(audiolet, sampleRate,
             numberOfChannels, bufferSize);

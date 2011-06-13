@@ -3,7 +3,7 @@
  */
 
 var BadValueDetector = function(audiolet, callback) {
-    BadValueDetector.superclass.call(this, audiolet, 1, 1);
+    PassThroughNode.call(this, audiolet, 1, 1);
     this.linkNumberOfOutputChannels(0, 0);
 
     if (callback) {

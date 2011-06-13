@@ -3,8 +3,7 @@
  */
 
 var AudioDataAPIDevice = function(audiolet, sampleRate, numberOfChannels, bufferSize) {
-    // Call super class contructer
-    AudioDataAPIDevice.superclass.call(this, audiolet);
+    AbstractAudioletDevice.call(this, audiolet);
 
     this.sampleRate = sampleRate || 44100.0;
     this.numberOfChannels = numberOfChannels || 2;
@@ -69,8 +68,8 @@ AudioDataAPIDevice.prototype.tick = function() {
         // Samples needed per channel
         samplesNeeded = Math.floor(samplesNeeded / this.numberOfChannels);
         // Request some sound data from the callback function.
-        AudioDataAPIDevice.superproto.tick.call(this, samplesNeeded, 
-                this.getWriteTime());
+        AudioletNode.prototype.tick.call(this, samplesNeeded,
+                                         this.getWriteTime());
         var buffer = this.buffer.interleaved();
 
         // Writing the data.
