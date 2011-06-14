@@ -2,7 +2,6 @@
  * @depends BiquadFilter.js
  */
 
-<<<<<<< HEAD
 /**
  * All-pass filter
  *
