@@ -6,14 +6,11 @@
  * From the outside groups look and behave exactly the same as nodes.
  * Internally you can connect nodes directly to the group's inputs and
  * outputs, allowing connection to nodes outside of the group.
- */
-
-/**
- * Constructor
  *
- * @param {Audiolet} audiolet The audiolet object
- * @param {Number} numberOfInputs
- * @param {Number} numberOfOutputs
+ * @constructor
+ * @param {Audiolet} audiolet The audiolet object.
+ * @param {Number} numberOfInputs The number of inputs.
+ * @param {Number} numberOfOutputs The number of outputs.
  */
 var AudioletGroup = function(audiolet, numberOfInputs, numberOfOutputs) {
     this.audiolet = audiolet;
@@ -34,9 +31,9 @@ var AudioletGroup = function(audiolet, numberOfInputs, numberOfOutputs) {
 /**
  * Connect the group to another node or group
  *
- * @param {AudioletNode|AudioletGroup} node The node to connect to
- * @param {Number} output The index of the output to connect from
- * @param {Number} input The index of the input to connect to
+ * @param {AudioletNode|AudioletGroup} node The node to connect to.
+ * @param {Number} [output=0] The index of the output to connect from.
+ * @param {Number} [input=0] The index of the input to connect to.
  */
 AudioletGroup.prototype.connect = function(node, output, input) {
     this.outputs[output || 0].connect(node, 0, input);
@@ -45,9 +42,9 @@ AudioletGroup.prototype.connect = function(node, output, input) {
 /**
  * Disconnect the group from another node or group
  *
- * @param {AudioletNode|AudioletGroup} node The node to disconnect from
- * @param {Number} output The index of the output to disconnect
- * @param {Number} input The index of the input to disconnect
+ * @param {AudioletNode|AudioletGroup} node The node to disconnect from.
+ * @param {Number} [output=0] The index of the output to disconnect.
+ * @param {Number} [input=0] The index of the input to disconnect.
  */
 AudioletGroup.prototype.disconnect = function(node, output, input) {
     this.outputs[output || 0].disconnect(node, 0, input);

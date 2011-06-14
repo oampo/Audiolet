@@ -18,19 +18,14 @@
  * - gate The gate controlling the envelope.  Value changes from 0 -> 1
  * trigger the envelope.  Linked to input 0.
  *
+ * @constructor
  * @extends Envelope
+ * @param {Audiolet} audiolet The audiolet object.
+ * @param {Number} gate The initial gate value.
+ * @param {Number} attack The attack time in seconds.
+ * @param {Number} release The release time in seconds.
+ * @param {Function} [onComplete] A function called after the release stage.
  */
-
-/**
- * Constructor
- *
- * @param {Audiolet} audiolet The audiolet object
- * @param {Number} gate The initial gate value
- * @param {Number} attack The attack time in seconds
- * @param {Number} release The release time in seconds
- * @param {Function} onComplete A function called after the release stage
- */
-
 var PercussiveEnvelope = function(audiolet, gate, attack, release,
                                   onComplete) {
     var levels = [0, 1, 0];
@@ -42,7 +37,7 @@ extend(PercussiveEnvelope, Envelope);
 /**
  * toString
  *
- * @return {String}
+ * @return {String} String representation.
  */
 PercussiveEnvelope.prototype.toString = function() {
     return 'Percussive Envelope';

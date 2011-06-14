@@ -1,4 +1,4 @@
-/**
+/*!
  * @depends ../core/AudioletNode.js
  */
 
@@ -20,14 +20,10 @@
  *
  * - frequency The filter frequency.  Linked to input 1.
  *
+ * @constructor
  * @extends AudioletNode
- */
-
-/**
- * Constructor
- *
- * @param {Audiolet} audiolet The audiolet object
- * @param {Number} frequency The initial frequency
+ * @param {Audiolet} audiolet The audiolet object.
+ * @param {Number} frequency The initial frequency.
  */
 var BiquadFilter = function(audiolet, frequency) {
     AudioletNode.call(this, audiolet, 2, 1);
@@ -55,7 +51,7 @@ extend(BiquadFilter, AudioletNode);
 /**
  * Calculate the biquad filter coefficients.  This should be overridden.
  *
- * @param {Number} frequency The filter frequency
+ * @param {Number} frequency The filter frequency.
  */
 BiquadFilter.prototype.calculateCoefficients = function(frequency) {
 };
@@ -63,8 +59,8 @@ BiquadFilter.prototype.calculateCoefficients = function(frequency) {
 /**
  * Process a block of samples
  *
- * @param {AudioletBuffer[]} inputBuffers Samples received from the inputs
- * @param {AudioletBuffer[]} outputBuffers Samples to be sent to the outputs
+ * @param {AudioletBuffer[]} inputBuffers Samples received from the inputs.
+ * @param {AudioletBuffer[]} outputBuffers Samples to be sent to the outputs.
  */
 BiquadFilter.prototype.generate = function(inputBuffers, outputBuffers) {
     var inputBuffer = inputBuffers[0];
@@ -161,7 +157,7 @@ BiquadFilter.prototype.generate = function(inputBuffers, outputBuffers) {
 /**
  * toString
  *
- * @return {String}
+ * @return {String} String representation.
  */
 BiquadFilter.prototype.toString = function() {
     return 'Biquad Filter';

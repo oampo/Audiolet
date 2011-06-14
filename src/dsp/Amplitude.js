@@ -20,15 +20,11 @@
  * - attack The attack time of the envelope follower.  Linked to input 1.
  * - release The release time of the envelope follower.  Linked to input 2.
  *
+ * @constructor
  * @extends AudioletNode
- */
-
-/**
- * Constructor
- *
- * @param {Audiolet} audiolet The audiolet object
- * @param {Number} [attack=0.01] The initial attack time in seconds
- * @param {Number} [release=0.01] The initial release time in seconds
+ * @param {Audiolet} audiolet The audiolet object.
+ * @param {Number} [attack=0.01] The initial attack time in seconds.
+ * @param {Number} [release=0.01] The initial release time in seconds.
  */
 var Amplitude = function(audiolet, attack, release) {
     AudioletNode.call(this, audiolet, 3, 1);
@@ -48,8 +44,8 @@ extend(Amplitude, AudioletNode);
 /**
  * Process a block of samples
  *
- * @param {AudioletBuffer[]} inputBuffers Samples received from the inputs
- * @param {AudioletBuffer[]} outputBuffers Samples to be sent to the outputs
+ * @param {AudioletBuffer[]} inputBuffers Samples received from the inputs.
+ * @param {AudioletBuffer[]} outputBuffers Samples to be sent to the outputs.
  */
 Amplitude.prototype.generate = function(inputBuffers, outputBuffers) {
     var inputBuffer = inputBuffers[0];
@@ -116,7 +112,7 @@ Amplitude.prototype.generate = function(inputBuffers, outputBuffers) {
 /**
  * toString
  *
- * @return {String}
+ * @return {String} String representation.
  */
 Amplitude.prototype.toString = function() {
     return ('Amplitude');

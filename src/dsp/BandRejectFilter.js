@@ -1,4 +1,4 @@
-/**
+/*!
  * @depends BiquadFilter.js
  */
 
@@ -18,14 +18,10 @@
  *
  * - frequency The filter frequency.  Linked to input 1.
  *
+ * @constructor
  * @extends BiquadFilter
- */
-
-/**
- * Constructor
- *
- * @param {Audiolet} audiolet The audiolet object
- * @param {Number} frequency The initial frequency
+ * @param {Audiolet} audiolet The audiolet object.
+ * @param {Number} frequency The initial frequency.
  */
 var BandRejectFilter = function(audiolet, frequency) {
     BiquadFilter.call(this, audiolet, frequency);
@@ -36,7 +32,7 @@ extend(BandRejectFilter, BiquadFilter);
  * Calculate the biquad filter coefficients using maths from
  * http://www.musicdsp.org/files/Audio-EQ-Cookbook.txt
  *
- * @param {Number} frequency The filter frequency
+ * @param {Number} frequency The filter frequency.
  */
 BandRejectFilter.prototype.calculateCoefficients = function(frequency) {
     var w0 = 2 * Math.PI * frequency /
@@ -56,7 +52,7 @@ BandRejectFilter.prototype.calculateCoefficients = function(frequency) {
 /**
  * toString
  *
- * @return {String}
+ * @return {String} String representation.
  */
 BandRejectFilter.prototype.toString = function() {
     return 'Band Reject Filter';

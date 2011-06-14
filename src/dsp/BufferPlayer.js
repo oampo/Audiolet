@@ -29,17 +29,13 @@
  * - loop Whether the buffer should loop when it reaches the end.  Linked to
  * input 3
  *
+ * @constructor
  * @extends AudioletNode
- */
-
-/**
- * Constructor
- *
- * @param {Audiolet} audiolet The audiolet object
- * @param {AudioletBuffer} buffer The buffer to play
- * @param {Number} [playbackRate=1] The initial playback rate
- * @param {Number} [startPosition=0] The initial start position
- * @param {Number} [loop=0] Initial value for whether to loop
+ * @param {Audiolet} audiolet The audiolet object.
+ * @param {AudioletBuffer} buffer The buffer to play.
+ * @param {Number} [playbackRate=1] The initial playback rate.
+ * @param {Number} [startPosition=0] The initial start position.
+ * @param {Number} [loop=0] Initial value for whether to loop.
  */
 var BufferPlayer = function(audiolet, buffer, playbackRate, startPosition,
                             loop) {
@@ -60,8 +56,8 @@ extend(BufferPlayer, AudioletNode);
 /**
  * Process a block of samples
  *
- * @param {AudioletBuffer[]} inputBuffers Samples received from the inputs
- * @param {AudioletBuffer[]} outputBuffers Samples to be sent to the outputs
+ * @param {AudioletBuffer[]} inputBuffers Samples received from the inputs.
+ * @param {AudioletBuffer[]} outputBuffers Samples to be sent to the outputs.
  */
 BufferPlayer.prototype.generate = function(inputBuffers, outputBuffers) {
     var outputBuffer = outputBuffers[0];
@@ -178,7 +174,7 @@ BufferPlayer.prototype.generate = function(inputBuffers, outputBuffers) {
 /**
  * toString
  *
- * @return {String}
+ * @return {String} String representation.
  */
 BufferPlayer.prototype.toString = function() {
     return ('Buffer player');

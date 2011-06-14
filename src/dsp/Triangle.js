@@ -17,14 +17,10 @@
  *
  * - frequency The frequency of the oscillator.  Linked to input 0.
  *
+ * @constructor
  * @extends TableLookupOscillator
- */
-
-/**
- * Constructor
- *
- * @param {Audiolet} audiolet The audiolet object
- * @param {Number} [frequency=440] Initial frequency
+ * @param {Audiolet} audiolet The audiolet object.
+ * @param {Number} [frequency=440] Initial frequency.
  */
 var Triangle = function(audiolet, frequency) {
     TableLookupOscillator.call(this, audiolet, Triangle.TABLE, frequency);
@@ -34,7 +30,7 @@ extend(Triangle, TableLookupOscillator);
 /**
  * toString
  *
- * @return {String}
+ * @return {String} String representation.
  */
 Triangle.prototype.toString = function() {
     return 'Triangle';

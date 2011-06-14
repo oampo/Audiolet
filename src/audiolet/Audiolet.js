@@ -1,19 +1,16 @@
 /**
  * The basic building block of Audiolet applications.  Nodes are connected
  * together to create a processing graph which governs the flow of audio data.
- * AudioletNodes can contain any number of inputs and outputs which send and 
+ * AudioletNodes can contain any number of inputs and outputs which send and
  * receive one or more channels of audio data.  Audio data is created and
  * processed using the generate function, which is called whenever new data is
  * needed.
- */
-
-/**
- * Constructor
  *
- * @param {Audiolet} audiolet The audiolet object
- * @param {Number} numberOfInputs
- * @param {Number} numberOfOutputs
- * @param {Function} [generate] A replacement for the generate function
+ * @constructor
+ * @param {Audiolet} audiolet The audiolet object.
+ * @param {Number} numberOfInputs The number of inputs.
+ * @param {Number} numberOfOutputs The number of outputs.
+ * @param {Function} [generate] A replacement for the generate function.
  */
 var AudioletNode = function(audiolet, numberOfInputs, numberOfOutputs,
                             generate) {
@@ -38,14 +35,14 @@ var AudioletNode = function(audiolet, numberOfInputs, numberOfOutputs,
     }
 
     this.timestamp = null;
-}
+};
 
 /**
- * Connect the node to another node or group
+ * Connect the node to another node or group.
  *
- * @param {AudioletNode} node The node to connect to
- * @param {Number} [output=0] The index of the output to connect from
- * @param {Number} [input=0] The index of the input to connect to
+ * @param {AudioletNode|AudioletGroup} node The node to connect to.
+ * @param {Number} [output=0] The index of the output to connect from.
+ * @param {Number} [input=0] The index of the input to connect to.
  */
 AudioletNode.prototype.connect = function(node, output, input) {
     if (node instanceof AudioletGroup) {
@@ -57,16 +54,15 @@ AudioletNode.prototype.connect = function(node, output, input) {
     var inputPin = node.inputs[input || 0];
     outputPin.connect(inputPin);
     inputPin.connect(outputPin);
-}
+};
 
 /**
  * Disconnect the node from another node or group
  *
- * @param {AudioletNode} node The node to disconnect from
- * @param {Number} [output=0] The index of the output to disconnect
- * @param {Number} [input=0] The index of the input to disconnect
+ * @param {AudioletNode|AudioletGroup} node The node to disconnect from.
+ * @param {Number} [output=0] The index of the output to disconnect.
+ * @param {Number} [input=0] The index of the input to disconnect.
  */
-
 AudioletNode.prototype.disconnect = function(node, output, input) {
     if (node instanceof AudioletGroup) {
         node = node.inputs[input || 0];
@@ -77,29 +73,29 @@ AudioletNode.prototype.disconnect = function(node, output, input) {
     var inputPin = node.inputs[input || 0];
     inputPin.disconnect(outputPin);
     outputPin.disconnect(inputPin);
-}
+};
 
 /**
- * Force an output to contain a fixed number of channels
+ * Force an output to contain a fixed number of channels.
  *
- * @param {Number} output The index of the output
- * @param {Number} numberOfChannels
+ * @param {Number} output The index of the output.
+ * @param {Number} numberOfChannels The number of channels.
  */
 AudioletNode.prototype.setNumberOfOutputChannels = function(output,
                                                             numberOfChannels) {
     this.outputs[output].numberOfChannels = numberOfChannels;
-}
+};
 
 /**
  * Link an output to an input, forcing the output to always contain the
- * same number of channels as the input
+ * same number of channels as the input.
  *
- * @param {Number} output The index of the output
- * @param {Number} input The index of the input
+ * @param {Number} output The index of the output.
+ * @param {Number} input The index of the input.
  */
 AudioletNode.prototype.linkNumberOfOutputChannels = function(output, input) {
     this.outputs[output].linkNumberOfChannels(this.inputs[input]);
-}
+};
 
 /**
  * Process a buffer of samples, first pulling any necessary data from
@@ -107,8 +103,8 @@ AudioletNode.prototype.linkNumberOfOutputChannels = function(output, input) {
  * manually by users, who should instead rely on automatic ticking from
  * connections to the AudioletDevice.
  *
- * @param {Number} length The number of samples to process
- * @param {Number} timestamp A timestamp for the block of samples
+ * @param {Number} length The number of samples to process.
+ * @param {Number} timestamp A timestamp for the block of samples.
  */
 AudioletNode.prototype.tick = function(length, timestamp) {
     if (timestamp != this.timestamp) {
@@ -123,14 +119,14 @@ AudioletNode.prototype.tick = function(length, timestamp) {
 
         this.generate(inputBuffers, outputBuffers);
     }
-}
+};
 
 /**
  * Call the tick function on nodes which are connected to the inputs.  This
  * function should not be called manually by users.
  *
- * @param {Number} length The number of samples to process
- * @param {Number} timestamp A timestamp for the block of samples
+ * @param {Number} length The number of samples to process.
+ * @param {Number} timestamp A timestamp for the block of samples.
  */
 AudioletNode.prototype.tickParents = function(length, timestamp) {
     var numberOfInputs = this.numberOfInputs;
@@ -144,14 +140,14 @@ AudioletNode.prototype.tickParents = function(length, timestamp) {
             input.connectedFrom[index].node.tick(length, timestamp);
         }
     }
-}
+};
 
 /**
  * Process a block of samples, reading from the input buffers and putting
  * new values into the output buffers.  Override me!
  *
- * @param {AudioletBuffer[]} inputBuffers Samples received from the inputs
- * @param {AudioletBuffer[]} outputBuffers Samples to be sent to the outputs
+ * @param {AudioletBuffer[]} inputBuffers Samples received from the inputs.
+ * @param {AudioletBuffer[]} outputBuffers Samples to be sent to the outputs.
  */
 AudioletNode.prototype.generate = function(inputBuffers, outputBuffers) {
     // Sane default - pass along any empty flags
@@ -162,14 +158,15 @@ AudioletNode.prototype.generate = function(inputBuffers, outputBuffers) {
             outputBuffers[i].isEmpty = true;
         }
     }
-}
+};
 
 /**
  * Create the input buffers by grabbing data from the outputs of connected
  * nodes and summing it.  If no nodes are connected to an input, then
  * give a one channel empty buffer.
  *
- * @param {Number} length The number of samples for the resulting buffers
+ * @param {Number} length The number of samples for the resulting buffers.
+ * @return {AudioletBuffer[]} The input buffers.
  */
 AudioletNode.prototype.createInputBuffers = function(length) {
     var inputBuffers = [];
@@ -224,12 +221,13 @@ AudioletNode.prototype.createInputBuffers = function(length) {
         }
     }
     return inputBuffers;
-}
+};
 
 /**
- * Create output buffers of the correct length
+ * Create output buffers of the correct length.
  *
- * @param {Number} length The number of samples for the resulting buffers
+ * @param {Number} length The number of samples for the resulting buffers.
+ * @return {AudioletNode[]} The output buffers.
  */
 AudioletNode.prototype.createOutputBuffers = function(length) {
     // Create the output buffers
@@ -242,11 +240,11 @@ AudioletNode.prototype.createOutputBuffers = function(length) {
         outputBuffers.push(output.buffer);
     }
     return (outputBuffers);
-}
+};
 
 /**
  * Remove the node completely from the processing graph, disconnecting all
- * of its inputs and outputs
+ * of its inputs and outputs.
  */
 AudioletNode.prototype.remove = function() {
     // Disconnect inputs
@@ -272,7 +270,7 @@ AudioletNode.prototype.remove = function() {
             this.disconnect(input, i, inputPin.index);
         }
     }
-}
+};
 
 
 /*!
@@ -282,58 +280,55 @@ AudioletNode.prototype.remove = function() {
 /**
  * An abstract base class for audio output devices
  *
+ * @constructor
  * @extends AudioletNode
+ * @param {Audiolet} audiolet The audiolet object.
  */
-var AbstractAudioletDevice = function(audiolet){
-    /**
-     * Constructor
-     *
-     * @param {Audiolet} audiolet The audiolet object
-     */
-    AudioletNode.call(this, audiolet, 1 ,0);
+var AbstractAudioletDevice = function(audiolet) {
+    AudioletNode.call(this, audiolet, 1 , 0);
     this.audiolet = audiolet;
     this.buffer = null;
-}
+};
 extend(AbstractAudioletDevice, AudioletNode);
 
 /**
  * Default generate function.  Makes the input buffer available as a
  * member.
  *
- * @param {AudioletBuffer[]} inputBuffers An array containing the input buffer
- * @param {AudioletBuffer[]} outputBuffers An empty array
+ * @param {AudioletBuffer[]} inputBuffers An array containing the input buffer.
+ * @param {AudioletBuffer[]} outputBuffers An empty array.
  */
 AbstractAudioletDevice.prototype.generate = function(inputBuffers,
                                                      outputBuffers) {
     this.buffer = inputBuffers[0];
-}
+};
 
 /**
  * Default playback time function.
  *
- * @returns {Number} Zero
+ * @return {Number} Zero.
  */
 AbstractAudioletDevice.prototype.getPlaybackTime = function() {
     return 0;
-}
+};
 
 /**
  * Default write time function.
  *
- * @returns {Number} Zero
+ * @return {Number} Zero.
  */
 AbstractAudioletDevice.prototype.getWriteTime = function() {
     return 0;
-}
+};
 
 /**
  * toString
  *
- * @returns {String}
+ * @return {String} String representation.
  */
 AbstractAudioletDevice.prototype.toString = function() {
     return 'Device';
-}
+};
 
 /**
  * @depends AbstractAudioletDevice.js
@@ -364,7 +359,7 @@ var AudioDataAPIDevice = function(audiolet, sampleRate, numberOfChannels,
 
     this.started = new Date().valueOf();
     this.interval = setInterval(this.tick.bind(this), 10);
-}
+};
 extend(AudioDataAPIDevice, AbstractAudioletDevice);
 
 AudioDataAPIDevice.prototype.tick = function() {
@@ -422,19 +417,19 @@ AudioDataAPIDevice.prototype.tick = function() {
             this.overflow = buffer.subarray(numSamplesWritten);
         }
     }
-}
+};
 
 AudioDataAPIDevice.prototype.getPlaybackTime = function() {
     return this.output.mozCurrentSampleOffset() / this.numberOfChannels;
-}
+};
 
 AudioDataAPIDevice.prototype.getWriteTime = function() {
     return this.writePosition / this.numberOfChannels;
-}
+};
 
 AudioDataAPIDevice.prototype.toString = function() {
     return 'Audio Data API Device';
-}
+};
 
 var AudioletBuffer = function(numberOfChannels, length) {
     this.numberOfChannels = numberOfChannels;
@@ -452,18 +447,18 @@ var AudioletBuffer = function(numberOfChannels, length) {
 
     this.isEmpty = false;
     this.channelOffset = 0;
-}
+};
 
 AudioletBuffer.prototype.getChannelData = function(channel) {
     return (this.channels[channel]);
-}
+};
 
 AudioletBuffer.prototype.set = function(buffer) {
     var numberOfChannels = buffer.numberOfChannels;
     for (var i = 0; i < numberOfChannels; i++) {
         this.channels[i].set(buffer.getChannelData(i));
     }
-}
+};
 
 AudioletBuffer.prototype.setSection = function(buffer, length, inputOffset,
                                                outputOffset) {
@@ -492,7 +487,7 @@ AudioletBuffer.prototype.setSection = function(buffer, length, inputOffset,
          */
         channel1.set(channel2);
     }
-}
+};
 
 AudioletBuffer.prototype.add = function(buffer) {
     var length = this.length;
@@ -504,7 +499,7 @@ AudioletBuffer.prototype.add = function(buffer) {
             channel1[j] += channel2[j];
         }
     }
-}
+};
 
 AudioletBuffer.prototype.addSection = function(buffer, length, inputOffset,
                                                outputOffset) {
@@ -518,7 +513,7 @@ AudioletBuffer.prototype.addSection = function(buffer, length, inputOffset,
             channel1[j + outputOffset] += channel2[j + inputOffset];
         }
     }
-}
+};
 
 AudioletBuffer.prototype.resize = function(numberOfChannels, length, lazy,
                                            offset) {
@@ -530,7 +525,7 @@ AudioletBuffer.prototype.resize = function(numberOfChannels, length, lazy,
     var oldLength = this.length;
     var channelOffset = this.channelOffset + offset;
 
-    for (var i=0; i < numberOfChannels; i++) {
+    for (var i = 0; i < numberOfChannels; i++) {
         // Get the current channels
         var channel = channels[i];
         var unslicedChannel = unslicedChannels[i];
@@ -582,34 +577,34 @@ AudioletBuffer.prototype.resize = function(numberOfChannels, length, lazy,
     this.length = length;
     this.numberOfChannels = numberOfChannels;
     this.channelOffset = channelOffset;
-}
+};
 
 AudioletBuffer.prototype.push = function(buffer) {
     var bufferLength = buffer.length;
     this.resize(this.numberOfChannels, this.length + bufferLength);
     this.setSection(buffer, bufferLength, 0, this.length - bufferLength);
-}
+};
 
 AudioletBuffer.prototype.pop = function(buffer) {
     var bufferLength = buffer.length;
     var offset = this.length - bufferLength;
     buffer.setSection(this, bufferLength, offset, 0);
     this.resize(this.numberOfChannels, offset);
-}
+};
 
 AudioletBuffer.prototype.unshift = function(buffer) {
     var bufferLength = buffer.length;
     this.resize(this.numberOfChannels, this.length + bufferLength, false,
             bufferLength);
     this.setSection(buffer, bufferLength, 0, 0);
-}
+};
 
 AudioletBuffer.prototype.shift = function(buffer) {
     var bufferLength = buffer.length;
     buffer.setSection(this, bufferLength, 0, 0);
     this.resize(this.numberOfChannels, this.length - bufferLength,
             false, bufferLength);
-}
+};
 
 AudioletBuffer.prototype.zero = function() {
     var numberOfChannels = this.numberOfChannels;
@@ -620,7 +615,7 @@ AudioletBuffer.prototype.zero = function() {
             channel[j] = 0;
         }
     }
-}
+};
 
 AudioletBuffer.prototype.combined = function() {
     var channels = this.channels;
@@ -631,7 +626,7 @@ AudioletBuffer.prototype.combined = function() {
         combined.set(channels[i], i * length);
     }
     return combined;
-}
+};
 
 AudioletBuffer.prototype.interleaved = function() {
     var channels = this.channels;
@@ -644,13 +639,13 @@ AudioletBuffer.prototype.interleaved = function() {
         }
     }
     return interleaved;
-}
+};
 
 AudioletBuffer.prototype.copy = function() {
     var buffer = new AudioletBuffer(this.numberOfChannels, this.length);
     buffer.set(this);
     return buffer;
-}
+};
 
 AudioletBuffer.prototype.load = function(path, async, callback) {
     var request = new AudioFileRequest(path, async);
@@ -667,11 +662,25 @@ AudioletBuffer.prototype.load = function(path, async, callback) {
 
     request.onFailure = function() {
         console.error('Could not load', path);
-    }.bind(this)
+    }.bind(this);
 
     request.send();
-}
+};
 
+/**
+ * A container for collections of connected AudioletNodes.  Groups make it
+ * possible to create multiple copies of predefined networks of nodes,
+ * without having to manually create and connect up each individual node.
+ *
+ * From the outside groups look and behave exactly the same as nodes.
+ * Internally you can connect nodes directly to the group's inputs and
+ * outputs, allowing connection to nodes outside of the group.
+ *
+ * @constructor
+ * @param {Audiolet} audiolet The audiolet object.
+ * @param {Number} numberOfInputs The number of inputs.
+ * @param {Number} numberOfOutputs The number of outputs.
+ */
 var AudioletGroup = function(audiolet, numberOfInputs, numberOfOutputs) {
     this.audiolet = audiolet;
     this.numberOfInputs = numberOfInputs;
@@ -686,16 +695,34 @@ var AudioletGroup = function(audiolet, numberOfInputs, numberOfOutputs) {
     for (var i = 0; i < numberOfOutputs; i++) {
         this.outputs.push(new PassThroughNode(this.audiolet, 1, 1));
     }
-}
+};
 
+/**
+ * Connect the group to another node or group
+ *
+ * @param {AudioletNode|AudioletGroup} node The node to connect to.
+ * @param {Number} [output=0] The index of the output to connect from.
+ * @param {Number} [input=0] The index of the input to connect to.
+ */
 AudioletGroup.prototype.connect = function(node, output, input) {
     this.outputs[output || 0].connect(node, 0, input);
-}
+};
 
+/**
+ * Disconnect the group from another node or group
+ *
+ * @param {AudioletNode|AudioletGroup} node The node to disconnect from.
+ * @param {Number} [output=0] The index of the output to disconnect.
+ * @param {Number} [input=0] The index of the input to disconnect.
+ */
 AudioletGroup.prototype.disconnect = function(node, output, input) {
     this.outputs[output || 0].disconnect(node, 0, input);
-}
+};
 
+/**
+ * Remove the group completely from the processing graph, disconnecting all
+ * of its inputs and outputs
+ */
 AudioletGroup.prototype.remove = function() {
     var numberOfInputs = this.inputs.length;
     for (var i = 0; i < numberOfInputs; i++) {
@@ -706,7 +733,7 @@ AudioletGroup.prototype.remove = function() {
     for (var i = 0; i < numberOfOutputs; i++) {
         this.outputs[i].remove();
     }
-}
+};
 
 /**
  * @depends AudioletGroup.js
@@ -732,12 +759,12 @@ var AudioletDestination = function(audiolet, sampleRate, numberOfChannels,
     this.blockSizeLimiter.connect(this.scheduler);
     this.scheduler.connect(this.upMixer);
     this.upMixer.connect(this.device);
-}
+};
 extend(AudioletDestination, AudioletGroup);
 
 AudioletDestination.prototype.toString = function() {
-    return "Destination";
-}
+    return 'Destination';
+};
 
 function AudioletDevice(audiolet, sampleRate, numberOfChannels, bufferSize) {
     // Mozilla?
@@ -769,11 +796,11 @@ var AudioletInput = function(node, index) {
     this.buffer = new AudioletBuffer(1, 0);
     // Overflow buffer, for feedback loops
     this.overflow = new AudioletBuffer(1, 0);
-}
+};
 
 AudioletInput.prototype.connect = function(output) {
     this.connectedFrom.push(output);
-}
+};
 
 AudioletInput.prototype.disconnect = function(output) {
     var numberOfStreams = this.connectedFrom.length;
@@ -783,21 +810,25 @@ AudioletInput.prototype.disconnect = function(output) {
             break;
         }
     }
-}
+};
 
 AudioletInput.prototype.isConnected = function() {
     return (this.connectedFrom.length > 0);
-}
+};
 
 AudioletInput.prototype.toString = function() {
     return this.node.toString() + 'Input #' + this.index;
-}
+};
 
 
+/**
+ * The base audiolet object.  Contains an output node which pulls data from
+ * connected nodes.
+ */
 var Audiolet = function(sampleRate, numberOfChannels, bufferSize) {
-    this.output = new AudioletDestination(this, sampleRate, 
+    this.output = new AudioletDestination(this, sampleRate,
                                           numberOfChannels, bufferSize);
-}
+};
 
 
 var AudioletOutput = function(node, index) {
@@ -816,11 +847,11 @@ var AudioletOutput = function(node, index) {
 
     this.suppliesFeedbackLoop = false;
     this.timestamp = null;
-}
+};
 
 AudioletOutput.prototype.connect = function(input) {
     this.connectedTo.push(input);
-}
+};
 
 AudioletOutput.prototype.disconnect = function(input) {
     var numberOfStreams = this.connectedTo.length;
@@ -830,26 +861,26 @@ AudioletOutput.prototype.disconnect = function(input) {
             break;
         }
     }
-}
+};
 
 AudioletOutput.prototype.isConnected = function() {
     return (this.connectedTo.length > 0);
-}
+};
 
 AudioletOutput.prototype.linkNumberOfChannels = function(input) {
     this.linkedInput = input;
-}
+};
 
 AudioletOutput.prototype.unlinkNumberOfChannels = function() {
     this.linkedInput = null;
-}
+};
 
 AudioletOutput.prototype.getNumberOfChannels = function() {
     if (this.linkedInput && this.linkedInput.isConnected()) {
         return (this.linkedInput.buffer.numberOfChannels);
     }
     return (this.numberOfChannels);
-}
+};
 
 AudioletOutput.prototype.getBuffer = function(length) {
     var buffer = this.buffer;
@@ -896,11 +927,11 @@ AudioletOutput.prototype.getBuffer = function(length) {
             return outputBuffer;
         }
     }
-}
+};
 
 AudioletOutput.prototype.toString = function() {
     return this.node.toString() + 'Output #' + this.index + ' - ';
-}
+};
 
 
 var AudioletParameter = function(node, inputIndex, value) {
@@ -912,33 +943,33 @@ var AudioletParameter = function(node, inputIndex, value) {
         this.input = null;
     }
     this.value = value || 0;
-}
+};
 
 AudioletParameter.prototype.isStatic = function() {
     var input = this.input;
     return (input == null ||
             input.connectedFrom.length == 0 ||
             input.buffer.isEmpty);
-}
+};
 
 AudioletParameter.prototype.isDynamic = function() {
     var input = this.input;
     return (input != null &&
             input.connectedFrom.length > 0 &&
             !input.buffer.isEmpty);
-}
+};
 
 AudioletParameter.prototype.setValue = function(value) {
     this.value = value;
-}
+};
 
 AudioletParameter.prototype.getValue = function() {
     return this.value;
-}
+};
 
 AudioletParameter.prototype.getChannel = function() {
     return this.input.buffer.channels[0];
-}
+};
 
 /**
  * @depends AudioletNode.js
@@ -948,7 +979,7 @@ var BlockSizeLimiter = function(audiolet, maximumBlockSize) {
     AudioletNode.call(this, audiolet, 1, 1);
     this.maximumBlockSize = maximumBlockSize;
     this.linkNumberOfOutputChannels(0, 0);
-}
+};
 extend(BlockSizeLimiter, AudioletNode);
 
 BlockSizeLimiter.prototype.tick = function(length, timestamp) {
@@ -987,7 +1018,7 @@ BlockSizeLimiter.prototype.tick = function(length, timestamp) {
             samplesGenerated += samplesNeeded;
         }
     }
-}
+};
 
 BlockSizeLimiter.prototype.generate = function(inputBuffers, outputBuffers,
                                                offset) {
@@ -1000,11 +1031,11 @@ BlockSizeLimiter.prototype.generate = function(inputBuffers, outputBuffers,
     }
     outputBuffer.setSection(inputBuffer, inputBuffer.length,
                             0, offset);
-}
+};
 
 BlockSizeLimiter.prototype.toString = function() {
     return 'Block Size Limiter';
-}
+};
 
 /**
  * @depends AbstractAudioletDevice.js
@@ -1022,37 +1053,37 @@ var DummyDevice = function(audiolet, sampleRate, numberOfChannels,
 
     setInterval(this.tick.bind(this),
                 1000 * this.bufferSize / this.sampleRate);
-}
+};
 extend(DummyDevice, AbstractAudioletDevice);
 
 DummyDevice.prototype.tick = function() {
     AudioletNode.prototype.tick.call(this, this.bufferSize,
                                      this.writePosition);
     this.writePosition += this.bufferSize;
-}
+};
 
 DummyDevice.prototype.getPlaybackTime = function() {
     return this.writePosition - this.bufferSize;
-}
+};
 
 DummyDevice.prototype.getWriteTime = function() {
     return this.writePosition;
-}
+};
 
 DummyDevice.prototype.toString = function() {
     return 'Dummy Device';
-}
+};
 
-/* 
+/*
  * A method for extending a javascript pseudo-class
  * Taken from
  * http://peter.michaux.ca/articles/class-based-inheritance-in-javascript
  *
- * @param {Object} subclass The class to extend
- * @param {Object} superclass The class to be extended
+ * @param {Object} subclass The class to extend.
+ * @param {Object} superclass The class to be extended.
  */
 function extend(subclass, superclass) {
-    function Dummy(){}
+    function Dummy() {}
     Dummy.prototype = superclass.prototype;
     subclass.prototype = new Dummy();
     subclass.prototype.constructor = subclass;
@@ -1065,7 +1096,7 @@ function extend(subclass, superclass) {
 var ParameterNode = function(audiolet, value) {
     AudioletNode.call(this, audiolet, 1, 1);
     this.parameter = new AudioletParameter(this, 0, value);
-}
+};
 extend(ParameterNode, AudioletNode);
 
 ParameterNode.prototype.generate = function(inputBuffers, outputBuffers) {
@@ -1090,11 +1121,11 @@ ParameterNode.prototype.generate = function(inputBuffers, outputBuffers) {
         }
         outputChannel[i] = parameter;
     }
-}
+};
 
 ParameterNode.prototype.toString = function() {
     return 'Parameter Node';
-}
+};
 
 /**
  * @depends AudioletNode.js
@@ -1102,7 +1133,7 @@ ParameterNode.prototype.toString = function() {
 
 var PassThroughNode = function(audiolet, numberOfInputs, numberOfOutputs) {
     AudioletNode.call(this, audiolet, numberOfInputs, numberOfOutputs);
-}
+};
 extend(PassThroughNode, AudioletNode);
 
 PassThroughNode.prototype.createOutputBuffers = function(length) {
@@ -1123,11 +1154,11 @@ PassThroughNode.prototype.createOutputBuffers = function(length) {
         outputBuffers.push(output.buffer);
     }
     return (outputBuffers);
-}
+};
 
 PassThroughNode.prototype.toString = function() {
     return 'Pass Through Node';
-}
+};
 
 // Priority Queue based on python heapq module
 // http://svn.python.org/view/python/branches/release27-maint/Lib/heapq.py
@@ -1145,12 +1176,12 @@ var PriorityQueue = function(array, compare) {
     else {
         this.heap = [];
     }
-}
+};
 
 PriorityQueue.prototype.push = function(item) {
     this.heap.push(item);
     this.siftDown(0, this.heap.length - 1);
-}
+};
 
 
 PriorityQueue.prototype.pop = function() {
@@ -1165,15 +1196,15 @@ PriorityQueue.prototype.pop = function() {
         returnItem = lastElement;
     }
     return (returnItem);
-}
+};
 
 PriorityQueue.prototype.peek = function() {
     return (this.heap[0]);
-}
+};
 
 PriorityQueue.prototype.isEmpty = function() {
     return (this.heap.length == 0);
-}
+};
 
 PriorityQueue.prototype.siftDown = function(startPosition, position) {
     var newItem = this.heap[position];
@@ -1188,7 +1219,7 @@ PriorityQueue.prototype.siftDown = function(startPosition, position) {
         break;
     }
     this.heap[position] = newItem;
-}
+};
 
 PriorityQueue.prototype.siftUp = function(position) {
     var endPosition = this.heap.length;
@@ -1208,11 +1239,11 @@ PriorityQueue.prototype.siftUp = function(position) {
     }
     this.heap[position] = newItem;
     this.siftDown(startPosition, position);
-}
+};
 
 PriorityQueue.prototype.compare = function(a, b) {
     return (a < b);
-}
+};
 
 /**
  * @depends AudioletNode.js
@@ -1237,13 +1268,13 @@ var Scheduler = function(audiolet, bpm) {
     this.beatLength = 60 / this.bpm * this.audiolet.device.sampleRate;
 
     this.emptyBuffer = new AudioletBuffer(1, 1);
-}
+};
 extend(Scheduler, AudioletNode);
 
 Scheduler.prototype.setTempo = function(bpm) {
     this.bpm = bpm;
     this.beatLength = 60 / this.bpm * this.audiolet.device.sampleRate;
-}
+};
 
 Scheduler.prototype.addRelative = function(beats, callback) {
     var event = {};
@@ -1251,7 +1282,7 @@ Scheduler.prototype.addRelative = function(beats, callback) {
     event.time = this.time + beats * this.beatLength;
     this.queue.push(event);
     return event;
-}
+};
 
 Scheduler.prototype.addAbsolute = function(beat, callback) {
     if (beat < this.beat ||
@@ -1264,7 +1295,7 @@ Scheduler.prototype.addAbsolute = function(beat, callback) {
     event.time = this.lastBeatTime + (beat - this.beat) * this.beatLength;
     this.queue.push(event);
     return event;
-}
+};
 
 Scheduler.prototype.play = function(patterns, durationPattern, callback) {
     var event = {};
@@ -1275,7 +1306,7 @@ Scheduler.prototype.play = function(patterns, durationPattern, callback) {
     event.time = this.audiolet.device.getWriteTime();
     this.queue.push(event);
     return event;
-}
+};
 
 Scheduler.prototype.remove = function(event) {
     var idx = this.queue.heap.indexOf(event);
@@ -1286,11 +1317,11 @@ Scheduler.prototype.remove = function(event) {
             return (a.time < b.time);
         });
     }
-}
+};
 
 Scheduler.prototype.stop = function(event) {
     this.remove(event);
-}
+};
 
 Scheduler.prototype.tick = function(length, timestamp) {
     // The time at the beginning of the block
@@ -1358,7 +1389,7 @@ Scheduler.prototype.tick = function(length, timestamp) {
         var offset = lastEventTime - startTime;
         this.generate(inputBuffers, outputBuffers, offset);
     }
-}
+};
 
 Scheduler.prototype.updateClock = function(time) {
     this.time = time;
@@ -1372,7 +1403,7 @@ Scheduler.prototype.updateClock = function(time) {
         }
         this.lastBeatTime += this.beatLength;
     }
-}
+};
 
 Scheduler.prototype.processEvent = function(event) {
     var durationPattern = event.durationPattern;
@@ -1413,7 +1444,7 @@ Scheduler.prototype.processEvent = function(event) {
         // Regular event
         event.callback();
     }
-}
+};
 
 Scheduler.prototype.generate = function(inputBuffers, outputBuffers, offset) {
     var inputBuffer = inputBuffers[0];
@@ -1435,11 +1466,11 @@ Scheduler.prototype.generate = function(inputBuffers, outputBuffers, offset) {
         var outputChannel = outputBuffer.getChannelData(i);
         outputChannel.set(inputChannel, offset);
     }
-}
+};
 
 Scheduler.prototype.toString = function() {
     return 'Scheduler';
-}
+};
 
 // Shim for subarray/slice
 var Int8Array, Uint8Array, Int16Array, Uint16Array;
@@ -1496,7 +1527,7 @@ var WebAudioAPIDevice = function(audiolet, sampleRate, numberOfChannels,
     this.node.onaudioprocess = this.tick.bind(this);
     this.node.connect(this.context.destination);
     this.writePosition = 0;
-}
+};
 extend(WebAudioAPIDevice, AbstractAudioletDevice);
 
 WebAudioAPIDevice.prototype.tick = function(event) {
@@ -1509,26 +1540,26 @@ WebAudioAPIDevice.prototype.tick = function(event) {
         channel.set(this.buffer.getChannelData(i));
     }
     this.writePosition += samplesNeeded;
-}
+};
 
 WebAudioAPIDevice.prototype.getPlaybackTime = function() {
     return this.context.currentTime * this.sampleRate;
-}
+};
 
 WebAudioAPIDevice.prototype.getWriteTime = function() {
     return this.writePosition;
-}
+};
 
 WebAudioAPIDevice.prototype.toString = function() {
     return 'Web Audio API Device';
-}
+};
 
 /**
  * @depends ../core/AudioletNode.js
  */
 var Envelope = function(audiolet, gate, levels, times, releaseStage,
                         onComplete) {
-    AudioletNode.call(this, audiolet, 1, 1); 
+    AudioletNode.call(this, audiolet, 1, 1);
     this.gate = new AudioletParameter(this, 0, gate || 1);
 
     this.levels = levels;
@@ -1543,7 +1574,7 @@ var Envelope = function(audiolet, gate, levels, times, releaseStage,
     this.level = 0;
     this.delta = 0;
     this.gateOn = false;
-}
+};
 extend(Envelope, AudioletNode);
 
 Envelope.prototype.generate = function(inputBuffers, outputBuffers) {
@@ -1646,43 +1677,98 @@ Envelope.prototype.generate = function(inputBuffers, outputBuffers) {
     this.level = level;
     this.delta = delta;
     this.gateOn = gateOn;
-}
+};
 
 Envelope.prototype.calculateDelta = function(stage, level) {
     var delta = this.levels[stage + 1] - level;
     var stageTime = this.times[stage] * this.audiolet.device.sampleRate;
     return (delta / stageTime);
-}
+};
 
 Envelope.prototype.calculateChangeTime = function(stage, time) {
     var stageTime = this.times[stage] * this.audiolet.device.sampleRate;
     return (time + stageTime);
-}
+};
 
 Envelope.prototype.toString = function() {
     return 'Envelope';
-}
+};
+
+/*!
+ * @depends Envelope.js
+ */
 
 /**
- * @depends Envelope.js
+ * Linear attack-decay-sustain-release envelope
+ *
+ * **Inputs**
+ *
+ * - Gate
+ *
+ * **Outputs**
+ *
+ * - Envelope
+ *
+ * **Parameters**
+ *
+ * - gate The gate turning the envelope on and off.  Value changes from 0 -> 1
+ * trigger the envelope.  Value changes from 1 -> 0 make the envelope move to
+ * its release stage.  Linked to input 0.
+ *
+ * @constructor
+ * @extends Envelope
+ * @param {Audiolet} audiolet The audiolet object.
+ * @param {Number} gate The initial gate value.
+ * @param {Number} attack The attack time in seconds.
+ * @param {Number} decay The decay time in seconds.
+ * @param {Number} sustain The sustain level (between 0 and 1).
+ * @param {Number} release The release time in seconds.
+ * @param {Function} onComplete A function called after the release stage.
  */
 var ADSREnvelope = function(audiolet, gate, attack, decay, sustain, release,
                             onComplete) {
     var levels = [0, 1, sustain, 0];
     var times = [attack, decay, release];
     Envelope.call(this, audiolet, gate, levels, times, 2, onComplete);
-}
+};
 extend(ADSREnvelope, Envelope);
 
+/**
+ * toString
+ *
+ * @return {String} String representation.
+ */
 ADSREnvelope.prototype.toString = function() {
     return 'ADSR Envelope';
-}
+};
 
-/**
+/*!
  * @depends ../core/AudioletNode.js
  */
 
-// Maths from http://www.musicdsp.org/files/Audio-EQ-Cookbook.txt
+/**
+ * Generic biquad filter.  The coefficients (a0, a1, a2, b0, b1 and b2) are set
+ * using the calculateCoefficients function, which should be overridden and
+ * will be called automatically when new values are needed.
+ *
+ * **Inputs**
+ *
+ * - Audio
+ * - Filter frequency
+ *
+ * **Outputs**
+ *
+ * - Filtered audio
+ *
+ * **Parameters**
+ *
+ * - frequency The filter frequency.  Linked to input 1.
+ *
+ * @constructor
+ * @extends AudioletNode
+ * @param {Audiolet} audiolet The audiolet object.
+ * @param {Number} frequency The initial frequency.
+ */
 var BiquadFilter = function(audiolet, frequency) {
     AudioletNode.call(this, audiolet, 2, 1);
 
@@ -1703,13 +1789,23 @@ var BiquadFilter = function(audiolet, frequency) {
     this.a0 = 0;
     this.a1 = 0;
     this.a2 = 0;
-}
+};
 extend(BiquadFilter, AudioletNode);
 
-// Overwrite me
+/**
+ * Calculate the biquad filter coefficients.  This should be overridden.
+ *
+ * @param {Number} frequency The filter frequency.
+ */
 BiquadFilter.prototype.calculateCoefficients = function(frequency) {
-}
+};
 
+/**
+ * Process a block of samples
+ *
+ * @param {AudioletBuffer[]} inputBuffers Samples received from the inputs.
+ * @param {AudioletBuffer[]} outputBuffers Samples to be sent to the outputs.
+ */
 BiquadFilter.prototype.generate = function(inputBuffers, outputBuffers) {
     var inputBuffer = inputBuffers[0];
     var outputBuffer = outputBuffers[0];
@@ -1800,22 +1896,54 @@ BiquadFilter.prototype.generate = function(inputBuffers, outputBuffers) {
         }
     }
     this.lastFrequency = lastFrequency;
-}
-
-BiquadFilter.prototype.toString = function() {
-    return 'Biquad Filter';
-}
+};
 
 /**
+ * toString
+ *
+ * @return {String} String representation.
+ */
+BiquadFilter.prototype.toString = function() {
+    return 'Biquad Filter';
+};
+
+/*!
  * @depends BiquadFilter.js
  */
 
-// Maths from http://www.musicdsp.org/files/Audio-EQ-Cookbook.txt
+/**
+ * All-pass filter
+ *
+ * **Inputs**
+ *
+ * - Audio
+ * - Filter frequency
+ *
+ * **Outputs**
+ *
+ * - Filtered audio
+ *
+ * **Parameters**
+ *
+ * - frequency The filter frequency.  Linked to input 1.
+ *
+ * @constructor
+ * @extends BiquadFilter
+ *
+ * @param {Audiolet} audiolet The audiolet object.
+ * @param {Number} frequency The initial frequency.
+ */
 var AllPassFilter = function(audiolet, frequency) {
     BiquadFilter.call(this, audiolet, frequency);
-}
+};
 extend(AllPassFilter, BiquadFilter);
 
+/**
+ * Calculate the biquad filter coefficients using maths from
+ * http://www.musicdsp.org/files/Audio-EQ-Cookbook.txt
+ *
+ * @param {Number} frequency The filter frequency.
+ */
 AllPassFilter.prototype.calculateCoefficients = function(frequency) {
     var w0 = 2 * Math.PI * frequency /
              this.audiolet.device.sampleRate;
@@ -1829,16 +1957,45 @@ AllPassFilter.prototype.calculateCoefficients = function(frequency) {
     this.a0 = 1 + alpha;
     this.a1 = -2 * cosw0;
     this.a2 = 1 - alpha;
-}
-
-AllPassFilter.prototype.toString = function() {
-    return 'All Pass Filter';
-}
+};
 
 /**
+ * toString
+ *
+ * @return {String} String representation.
+ */
+AllPassFilter.prototype.toString = function() {
+    return 'All Pass Filter';
+};
+
+/*!
  * @depends ../core/AudioletNode.js
  */
 
+/**
+ * Amplitude envelope follower
+ *
+ * **Inputs**
+ *
+ * - Audio
+ * - Attack time
+ * - Release time
+ *
+ * **Outputs**
+ *
+ * - Amplitude envelope
+ *
+ * **Parameters**
+ *
+ * - attack The attack time of the envelope follower.  Linked to input 1.
+ * - release The release time of the envelope follower.  Linked to input 2.
+ *
+ * @constructor
+ * @extends AudioletNode
+ * @param {Audiolet} audiolet The audiolet object.
+ * @param {Number} [attack=0.01] The initial attack time in seconds.
+ * @param {Number} [release=0.01] The initial release time in seconds.
+ */
 var Amplitude = function(audiolet, attack, release) {
     AudioletNode.call(this, audiolet, 3, 1);
     this.linkNumberOfOutputChannels(0, 0);
@@ -1851,9 +2008,15 @@ var Amplitude = function(audiolet, attack, release) {
 
     //        release = Math.pow(0.01, 1 / (release * sampleRate));
     this.release = new AudioletParameter(this, 2, release || 0.01);
-}
+};
 extend(Amplitude, AudioletNode);
 
+/**
+ * Process a block of samples
+ *
+ * @param {AudioletBuffer[]} inputBuffers Samples received from the inputs.
+ * @param {AudioletBuffer[]} outputBuffers Samples to be sent to the outputs.
+ */
 Amplitude.prototype.generate = function(inputBuffers, outputBuffers) {
     var inputBuffer = inputBuffers[0];
     var outputBuffer = outputBuffers[0];
@@ -1914,16 +2077,38 @@ Amplitude.prototype.generate = function(inputBuffers, outputBuffers) {
         }
         followers[i] = follower;
     }
-}
-
-Amplitude.prototype.toString = function() {
-    return ('Amplitude');
-}
+};
 
 /**
+ * toString
+ *
+ * @return {String} String representation.
+ */
+Amplitude.prototype.toString = function() {
+    return ('Amplitude');
+};
+
+/*!
  * @depends ../core/PassThroughNode.js
  */
 
+/**
+ * Detect potentially hazardous values in the audio stream.  Looks for
+ * undefineds, nulls, NaNs and Infinities.
+ *
+ * **Inputs**
+ *
+ * - Audio
+ *
+ * **Outputs**
+ *
+ * - Audio
+ *
+ * @constructor
+ * @extends PassThroughNode
+ * @param {Audiolet} audiolet The audiolet object.
+ * @param {Function} [callback] Function called if a bad value is detected.
+ */
 var BadValueDetector = function(audiolet, callback) {
     PassThroughNode.call(this, audiolet, 1, 1);
     this.linkNumberOfOutputChannels(0, 0);
@@ -1931,15 +2116,27 @@ var BadValueDetector = function(audiolet, callback) {
     if (callback) {
         this.callback = callback;
     }
-}
+};
 extend(BadValueDetector, PassThroughNode);
 
-// Override me
+/**
+ * Default callback.  Logs the value and position of the bad value.
+ *
+ * @param {Number|Object|'undefined'} value The value detected.
+ * @param {Number} channel The index of the channel the value was found in.
+ * @param {Number} index The sample index the value was found at.
+ */
 BadValueDetector.prototype.callback = function(value, channel, index) {
-    console.error(value + " detected at channel " + channel + " index "
-                  + index);
-}
+    console.error(value + ' detected at channel ' + channel + ' index ' +
+                  index);
+};
 
+/**
+ * Process a block of samples
+ *
+ * @param {AudioletBuffer[]} inputBuffers Samples received from the inputs.
+ * @param {AudioletBuffer[]} outputBuffers Samples to be sent to the outputs.
+ */
 BadValueDetector.prototype.generate = function(inputBuffers, outputBuffers) {
     var inputBuffer = inputBuffers[0];
 
@@ -1963,22 +2160,53 @@ BadValueDetector.prototype.generate = function(inputBuffers, outputBuffers) {
             }
         }
     }
-}
-
-BadValueDetector.prototype.toString = function() {
-    return 'Bad Value Detector';
-}
+};
 
 /**
+ * toString
+ *
+ * @return {String} String representation.
+ */
+BadValueDetector.prototype.toString = function() {
+    return 'Bad Value Detector';
+};
+
+/*!
  * @depends BiquadFilter.js
  */
 
-// Maths from http://www.musicdsp.org/files/Audio-EQ-Cookbook.txt
+/**
+ * Band-pass filter
+ *
+ * **Inputs**
+ *
+ * - Audio
+ * - Filter frequency
+ *
+ * **Outputs**
+ *
+ * - Filtered audio
+ *
+ * **Parameters**
+ *
+ * - frequency The filter frequency.  Linked to input 1.
+ *
+ * @constructor
+ * @extends BiquadFilter
+ * @param {Audiolet} audiolet The audiolet object.
+ * @param {Number} frequency The initial frequency.
+ */
 var BandPassFilter = function(audiolet, frequency) {
     BiquadFilter.call(this, audiolet, frequency);
-}
+};
 extend(BandPassFilter, BiquadFilter);
 
+/**
+ * Calculate the biquad filter coefficients using maths from
+ * http://www.musicdsp.org/files/Audio-EQ-Cookbook.txt
+ *
+ * @param {Number} frequency The filter frequency.
+ */
 BandPassFilter.prototype.calculateCoefficients = function(frequency) {
     var w0 = 2 * Math.PI * frequency / this.audiolet.device.sampleRate;
     var cosw0 = Math.cos(w0);
@@ -1991,22 +2219,53 @@ BandPassFilter.prototype.calculateCoefficients = function(frequency) {
     this.a0 = 1 + alpha;
     this.a1 = -2 * cosw0;
     this.a2 = 1 - alpha;
-}
-
-BandPassFilter.prototype.toString = function() {
-    return 'Band Pass Filter';
-}
+};
 
 /**
+ * toString
+ *
+ * @return {String} String representation.
+ */
+BandPassFilter.prototype.toString = function() {
+    return 'Band Pass Filter';
+};
+
+/*!
  * @depends BiquadFilter.js
  */
 
-// Maths from http://www.musicdsp.org/files/Audio-EQ-Cookbook.txt
+/**
+ * Band-reject filter
+ *
+ * **Inputs**
+ *
+ * - Audio
+ * - Filter frequency
+ *
+ * **Outputs**
+ *
+ * - Filtered audio
+ *
+ * **Parameters**
+ *
+ * - frequency The filter frequency.  Linked to input 1.
+ *
+ * @constructor
+ * @extends BiquadFilter
+ * @param {Audiolet} audiolet The audiolet object.
+ * @param {Number} frequency The initial frequency.
+ */
 var BandRejectFilter = function(audiolet, frequency) {
     BiquadFilter.call(this, audiolet, frequency);
-}
+};
 extend(BandRejectFilter, BiquadFilter);
 
+/**
+ * Calculate the biquad filter coefficients using maths from
+ * http://www.musicdsp.org/files/Audio-EQ-Cookbook.txt
+ *
+ * @param {Number} frequency The filter frequency.
+ */
 BandRejectFilter.prototype.calculateCoefficients = function(frequency) {
     var w0 = 2 * Math.PI * frequency /
              this.audiolet.device.sampleRate;
@@ -2020,19 +2279,59 @@ BandRejectFilter.prototype.calculateCoefficients = function(frequency) {
     this.a0 = 1 + alpha;
     this.a1 = -2 * cosw0;
     this.a2 = 1 - alpha;
-}
-
-BandRejectFilter.prototype.toString = function() {
-    return 'Band Reject Filter';
-}
+};
 
 /**
+ * toString
+ *
+ * @return {String} String representation.
+ */
+BandRejectFilter.prototype.toString = function() {
+    return 'Band Reject Filter';
+};
+
+/*!
  * @depends ../core/AudioletNode.js
  */
 
+/**
+ * Play the contents of an audio buffer
+ *
+ * **Inputs**
+ *
+ * - Playback rate
+ * - Restart trigger
+ * - Start position
+ * - Loop on/off
+ *
+ * **Outputs**
+ *
+ * - Audio
+ *
+ * **Parameters**
+ *
+ * - playbackRate The rate that the buffer should play at.  Value of 1 plays at
+ * the regular rate.  Values > 1 are pitched up.  Values < 1 are pitched down.
+ * Linked to input 0.
+ * - restartTrigger Changes of value from 0 -> 1 restart the playback from the
+ * start position.  Linked to input 1.
+ * - startPosition The position at which playback should begin.  Values between
+ * 0 (the beginning of the buffer) and 1 (the end of the buffer).  Linked to
+ * input 2.
+ * - loop Whether the buffer should loop when it reaches the end.  Linked to
+ * input 3
+ *
+ * @constructor
+ * @extends AudioletNode
+ * @param {Audiolet} audiolet The audiolet object.
+ * @param {AudioletBuffer} buffer The buffer to play.
+ * @param {Number} [playbackRate=1] The initial playback rate.
+ * @param {Number} [startPosition=0] The initial start position.
+ * @param {Number} [loop=0] Initial value for whether to loop.
+ */
 var BufferPlayer = function(audiolet, buffer, playbackRate, startPosition,
                             loop) {
-    AudioletNode.call(this, audiolet, 3, 1); 
+    AudioletNode.call(this, audiolet, 3, 1);
     this.buffer = buffer;
     this.setNumberOfOutputChannels(0, this.buffer.numberOfChannels);
     this.position = startPosition || 0;
@@ -2043,9 +2342,15 @@ var BufferPlayer = function(audiolet, buffer, playbackRate, startPosition,
 
     this.restartTriggerOn = false;
     this.playing = true;
-}
+};
 extend(BufferPlayer, AudioletNode);
 
+/**
+ * Process a block of samples
+ *
+ * @param {AudioletBuffer[]} inputBuffers Samples received from the inputs.
+ * @param {AudioletBuffer[]} outputBuffers Samples to be sent to the outputs.
+ */
 BufferPlayer.prototype.generate = function(inputBuffers, outputBuffers) {
     var outputBuffer = outputBuffers[0];
 
@@ -2156,18 +2461,23 @@ BufferPlayer.prototype.generate = function(inputBuffers, outputBuffers) {
     this.playing = playing;
     this.position = position;
     this.restartTriggerOn = restartTriggerOn;
-}
+};
 
+/**
+ * toString
+ *
+ * @return {String} String representation.
+ */
 BufferPlayer.prototype.toString = function() {
     return ('Buffer player');
-}
+};
 
 /**
  * @depends ../core/AudioletNode.js
  */
 
 var CombFilter = function(audiolet, maximumDelayTime, delayTime, decayTime) {
-    AudioletNode.call(this, audiolet, 3, 1); 
+    AudioletNode.call(this, audiolet, 3, 1);
     this.linkNumberOfOutputChannels(0, 0);
     this.maximumDelayTime = maximumDelayTime;
     this.delayTime = new AudioletParameter(this, 1, delayTime || 1);
@@ -2175,7 +2485,7 @@ var CombFilter = function(audiolet, maximumDelayTime, delayTime, decayTime) {
     var bufferSize = maximumDelayTime * this.audiolet.device.sampleRate;
     this.buffers = [];
     this.readWriteIndex = 0;
-}
+};
 extend(CombFilter, AudioletNode);
 
 CombFilter.prototype.generate = function(inputBuffers, outputBuffers) {
@@ -2261,21 +2571,21 @@ CombFilter.prototype.generate = function(inputBuffers, outputBuffers) {
         }
     }
     this.readWriteIndex = readWriteIndex;
-}
+};
 
 CombFilter.prototype.toString = function() {
     return 'Comb Filter';
-}
+};
 
 /**
  * @depends ../core/AudioletNode.js
  */
 var TableLookupOscillator = function(audiolet, table, frequency) {
-    AudioletNode.call(this, audiolet, 1, 1); 
+    AudioletNode.call(this, audiolet, 1, 1);
     this.table = table;
     this.frequency = new AudioletParameter(this, 0, frequency || 440);
     this.phase = 0;
-}
+};
 extend(TableLookupOscillator, AudioletNode);
 
 TableLookupOscillator.prototype.generate = function(inputBuffers,
@@ -2311,11 +2621,11 @@ TableLookupOscillator.prototype.generate = function(inputBuffers,
         channel[i] = table[Math.floor(phase)];
     }
     this.phase = phase;
-}
+};
 
 TableLookupOscillator.prototype.toString = function() {
     return 'Table Lookup Oscillator';
-}
+};
 
 
 /*!
@@ -2337,28 +2647,24 @@ TableLookupOscillator.prototype.toString = function() {
  *
  * - frequency The frequency of the oscillator.  Linked to input 0.
  *
+ * @constructor
  * @extends TableLookupOscillator
- */
-
-/**
- * Constructor
- *
- * @param {Audiolet} audiolet The audiolet object
- * @param {Number} [frequency=440] Initial frequency
+ * @param {Audiolet} audiolet The audiolet object.
+ * @param {Number} [frequency=440] Initial frequency.
  */
 var Sine = function(audiolet, frequency) {
-    TableLookupOscillator.call(this, audiolet, Sine.TABLE, frequency); 
-}
+    TableLookupOscillator.call(this, audiolet, Sine.TABLE, frequency);
+};
 extend(Sine, TableLookupOscillator);
 
 /**
  * toString
  *
- * @return {String}
+ * @return {String} String representation.
  */
 Sine.prototype.toString = function() {
     return 'Sine';
-}
+};
 
 /**
  * Sine table
@@ -2375,10 +2681,10 @@ for (var i = 0; i < 8192; i++) {
  */
 
 var CrossFade = function(audiolet, position) {
-    AudioletNode.call(this, audiolet, 3, 1); 
+    AudioletNode.call(this, audiolet, 3, 1);
     this.linkNumberOfOutputChannels(0, 0);
     this.position = new AudioletParameter(this, 2, position || 0.5);
-}
+};
 extend(CrossFade, AudioletNode);
 
 CrossFade.prototype.generate = function(inputBuffers, outputBuffers) {
@@ -2441,11 +2747,11 @@ CrossFade.prototype.generate = function(inputBuffers, outputBuffers) {
                 valueB * gainB;
         }
     }
-}
+};
 
 CrossFade.prototype.toString = function() {
     return 'Cross Fader';
-}
+};
 
 /**
  * @depends ../core/AudioletNode.js
@@ -2453,7 +2759,7 @@ CrossFade.prototype.toString = function() {
 
 var DampedCombFilter = function(audiolet, maximumDelayTime, delayTime,
                                 decayTime, damping) {
-    AudioletNode.call(this, audiolet, 4, 1); 
+    AudioletNode.call(this, audiolet, 4, 1);
     this.linkNumberOfOutputChannels(0, 0);
     this.maximumDelayTime = maximumDelayTime;
     this.delayTime = new AudioletParameter(this, 1, delayTime || 1);
@@ -2463,7 +2769,7 @@ var DampedCombFilter = function(audiolet, maximumDelayTime, delayTime,
     this.buffers = [];
     this.readWriteIndex = 0;
     this.filterStore = 0;
-}
+};
 extend(DampedCombFilter, AudioletNode);
 
 DampedCombFilter.prototype.generate = function(inputBuffers, outputBuffers) {
@@ -2566,25 +2872,25 @@ DampedCombFilter.prototype.generate = function(inputBuffers, outputBuffers) {
     }
     this.readWriteIndex = readWriteIndex;
     this.filterStore = filterStore;
-}
+};
 
 DampedCombFilter.prototype.toString = function() {
     return 'Damped Comb Filter';
-}
+};
 
 /**
  * @depends ../core/AudioletNode.js
  */
 
 var Delay = function(audiolet, maximumDelayTime, delayTime) {
-    AudioletNode.call(this, audiolet, 2, 1); 
+    AudioletNode.call(this, audiolet, 2, 1);
     this.linkNumberOfOutputChannels(0, 0);
     this.maximumDelayTime = maximumDelayTime;
     this.delayTime = new AudioletParameter(this, 1, delayTime || 1);
     var bufferSize = maximumDelayTime * this.audiolet.device.sampleRate;
     this.buffers = [];
     this.readWriteIndex = 0;
-}
+};
 extend(Delay, AudioletNode);
 
 Delay.prototype.generate = function(inputBuffers, outputBuffers) {
@@ -2646,18 +2952,18 @@ Delay.prototype.generate = function(inputBuffers, outputBuffers) {
         }
     }
     this.readWriteIndex = readWriteIndex;
-}
+};
 
 Delay.prototype.toString = function() {
     return 'Delay';
-}
+};
 
 /**
  * @depends ../core/AudioletNode.js
  */
 
 var DiscontinuityDetector = function(audiolet, threshold, callback) {
-    AudioletNode.call(this, audiolet, 1, 1); 
+    AudioletNode.call(this, audiolet, 1, 1);
     this.linkNumberOfOutputChannels(0, 0);
 
     this.threshold = threshold || 0.2;
@@ -2666,14 +2972,14 @@ var DiscontinuityDetector = function(audiolet, threshold, callback) {
     }
     this.lastValues = [];
 
-}
+};
 extend(DiscontinuityDetector, AudioletNode);
 
 // Override me
 DiscontinuityDetector.prototype.callback = function(size, channel, index) {
-    console.error("Discontinuity of " + size + " detected on channel " +
-                  channel + " index " + index);
-}
+    console.error('Discontinuity of ' + size + ' detected on channel ' +
+                  channel + ' index ' + index);
+};
 
 DiscontinuityDetector.prototype.generate = function(inputBuffers,
                                                     outputBuffers) {
@@ -2709,11 +3015,11 @@ DiscontinuityDetector.prototype.generate = function(inputBuffers,
 
         lastValues[i] = lastValue;
     }
-}
+};
 
 DiscontinuityDetector.prototype.toString = function() {
     return 'Discontinuity Detector';
-}
+};
 
 
 /**
@@ -2721,10 +3027,10 @@ DiscontinuityDetector.prototype.toString = function() {
  */
 
 var Gain = function(audiolet, gain) {
-    AudioletNode.call(this, audiolet, 2, 1); 
+    AudioletNode.call(this, audiolet, 2, 1);
     this.linkNumberOfOutputChannels(0, 0);
     this.gain = new AudioletParameter(this, 1, gain || 1);
-}
+};
 extend(Gain, AudioletNode);
 
 Gain.prototype.generate = function(inputBuffers, outputBuffers) {
@@ -2758,11 +3064,11 @@ Gain.prototype.generate = function(inputBuffers, outputBuffers) {
             outputChannel[j] = inputChannel[j] * gain;
         }
     }
-}
+};
 
 Gain.prototype.toString = function() {
     return ('Gain');
-}
+};
 
 /**
  * @depends BiquadFilter.js
@@ -2770,8 +3076,8 @@ Gain.prototype.toString = function() {
 
 // Maths from http://www.musicdsp.org/files/Audio-EQ-Cookbook.txt
 var HighPassFilter = function(audiolet, frequency) {
-    BiquadFilter.call(this, audiolet, frequency); 
-}
+    BiquadFilter.call(this, audiolet, frequency);
+};
 extend(HighPassFilter, BiquadFilter);
 
 HighPassFilter.prototype.calculateCoefficients = function(frequency) {
@@ -2787,24 +3093,24 @@ HighPassFilter.prototype.calculateCoefficients = function(frequency) {
     this.a0 = 1 + alpha;
     this.a1 = -2 * cosw0;
     this.a2 = 1 - alpha;
-}
+};
 
 HighPassFilter.prototype.toString = function() {
     return 'High Pass Filter';
-}
+};
 
 /**
  * @depends ../core/AudioletNode.js
  */
 
 var Lag = function(audiolet, value, lagTime) {
-    AudioletNode.call(this, audiolet, 2, 1); 
+    AudioletNode.call(this, audiolet, 2, 1);
     this.value = new AudioletParameter(this, 0, value || 0);
     this.lag = new AudioletParameter(this, 1, lagTime || 1);
     this.lastValue = value || 0;
 
     this.log001 = Math.log(0.001);
-}
+};
 extend(Lag, AudioletNode);
 
 Lag.prototype.generate = function(inputBuffers, outputBuffers) {
@@ -2851,11 +3157,11 @@ Lag.prototype.generate = function(inputBuffers, outputBuffers) {
         lastValue = output;
     }
     this.lastValue = lastValue;
-}
+};
 
 Lag.prototype.toString = function() {
     return 'Lag';
-}
+};
 
 
 /**
@@ -2863,7 +3169,7 @@ Lag.prototype.toString = function() {
  */
 
 var Limiter = function(audiolet, threshold, attack, release) {
-    AudioletGroup.call(this, audiolet, 4, 1); 
+    AudioletGroup.call(this, audiolet, 4, 1);
 
     // Parameters
     var attack = attack || 0.01;
@@ -2889,18 +3195,18 @@ var Limiter = function(audiolet, threshold, attack, release) {
 
     this.amplitude.connect(this.limitFromAmplitude, 0, 1);
     this.limitFromAmplitude.connect(this.outputs[0]);
-}
+};
 extend(Limiter, AudioletGroup);
 
 Limiter.prototype.toString = function() {
     return 'Limiter';
-}
+};
 
 var LimitFromAmplitude = function(audiolet, threshold) {
-    AudioletNode.call(this, audiolet, 3, 1); 
+    AudioletNode.call(this, audiolet, 3, 1);
     this.linkNumberOfOutputChannels(0, 0);
     this.threshold = new AudioletParameter(this, 2, threshold || 0.95);
-}
+};
 extend(LimitFromAmplitude, AudioletNode);
 
 LimitFromAmplitude.prototype.generate = function(inputBuffers, outputBuffers) {
@@ -2945,21 +3251,21 @@ LimitFromAmplitude.prototype.generate = function(inputBuffers, outputBuffers) {
             }
         }
     }
-}
+};
 
 LimitFromAmplitude.prototype.toString = function() {
     return ('Limit From Amplitude');
-}
+};
 
 /**
  * @depends ../core/AudioletNode.js
  */
 
 var LinearCrossFade = function(audiolet, position) {
-    AudioletNode.call(this, audiolet, 3, 1); 
+    AudioletNode.call(this, audiolet, 3, 1);
     this.linkNumberOfOutputChannels(0, 0);
     this.position = new AudioletParameter(this, 2, position || 0.5);
-}
+};
 extend(LinearCrossFade, AudioletNode);
 
 LinearCrossFade.prototype.generate = function(inputBuffers, outputBuffers) {
@@ -3005,11 +3311,11 @@ LinearCrossFade.prototype.generate = function(inputBuffers, outputBuffers) {
                                inputChannelB[i] * gainB;
         }
     }
-}
+};
 
 LinearCrossFade.prototype.toString = function() {
     return 'Linear Cross Fader';
-}
+};
 
 /**
  * @depends BiquadFilter.js
@@ -3017,8 +3323,8 @@ LinearCrossFade.prototype.toString = function() {
 
 // Maths from http://www.musicdsp.org/files/Audio-EQ-Cookbook.txt
 var LowPassFilter = function(audiolet, frequency) {
-    BiquadFilter.call(this, audiolet, frequency); 
-}
+    BiquadFilter.call(this, audiolet, frequency);
+};
 extend(LowPassFilter, BiquadFilter);
 
 LowPassFilter.prototype.calculateCoefficients = function(frequency) {
@@ -3034,22 +3340,22 @@ LowPassFilter.prototype.calculateCoefficients = function(frequency) {
     this.a0 = 1 + alpha;
     this.a1 = -2 * cosw0;
     this.a2 = 1 - alpha;
-}
+};
 
 LowPassFilter.prototype.toString = function() {
     return 'Low Pass Filter';
-}
+};
 
 /**
  * @depends ../core/AudioletNode.js
  */
 
 var Pan = function(audiolet) {
-    AudioletNode.call(this, audiolet, 2, 1); 
+    AudioletNode.call(this, audiolet, 2, 1);
     // Hardcode two output channels
     this.setNumberOfOutputChannels(0, 2);
     this.pan = new AudioletParameter(this, 1, 0.5);
-}
+};
 extend(Pan, AudioletNode);
 
 Pan.prototype.generate = function(inputBuffers, outputBuffers) {
@@ -3086,26 +3392,56 @@ Pan.prototype.generate = function(inputBuffers, outputBuffers) {
         leftOutputChannel[i] = value * Math.cos(scaledPan);
         rightOutputChannel[i] = value * Math.sin(scaledPan);
     }
-}
+};
 
 Pan.prototype.toString = function() {
     return 'Stereo Panner';
-}
+};
+
+/*!
+ * @depends Envelope.js
+ */
 
 /**
- * @depends Envelope.js
+ * Simple attack-release envelope
+ *
+ * **Inputs**
+ *
+ * - Gate
+ *
+ * **Outputs**
+ *
+ * - Envelope
+ *
+ * **Parameters**
+ *
+ * - gate The gate controlling the envelope.  Value changes from 0 -> 1
+ * trigger the envelope.  Linked to input 0.
+ *
+ * @constructor
+ * @extends Envelope
+ * @param {Audiolet} audiolet The audiolet object.
+ * @param {Number} gate The initial gate value.
+ * @param {Number} attack The attack time in seconds.
+ * @param {Number} release The release time in seconds.
+ * @param {Function} [onComplete] A function called after the release stage.
  */
 var PercussiveEnvelope = function(audiolet, gate, attack, release,
                                   onComplete) {
     var levels = [0, 1, 0];
     var times = [attack, release];
-    Envelope.call(this, audiolet, gate, levels, times, null, onComplete); 
-}
+    Envelope.call(this, audiolet, gate, levels, times, null, onComplete);
+};
 extend(PercussiveEnvelope, Envelope);
 
+/**
+ * toString
+ *
+ * @return {String} String representation.
+ */
 PercussiveEnvelope.prototype.toString = function() {
     return 'Percussive Envelope';
-}
+};
 
 /**
  * @depends ../core/AudioletGroup.js
@@ -3212,20 +3548,20 @@ var Reverb = function(audiolet, mix, roomSize, damping) {
     this.allPassFilters[lastAllPassIndex].connect(this.mixer, 0, 1);
 
     this.mixer.connect(this.outputs[0]);
-}
+};
 extend(Reverb, AudioletGroup);
 
 Reverb.prototype.toString = function() {
     return 'Reverb';
-}
+};
 
 // Converts a feedback gain multiplier to a 60db decay time
 var FeedbackGainToDecayTime = function(audiolet, delayTime) {
-    AudioletNode.call(this, audiolet, 1, 1); 
+    AudioletNode.call(this, audiolet, 1, 1);
     this.delayTime = delayTime;
     this.lastFeedbackGain = null;
     this.decayTime = null;
-}
+};
 extend(FeedbackGainToDecayTime, AudioletNode);
 
 FeedbackGainToDecayTime.prototype.generate = function(inputBuffers,
@@ -3251,20 +3587,49 @@ FeedbackGainToDecayTime.prototype.generate = function(inputBuffers,
 
     this.decayTime = decayTime;
     this.lastFeedbackGain = lastFeedbackGain;
-}
+};
 
-/**
+/*!
  * @depends TableLookupOscillator.js
  */
+
+/**
+ * Saw wave oscillator using a lookup table
+ *
+ * **Inputs**
+ *
+ * - Frequency
+ *
+ * **Outputs**
+ *
+ * - Saw wave
+ *
+ * **Parameters**
+ *
+ * - frequency The frequency of the oscillator.  Linked to input 0.
+ *
+ * @constructor
+ * @extends TableLookupOscillator
+ * @param {Audiolet} audiolet The audiolet object.
+ * @param {Number} [frequency=440] Initial frequency.
+ */
 var Saw = function(audiolet, frequency) {
-    TableLookupOscillator.call(this, audiolet, Saw.TABLE, frequency); 
-}
+    TableLookupOscillator.call(this, audiolet, Saw.TABLE, frequency);
+};
 extend(Saw, TableLookupOscillator);
 
+/**
+ * toString
+ *
+ * @return {String} String representation.
+ */
 Saw.prototype.toString = function() {
     return 'Saw';
-}
+};
 
+/**
+ * Saw table
+ */
 Saw.TABLE = [];
 for (var i = 0; i < 8192; i++) {
     Saw.TABLE.push(((((i - 4096) / 8192) % 1) + 1) % 1 * 2 - 1);
@@ -3276,9 +3641,9 @@ for (var i = 0; i < 8192; i++) {
  */
 
 var SoftClip = function(audiolet) {
-    AudioletNode.call(this, audiolet, 1, 1); 
+    AudioletNode.call(this, audiolet, 1, 1);
     this.linkNumberOfOutputChannels(0, 0);
-}
+};
 extend(SoftClip, AudioletNode);
 
 SoftClip.prototype.generate = function(inputBuffers, outputBuffers) {
@@ -3308,25 +3673,54 @@ SoftClip.prototype.generate = function(inputBuffers, outputBuffers) {
             }
         }
     }
-}
+};
 
 SoftClip.prototype.toString = function() {
     return ('SoftClip');
-}
+};
 
 
-/**
+/*!
  * @depends TableLookupOscillator.js
  */
+
+/**
+ * Square wave oscillator using a lookup table
+ *
+ * **Inputs**
+ *
+ * - Frequency
+ *
+ * **Outputs**
+ *
+ * - Square wave
+ *
+ * **Parameters**
+ *
+ * - frequency The frequency of the oscillator.  Linked to input 0.
+ *
+ * @constructor
+ * @extends TableLookupOscillator
+ * @param {Audiolet} audiolet The audiolet object.
+ * @param {Number} [frequency=440] Initial frequency.
+ */
 var Square = function(audiolet, frequency) {
-    TableLookupOscillator.call(this, audiolet, Square.TABLE, frequency); 
-}
+    TableLookupOscillator.call(this, audiolet, Square.TABLE, frequency);
+};
 extend(Square, TableLookupOscillator);
 
+/**
+ * toString
+ *
+ * @return {String} String representation.
+ */
 Square.prototype.toString = function() {
     return 'Square';
-}
+};
 
+/**
+ * Square wave table
+ */
 Square.TABLE = [];
 for (var i = 0; i < 8192; i++) {
     Square.TABLE.push(((i - 4096) / 8192) < 0 ? 1 : -1);
@@ -3334,18 +3728,47 @@ for (var i = 0; i < 8192; i++) {
 
 
 
-/**
+/*!
  * @depends TableLookupOscillator.js
  */
+
+/**
+ * Triangle wave oscillator using a lookup table
+ *
+ * **Inputs**
+ *
+ * - Frequency
+ *
+ * **Outputs**
+ *
+ * - Triangle wave
+ *
+ * **Parameters**
+ *
+ * - frequency The frequency of the oscillator.  Linked to input 0.
+ *
+ * @constructor
+ * @extends TableLookupOscillator
+ * @param {Audiolet} audiolet The audiolet object.
+ * @param {Number} [frequency=440] Initial frequency.
+ */
 var Triangle = function(audiolet, frequency) {
-    TableLookupOscillator.call(this, audiolet, Triangle.TABLE, frequency); 
-}
+    TableLookupOscillator.call(this, audiolet, Triangle.TABLE, frequency);
+};
 extend(Triangle, TableLookupOscillator);
 
+/**
+ * toString
+ *
+ * @return {String} String representation.
+ */
 Triangle.prototype.toString = function() {
     return 'Triangle';
-}
+};
 
+/**
+ * Triangle table
+ */
 Triangle.TABLE = [];
 for (var i = 0; i < 8192; i++) {
     // Smelly, but looks right...
@@ -3358,9 +3781,9 @@ for (var i = 0; i < 8192; i++) {
  */
 
 var TriggerControl = function(audiolet, trigger) {
-    AudioletNode.call(this, audiolet, 0, 1); 
+    AudioletNode.call(this, audiolet, 0, 1);
     this.trigger = new AudioletParameter(this, null, trigger || 0);
-}
+};
 extend(TriggerControl, AudioletNode);
 
 TriggerControl.prototype.generate = function(inputBuffers, outputBuffers) {
@@ -3381,21 +3804,21 @@ TriggerControl.prototype.generate = function(inputBuffers, outputBuffers) {
             channel[i] = 0;
         }
     }
-}
+};
 
 TriggerControl.prototype.toString = function() {
     return 'Trigger Control';
-}
+};
 
 /**
  * @depends ../core/AudioletNode.js
  */
 
 var UpMixer = function(audiolet, outputChannels) {
-    AudioletNode.call(this, audiolet, 1, 1); 
+    AudioletNode.call(this, audiolet, 1, 1);
     this.outputChannels = outputChannels;
     this.outputs[0].numberOfChannels = outputChannels;
-}
+};
 extend(UpMixer, AudioletNode);
 
 UpMixer.prototype.generate = function(inputBuffers, outputBuffers) {
@@ -3415,19 +3838,19 @@ UpMixer.prototype.generate = function(inputBuffers, outputBuffers) {
         var outputChannel = outputBuffer.getChannelData(i);
         outputChannel.set(inputChannel);
     }
-}
+};
 
 UpMixer.prototype.toString = function() {
     return 'UpMixer';
-}
+};
 
 
 /**
  * @depends ../core/AudioletNode.js
  */
 var WhiteNoise = function(audiolet) {
-    AudioletNode.call(this, audiolet, 0, 1); 
-}
+    AudioletNode.call(this, audiolet, 0, 1);
+};
 extend(WhiteNoise, AudioletNode);
 
 WhiteNoise.prototype.generate = function(inputBuffers, outputBuffers) {
@@ -3439,11 +3862,11 @@ WhiteNoise.prototype.generate = function(inputBuffers, outputBuffers) {
     for (var i = 0; i < bufferLength; i++) {
         channel[i] = Math.random() * 2 - 1;
     }
-}
+};
 
 WhiteNoise.prototype.toString = function() {
     return 'White Noise';
-}
+};
 
 
 /**
@@ -3451,10 +3874,10 @@ WhiteNoise.prototype.toString = function() {
  */
 
 var Add = function(audiolet, value) {
-    AudioletNode.call(this, audiolet, 2, 1); 
+    AudioletNode.call(this, audiolet, 2, 1);
     this.linkNumberOfOutputChannels(0, 0);
     this.value = new AudioletParameter(this, 1, value || 1);
-}
+};
 extend(Add, AudioletNode);
 
 Add.prototype.generate = function(inputBuffers, outputBuffers) {
@@ -3488,11 +3911,11 @@ Add.prototype.generate = function(inputBuffers, outputBuffers) {
             outputChannel[j] = inputChannel[j] + value;
         }
     }
-}
+};
 
 Add.prototype.toString = function() {
     return 'Add';
-}
+};
 
 
 /**
@@ -3500,10 +3923,10 @@ Add.prototype.toString = function() {
  */
 
 var Divide = function(audiolet, value) {
-    AudioletNode.call(this, audiolet, 2, 1); 
+    AudioletNode.call(this, audiolet, 2, 1);
     this.linkNumberOfOutputChannels(0, 0);
     this.value = new AudioletParameter(this, 1, value || 1);
-}
+};
 extend(Divide, AudioletNode);
 
 Divide.prototype.generate = function(inputBuffers, outputBuffers) {
@@ -3537,11 +3960,11 @@ Divide.prototype.generate = function(inputBuffers, outputBuffers) {
             outputChannel[j] = inputChannel[j] / value;
         }
     }
-}
+};
 
 Divide.prototype.toString = function() {
     return 'Divide';
-}
+};
 
 
 /**
@@ -3549,10 +3972,10 @@ Divide.prototype.toString = function() {
  */
 
 var Modulo = function(audiolet, value) {
-    AudioletNode.call(this, audiolet, 2, 1); 
+    AudioletNode.call(this, audiolet, 2, 1);
     this.linkNumberOfOutputChannels(0, 0);
     this.value = new AudioletParameter(this, 1, value || 1);
-}
+};
 extend(Modulo, AudioletNode);
 
 Modulo.prototype.generate = function(inputBuffers, outputBuffers) {
@@ -3586,11 +4009,11 @@ Modulo.prototype.generate = function(inputBuffers, outputBuffers) {
             outputChannel[j] = inputChannel[j] % value;
         }
     }
-}
+};
 
 Modulo.prototype.toString = function() {
     return 'Modulo';
-}
+};
 
 
 /**
@@ -3598,11 +4021,11 @@ Modulo.prototype.toString = function() {
  */
 
 var MulAdd = function(audiolet, mul, add) {
-    AudioletNode.call(this, audiolet, 3, 1); 
+    AudioletNode.call(this, audiolet, 3, 1);
     this.linkNumberOfOutputChannels(0, 0);
     this.mul = new AudioletParameter(this, 1, mul || 1);
     this.add = new AudioletParameter(this, 2, add || 0);
-}
+};
 extend(MulAdd, AudioletNode);
 
 MulAdd.prototype.generate = function(inputBuffers, outputBuffers) {
@@ -3648,11 +4071,11 @@ MulAdd.prototype.generate = function(inputBuffers, outputBuffers) {
             outputChannel[j] = inputChannel[j] * mul + add;
         }
     }
-}
+};
 
 MulAdd.prototype.toString = function() {
     return 'Multiplier/Adder';
-}
+};
 
 
 /**
@@ -3660,10 +4083,10 @@ MulAdd.prototype.toString = function() {
  */
 
 var Multiply = function(audiolet, value) {
-    AudioletNode.call(this, audiolet, 2, 1); 
+    AudioletNode.call(this, audiolet, 2, 1);
     this.linkNumberOfOutputChannels(0, 0);
     this.value = new AudioletParameter(this, 1, value || 1);
-}
+};
 extend(Multiply, AudioletNode);
 
 Multiply.prototype.generate = function(inputBuffers, outputBuffers) {
@@ -3697,11 +4120,11 @@ Multiply.prototype.generate = function(inputBuffers, outputBuffers) {
             outputChannel[j] = inputChannel[j] * value;
         }
     }
-}
+};
 
 Multiply.prototype.toString = function() {
     return 'Multiply';
-}
+};
 
 
 /**
@@ -3709,9 +4132,9 @@ Multiply.prototype.toString = function() {
  */
 
 var Reciprocal = function(audiolet, value) {
-    AudioletNode.call(this, audiolet, 1, 1); 
+    AudioletNode.call(this, audiolet, 1, 1);
     this.linkNumberOfOutputChannels(0, 0);
-}
+};
 extend(Reciprocal, AudioletNode);
 
 Reciprocal.prototype.generate = function(inputBuffers, outputBuffers) {
@@ -3732,11 +4155,11 @@ Reciprocal.prototype.generate = function(inputBuffers, outputBuffers) {
             outputChannel[j] = 1 / inputChannel[j];
         }
     }
-}
+};
 
 Reciprocal.prototype.toString = function() {
     return 'Reciprocal';
-}
+};
 
 
 /**
@@ -3744,10 +4167,10 @@ Reciprocal.prototype.toString = function() {
  */
 
 var Subtract = function(audiolet, value) {
-    AudioletNode.call(this, audiolet, 2, 1); 
+    AudioletNode.call(this, audiolet, 2, 1);
     this.linkNumberOfOutputChannels(0, 0);
     this.value = new AudioletParameter(this, 1, value || 1);
-}
+};
 extend(Subtract, AudioletNode);
 
 Subtract.prototype.generate = function(inputBuffers, outputBuffers) {
@@ -3781,11 +4204,11 @@ Subtract.prototype.generate = function(inputBuffers, outputBuffers) {
             outputChannel[j] = inputChannel[j] - value;
         }
     }
-}
+};
 
 Subtract.prototype.toString = function() {
     return 'Subtract';
-}
+};
 
 
 /**
@@ -3793,9 +4216,9 @@ Subtract.prototype.toString = function() {
  */
 
 var Tanh = function(audiolet) {
-    AudioletNode.call(this, audiolet, 1, 1); 
+    AudioletNode.call(this, audiolet, 1, 1);
     this.linkNumberOfOutputChannels(0, 0);
-}
+};
 extend(Tanh, AudioletNode);
 
 Tanh.prototype.generate = function(inputBuffers, outputBuffers) {
@@ -3818,19 +4241,19 @@ Tanh.prototype.generate = function(inputBuffers, outputBuffers) {
                 (Math.exp(value) + Math.exp(-value));
         }
     }
-}
+};
 
 Tanh.prototype.toString = function() {
     return ('Tanh');
-}
+};
 
 
 var Pattern = function() {
-}
+};
 
 Pattern.prototype.next = function() {
     return null;
-}
+};
 
 Pattern.prototype.valueOf = function(item) {
     if (item instanceof Pattern) {
@@ -3839,10 +4262,10 @@ Pattern.prototype.valueOf = function(item) {
     else {
         return (item);
     }
-}
+};
 
 Pattern.prototype.reset = function() {
-}
+};
 
 
 /**
@@ -3856,7 +4279,7 @@ var PArithmetic = function(start, step, repeats) {
     this.step = step;
     this.repeats = repeats;
     this.position = 0;
-}
+};
 extend(PArithmetic, Pattern);
 
 PArithmetic.prototype.next = function() {
@@ -3880,7 +4303,7 @@ PArithmetic.prototype.next = function() {
         returnValue = null;
     }
     return (returnValue);
-}
+};
 
 PArithmetic.prototype.reset = function() {
     this.value = this.start;
@@ -3888,7 +4311,7 @@ PArithmetic.prototype.reset = function() {
     if (this.step instanceof Pattern) {
         this.step.reset();
     }
-}
+};
 
 var Pseries = PArithmetic;
 
@@ -3898,11 +4321,11 @@ var Pseries = PArithmetic;
  */
 
 var PChoose = function(list, repeats) {
-    Pattern.call(this); 
+    Pattern.call(this);
     this.list = list;
     this.repeats = repeats || 1;
     this.position = 0;
-}
+};
 extend(PChoose, Pattern);
 
 PChoose.prototype.next = function() {
@@ -3929,7 +4352,7 @@ PChoose.prototype.next = function() {
         returnValue = null;
     }
     return (returnValue);
-}
+};
 
 PChoose.prototype.reset = function() {
     this.position = 0;
@@ -3939,7 +4362,7 @@ PChoose.prototype.reset = function() {
             item.reset();
         }
     }
-}
+};
 var Prand = PChoose;
 
 
@@ -3948,13 +4371,13 @@ var Prand = PChoose;
  */
 
 var PGeometric = function(start, step, repeats) {
-    Pattern.call(this); 
+    Pattern.call(this);
     this.start = start;
     this.value = start;
     this.step = step;
     this.repeats = repeats;
     this.position = 0;
-}
+};
 extend(PGeometric, Pattern);
 
 PGeometric.prototype.next = function() {
@@ -3978,7 +4401,7 @@ PGeometric.prototype.next = function() {
         returnValue = null;
     }
     return (returnValue);
-}
+};
 
 PGeometric.prototype.reset = function() {
     this.value = this.start;
@@ -3986,7 +4409,7 @@ PGeometric.prototype.reset = function() {
     if (this.step instanceof Pattern) {
         this.step.reset();
     }
-}
+};
 var Pgeom = PGeometric;
 
 
@@ -3995,11 +4418,11 @@ var Pgeom = PGeometric;
  */
 
 var PProxy = function(pattern) {
-    Pattern.call(this); 
+    Pattern.call(this);
     if (pattern) {
         this.pattern = pattern;
     }
-}
+};
 extend(PProxy, Pattern);
 
 PProxy.prototype.next = function() {
@@ -4011,7 +4434,7 @@ PProxy.prototype.next = function() {
         returnValue = null;
     }
     return returnValue;
-}
+};
 var Pp = PProxy;
 
 
@@ -4020,12 +4443,12 @@ var Pp = PProxy;
  */
 
 var PRandom = function(low, high, repeats) {
-    Pattern.call(this); 
+    Pattern.call(this);
     this.low = low;
     this.high = high;
     this.repeats = repeats;
     this.position = 0;
-}
+};
 extend(PRandom, Pattern);
 
 PRandom.prototype.next = function() {
@@ -4046,11 +4469,11 @@ PRandom.prototype.next = function() {
         returnValue = null;
     }
     return (returnValue);
-}
+};
 
 PRandom.prototype.reset = function() {
     this.position = 0;
-}
+};
 var Pwhite = PRandom;
 
 
@@ -4059,12 +4482,12 @@ var Pwhite = PRandom;
  */
 
 var PSequence = function(list, repeats, offset) {
-    Pattern.call(this); 
+    Pattern.call(this);
     this.list = list;
     this.repeats = repeats || 1;
     this.position = 0;
     this.offset = offset || 0;
-}
+};
 extend(PSequence, Pattern);
 
 PSequence.prototype.next = function() {
@@ -4091,7 +4514,7 @@ PSequence.prototype.next = function() {
         returnValue = null;
     }
     return (returnValue);
-}
+};
 
 PSequence.prototype.reset = function() {
     this.position = 0;
@@ -4101,7 +4524,7 @@ PSequence.prototype.reset = function() {
             item.reset();
         }
     }
-}
+};
 var Pseq = PSequence;
 
 
@@ -4110,12 +4533,12 @@ var Pseq = PSequence;
  */
 
 var PSeries = function(list, repeats, offset) {
-    Pattern.call(this); 
+    Pattern.call(this);
     this.list = list;
     this.repeats = repeats || 1;
     this.position = 0;
     this.offset = offset || 0;
-}
+};
 extend(PSeries, Pattern);
 
 PSeries.prototype.next = function() {
@@ -4142,7 +4565,7 @@ PSeries.prototype.next = function() {
         returnValue = null;
     }
     return (returnValue);
-}
+};
 
 PSeries.prototype.reset = function() {
     this.position = 0;
@@ -4152,7 +4575,7 @@ PSeries.prototype.reset = function() {
             item.reset();
         }
     }
-}
+};
 var Pser = PSeries;
 
 
@@ -4161,7 +4584,7 @@ var Pser = PSeries;
  */
 
 var PShuffle = function(list, repeats) {
-    Pattern.call(this); 
+    Pattern.call(this);
     this.list = [];
     // Shuffle values into new list
     while (list.length) {
@@ -4171,7 +4594,7 @@ var PShuffle = function(list, repeats) {
     }
     this.repeats = repeats;
     this.position = 0;
-}
+};
 extend(PShuffle, Pattern);
 PShuffle.prototype.next = function() {
     var returnValue;
@@ -4197,7 +4620,7 @@ PShuffle.prototype.next = function() {
         returnValue = null;
     }
     return (returnValue);
-}
+};
 var Pshuffle = PShuffle;
 
 
@@ -4206,11 +4629,11 @@ var Pshuffle = PShuffle;
  */
 
 var PWeightedChoose = function() {
-    Pattern.call(this); 
-}
+    Pattern.call(this);
+};
 
 PWeightedChoose.prototype.next = function() {
-}
+};
 extend(PWeightedChoose, Pattern);
 
 Pwrand = PWeightedChoose;
@@ -4218,7 +4641,7 @@ Pwrand = PWeightedChoose;
 var Scale = function(degrees, tuning) {
     this.degrees = degrees;
     this.tuning = tuning || new EqualTemperamentTuning(12);
-}
+};
 
 Scale.prototype.getFrequency = function(degree, rootFrequency, octave) {
     var frequency = rootFrequency;
@@ -4227,22 +4650,22 @@ Scale.prototype.getFrequency = function(degree, rootFrequency, octave) {
     frequency *= Math.pow(this.tuning.octaveRatio, octave);
     frequency *= this.tuning.ratios[this.degrees[degree]];
     return frequency;
-}
+};
 
 /**
  * @depends Scale.js
  */
 var MajorScale = function() {
-    Scale.call(this, [0, 2, 4, 5, 7, 9, 11]); 
-}
+    Scale.call(this, [0, 2, 4, 5, 7, 9, 11]);
+};
 extend(MajorScale, Scale);
 
 /**
  * @depends Scale.js
  */
 var MinorScale = function() {
-    Scale.call(this, [0, 2, 3, 5, 7, 8, 10]); 
-}
+    Scale.call(this, [0, 2, 3, 5, 7, 8, 10]);
+};
 extend(MinorScale, Scale);
 
 var Tuning = function(semitones, octaveRatio) {
@@ -4250,20 +4673,20 @@ var Tuning = function(semitones, octaveRatio) {
     this.octaveRatio = octaveRatio || 2;
     this.ratios = [];
     var tuningLength = this.semitones.length;
-    for (var i=0; i<tuningLength; i++) {
+    for (var i = 0; i < tuningLength; i++) {
         this.ratios.push(Math.pow(2, i / tuningLength));
     }
-}
+};
 
 /**
  * @depends Tuning.js
  */
 var EqualTemperamentTuning = function(pitchesPerOctave) {
     var semitones = [];
-    for (var i=0; i<pitchesPerOctave; i++) {
+    for (var i = 0; i < pitchesPerOctave; i++) {
         semitones.push(i);
     }
     Tuning.call(this, semitones, 2);
-}
+};
 extend(EqualTemperamentTuning, Tuning);
 
