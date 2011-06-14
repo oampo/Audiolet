@@ -6,7 +6,7 @@ window.onload = function() {
 
         // Gain envelope
         this.gain = new Gain(audiolet);
-        this.env = new PercussiveEnvelope(audiolet, 1, 0.1, 0.1, 
+        this.env = new PercussiveEnvelope(audiolet, 1, 0.1, 0.1,
             function() {
                 this.audiolet.scheduler.addRelative(0, this.remove.bind(this));
             }.bind(this)
@@ -20,7 +20,7 @@ window.onload = function() {
         // Envelope
         this.env.connect(this.envMulAdd);
         this.envMulAdd.connect(this.gain, 0, 1);
-    }
+    };
     extend(Synth, AudioletGroup);
 
     var SchedulerApp = function() {
@@ -33,18 +33,19 @@ window.onload = function() {
                                           [3, 5, 7],
                                           [4, 6, 8]]);
         // Play the progression
-        this.audiolet.scheduler.play([chordPattern], 1, this.playChord.bind(this));
-    }
+        this.audiolet.scheduler.play([chordPattern], 1,
+                                     this.playChord.bind(this));
+    };
 
     SchedulerApp.prototype.playChord = function(chord) {
-        for (var i=0; i<chord.length; i++) {
+        for (var i = 0; i < chord.length; i++) {
             var degree = chord[i];
             var frequency = this.scale.getFrequency(degree, 16.352, 4);
             var synth = new Synth(this.audiolet, frequency);
             synth.connect(this.audiolet.output);
         }
-    }
+    };
 
     var app = new SchedulerApp();
-}
+};
 

@@ -3,14 +3,14 @@ window.onload = function() {
         AudioletGroup.apply(this, [audiolet, 0, 1]);
         // Basic wave
         this.saw = new Saw(audiolet, 100);
-        
+
         // Frequency LFO
         this.frequencyLFO = new Sine(audiolet, 2);
         this.frequencyMA = new MulAdd(audiolet, 10, 100);
 
         // Filter
         this.filter = new LowPassFilter(audiolet, 1000);
-        
+
         // Filter LFO
         this.filterLFO = new Sine(audiolet, 8);
         this.filterMA = new MulAdd(audiolet, 900, 1000);
@@ -41,7 +41,7 @@ window.onload = function() {
         this.env.connect(this.gain, 0, 1);
     };
     extend(Synth, AudioletGroup);
-    
+
     var audiolet = new Audiolet();
     var synth = new Synth(audiolet);
 
@@ -57,8 +57,8 @@ window.onload = function() {
             this.filterLFO.frequency.setValue(filterLFOFrequency);
             this.env.gate.setValue(gate);
         }.bind(synth)
-    );  
+    );
 
     synth.connect(audiolet.output);
-}
+};
 

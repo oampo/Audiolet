@@ -4,6 +4,6 @@ window.onload = function() {
     var filter = new LowPassFilter(audiolet, 200);
     sine.connect(filter);
     filter.connect(audiolet.output);
-}
+};
 
 

@@ -19,7 +19,7 @@ window.onload = function() {
 
         // Stereo panner
         this.pan = new Pan(audiolet);
-        this.panLFO = new Sine(audiolet, 1/8);
+        this.panLFO = new Sine(audiolet, 1 / 8);
 
 
         // Connect oscillator
@@ -117,7 +117,7 @@ window.onload = function() {
         this.gainEnvMulAdd.connect(this.gain, 0, 1);
         this.gain.connect(this.upMixer);
         this.upMixer.connect(this.outputs[0]);
-    }   
+    }
     extend(Kick, AudioletGroup);
 
     var Shaker = function(audiolet) {
@@ -304,4 +304,4 @@ window.onload = function() {
 
     // Run the demo
     var demo = new Demo();
-}
+};

@@ -8,7 +8,7 @@ window.onload = function() {
         // Create an empty buffer
         this.amen = new AudioletBuffer(1, 0);
         // Load wav using synchronous XHR
-        this.amen.load("audio/amen.wav", false);
+        this.amen.load('audio/amen.wav', false);
 
         // Create buffer player
         this.player = new BufferPlayer(this.audiolet, this.amen, 1, 0, 1);
@@ -24,14 +24,14 @@ window.onload = function() {
                                               1, 1, 1, 1,
                                               2, 2, 2, 2,
                                               3, 3, 3, 3],
-                                             Infinity); 
+                                             Infinity);
         // Rearrange the individual beats within a bar
         var positionInBar = new PChoose([new PSequence([0, 1, 2, 3]),
                                          new PSequence([0, 0, 0, 0]),
                                          new PSequence([0, 0, 2, 2]),
                                          new PSequence([0, 3, 2, 1])],
                                          Infinity);
-        
+
         this.audiolet.scheduler.play([barStartPosition, positionInBar], 1,
             function(barStartPosition, positionInBar) {
                 // Scale position 0->1
@@ -45,6 +45,6 @@ window.onload = function() {
     }
 
     this.audioletApp = new AudioletApp();
-}
+};
 
 
