@@ -1,13 +1,43 @@
-/**
+/*!
  * @depends BiquadFilter.js
  */
 
-// Maths from http://www.musicdsp.org/files/Audio-EQ-Cookbook.txt
+/**
+ * Band-pass filter
+ *
+ * **Inputs**
+ *
+ * - Audio
+ * - Filter frequency
+ *
+ * **Outputs**
+ *
+ * - Filtered audio
+ *
+ * **Parameters**
+ *
+ * - frequency The filter frequency.  Linked to input 1.
+ *
+ * @extends BiquadFilter
+ */
+
+/**
+ * Constructor
+ *
+ * @param {Audiolet} audiolet The audiolet object
+ * @param {Number} frequency The initial frequency
+ */
 var BandPassFilter = function(audiolet, frequency) {
     BiquadFilter.call(this, audiolet, frequency);
 };
 extend(BandPassFilter, BiquadFilter);
 
+/**
+ * Calculate the biquad filter coefficients using maths from
+ * http://www.musicdsp.org/files/Audio-EQ-Cookbook.txt
+ *
+ * @param {Number} frequency The filter frequency
+ */
 BandPassFilter.prototype.calculateCoefficients = function(frequency) {
     var w0 = 2 * Math.PI * frequency / this.audiolet.device.sampleRate;
     var cosw0 = Math.cos(w0);
@@ -22,6 +52,11 @@ BandPassFilter.prototype.calculateCoefficients = function(frequency) {
     this.a2 = 1 - alpha;
 };
 
+/**
+ * toString
+ *
+ * @return {String}
+ */
 BandPassFilter.prototype.toString = function() {
     return 'Band Pass Filter';
 };

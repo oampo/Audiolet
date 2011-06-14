@@ -1,7 +1,46 @@
-/**
+/*!
  * @depends ../core/AudioletNode.js
  */
 
+/**
+ * Play the contents of an audio buffer
+ *
+ * **Inputs**
+ *
+ * - Playback rate
+ * - Restart trigger
+ * - Start position
+ * - Loop on/off
+ *
+ * **Outputs**
+ *
+ * - Audio
+ *
+ * **Parameters**
+ *
+ * - playbackRate The rate that the buffer should play at.  Value of 1 plays at
+ * the regular rate.  Values > 1 are pitched up.  Values < 1 are pitched down.
+ * Linked to input 0.
+ * - restartTrigger Changes of value from 0 -> 1 restart the playback from the
+ * start position.  Linked to input 1.
+ * - startPosition The position at which playback should begin.  Values between
+ * 0 (the beginning of the buffer) and 1 (the end of the buffer).  Linked to
+ * input 2.
+ * - loop Whether the buffer should loop when it reaches the end.  Linked to
+ * input 3
+ *
+ * @extends AudioletNode
+ */
+
+/**
+ * Constructor
+ *
+ * @param {Audiolet} audiolet The audiolet object
+ * @param {AudioletBuffer} buffer The buffer to play
+ * @param {Number} [playbackRate=1] The initial playback rate
+ * @param {Number} [startPosition=0] The initial start position
+ * @param {Number} [loop=0] Initial value for whether to loop
+ */
 var BufferPlayer = function(audiolet, buffer, playbackRate, startPosition,
                             loop) {
     AudioletNode.call(this, audiolet, 3, 1);
@@ -18,6 +57,12 @@ var BufferPlayer = function(audiolet, buffer, playbackRate, startPosition,
 };
 extend(BufferPlayer, AudioletNode);
 
+/**
+ * Process a block of samples
+ *
+ * @param {AudioletBuffer[]} inputBuffers Samples received from the inputs
+ * @param {AudioletBuffer[]} outputBuffers Samples to be sent to the outputs
+ */
 BufferPlayer.prototype.generate = function(inputBuffers, outputBuffers) {
     var outputBuffer = outputBuffers[0];
 
@@ -130,6 +175,11 @@ BufferPlayer.prototype.generate = function(inputBuffers, outputBuffers) {
     this.restartTriggerOn = restartTriggerOn;
 };
 
+/**
+ * toString
+ *
+ * @return {String}
+ */
 BufferPlayer.prototype.toString = function() {
     return ('Buffer player');
 };

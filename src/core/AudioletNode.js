@@ -40,7 +40,7 @@ var AudioletNode = function(audiolet, numberOfInputs, numberOfOutputs,
 /**
  * Connect the node to another node or group.
  *
- * @param {AudioletNode} node The node to connect to.
+ * @param {AudioletNode|AudioletGroup} node The node to connect to.
  * @param {Number} [output=0] The index of the output to connect from.
  * @param {Number} [input=0] The index of the input to connect to.
  */
@@ -59,11 +59,10 @@ AudioletNode.prototype.connect = function(node, output, input) {
 /**
  * Disconnect the node from another node or group
  *
- * @param {AudioletNode} node The node to disconnect from.
+ * @param {AudioletNode|AudioletGroup} node The node to disconnect from.
  * @param {Number} [output=0] The index of the output to disconnect.
  * @param {Number} [input=0] The index of the input to disconnect.
  */
-
 AudioletNode.prototype.disconnect = function(node, output, input) {
     if (node instanceof AudioletGroup) {
         node = node.inputs[input || 0];

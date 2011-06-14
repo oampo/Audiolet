@@ -2,7 +2,33 @@
  * @depends ../core/AudioletNode.js
  */
 
-// Maths from http://www.musicdsp.org/files/Audio-EQ-Cookbook.txt
+/**
+ * Generic biquad filter.  The coefficients (a0, a1, a2, b0, b1 and b2) are set
+ * using the calculateCoefficients function, which should be overridden and
+ * will be called automatically when new values are needed.
+ *
+ * **Inputs**
+ *
+ * - Audio
+ * - Filter frequency
+ *
+ * **Outputs**
+ *
+ * - Filtered audio
+ *
+ * **Parameters**
+ *
+ * - frequency The filter frequency.  Linked to input 1.
+ *
+ * @extends AudioletNode
+ */
+
+/**
+ * Constructor
+ *
+ * @param {Audiolet} audiolet The audiolet object
+ * @param {Number} frequency The initial frequency
+ */
 var BiquadFilter = function(audiolet, frequency) {
     AudioletNode.call(this, audiolet, 2, 1);
 
@@ -26,10 +52,20 @@ var BiquadFilter = function(audiolet, frequency) {
 };
 extend(BiquadFilter, AudioletNode);
 
-// Overwrite me
+/**
+ * Calculate the biquad filter coefficients.  This should be overridden.
+ *
+ * @param {Number} frequency The filter frequency
+ */
 BiquadFilter.prototype.calculateCoefficients = function(frequency) {
 };
 
+/**
+ * Process a block of samples
+ *
+ * @param {AudioletBuffer[]} inputBuffers Samples received from the inputs
+ * @param {AudioletBuffer[]} outputBuffers Samples to be sent to the outputs
+ */
 BiquadFilter.prototype.generate = function(inputBuffers, outputBuffers) {
     var inputBuffer = inputBuffers[0];
     var outputBuffer = outputBuffers[0];
@@ -122,6 +158,11 @@ BiquadFilter.prototype.generate = function(inputBuffers, outputBuffers) {
     this.lastFrequency = lastFrequency;
 };
 
+/**
+ * toString
+ *
+ * @return {String}
+ */
 BiquadFilter.prototype.toString = function() {
     return 'Biquad Filter';
 };

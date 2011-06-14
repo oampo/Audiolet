@@ -192,7 +192,7 @@ test("Disconnect from group with arguments", testDisconnectGroupArguments);
 
 function testTick() {
     var audiolet = new Audiolet();
-    var node = new Introspector(audiolet);
+    var node = new Introspector(audiolet, 3, 3);
     node.tick(1024, 0);
 
     Assert.assertEquals(node.timesCalled, 1, "Generate called");
@@ -209,9 +209,9 @@ test("Tick", testTick);
 
 function testParentsTicked() {
     var audiolet = new Audiolet();
-    var nodeA = new Introspector(audiolet);
-    var nodeB = new Introspector(audiolet);
-    var nodeC = new Introspector(audiolet);
+    var nodeA = new Introspector(audiolet, 0, 1);
+    var nodeB = new Introspector(audiolet, 1, 1);
+    var nodeC = new Introspector(audiolet, 1, 0);
 
     nodeA.connect(nodeB);
     nodeB.connect(nodeC);
@@ -227,10 +227,10 @@ test("Tick parents", testParentsTicked);
 
 function testSingleTickPerTimestamp() {
     var audiolet = new Audiolet();
-    var nodeA = new Introspector(audiolet);
-    var nodeB = new Introspector(audiolet);
-    var nodeC = new Introspector(audiolet);
-    var nodeD = new Introspector(audiolet);
+    var nodeA = new Introspector(audiolet, 0, 1);
+    var nodeB = new Introspector(audiolet, 1, 1);
+    var nodeC = new Introspector(audiolet, 1, 1);
+    var nodeD = new Introspector(audiolet, 1, 0);
 
     nodeA.connect(nodeB);
     nodeA.connect(nodeC);
@@ -256,7 +256,7 @@ test("Single click per timestamp", testSingleTickPerTimestamp);
 
 function testInputBufferDisconnected() {
     var audiolet = new Audiolet();
-    var node = new Introspector(audiolet);
+    var node = new Introspector(audiolet, 3, 3);
     var inputBuffers = node.createInputBuffers(1024);
 
     Assert.assertEquals(inputBuffers.length, 3, "Number of buffers");
@@ -278,7 +278,7 @@ test("Input buffer creation for disconnected node",
 function testInputBufferConnected() {
     var audiolet = new Audiolet();
     var nodeA = new ConstantSource(audiolet, 3, 1);
-    var nodeB = new Introspector(audiolet);
+    var nodeB = new Introspector(audiolet, 3, 3);
     nodeA.connect(nodeB, 1, 2);
 
     // Make sure node A has generated
@@ -310,7 +310,7 @@ function testInputBufferMultipleConnections() {
     var audiolet = new Audiolet();
     var nodeA = new ConstantSource(audiolet, 3, 1);
     var nodeB = new ConstantSource(audiolet, 3, 2);
-    var nodeC = new Introspector(audiolet);
+    var nodeC = new Introspector(audiolet, 3, 3);
     nodeA.connect(nodeC, 1, 2);
     nodeB.connect(nodeC, 0, 2);
 
@@ -352,7 +352,7 @@ test("Input buffer creation for node with multiple connections",
 
 function testCreateOutputBuffers() {
     var audiolet = new Audiolet();
-    var node = new Introspector(audiolet);
+    var node = new Introspector(audiolet, 3, 3);
 
     var outputBuffers = node.createOutputBuffers(1024);
 
@@ -373,7 +373,7 @@ test("Output buffer creation", testCreateOutputBuffers);
 
 function testSetNumberOfChannels() {
     var audiolet = new Audiolet();
-    var node = new Introspector(audiolet);
+    var node = new Introspector(audiolet, 3, 3);
     node.setNumberOfOutputChannels(1, 2);
 
     var outputBuffers = node.createOutputBuffers(1024);
@@ -391,7 +391,7 @@ test("Set number of output channels", testSetNumberOfChannels);
 function testLinkNumberOfChannels() {
     var audiolet = new Audiolet();
     var nodeA = new ConstantSource(audiolet, 3, 1);
-    var nodeB = new Introspector(audiolet);
+    var nodeB = new Introspector(audiolet, 3, 3);
 
     nodeA.connect(nodeB, 1, 2);
     // Output 1 should have the same number of channels as input 2, which is

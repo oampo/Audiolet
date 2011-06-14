@@ -1,3 +1,20 @@
+/**
+ * A container for collections of connected AudioletNodes.  Groups make it
+ * possible to create multiple copies of predefined networks of nodes,
+ * without having to manually create and connect up each individual node.
+ *
+ * From the outside groups look and behave exactly the same as nodes.
+ * Internally you can connect nodes directly to the group's inputs and
+ * outputs, allowing connection to nodes outside of the group.
+ */
+
+/**
+ * Constructor
+ *
+ * @param {Audiolet} audiolet The audiolet object
+ * @param {Number} numberOfInputs
+ * @param {Number} numberOfOutputs
+ */
 var AudioletGroup = function(audiolet, numberOfInputs, numberOfOutputs) {
     this.audiolet = audiolet;
     this.numberOfInputs = numberOfInputs;
@@ -14,14 +31,32 @@ var AudioletGroup = function(audiolet, numberOfInputs, numberOfOutputs) {
     }
 };
 
+/**
+ * Connect the group to another node or group
+ *
+ * @param {AudioletNode|AudioletGroup} node The node to connect to
+ * @param {Number} output The index of the output to connect from
+ * @param {Number} input The index of the input to connect to
+ */
 AudioletGroup.prototype.connect = function(node, output, input) {
     this.outputs[output || 0].connect(node, 0, input);
 };
 
+/**
+ * Disconnect the group from another node or group
+ *
+ * @param {AudioletNode|AudioletGroup} node The node to disconnect from
+ * @param {Number} output The index of the output to disconnect
+ * @param {Number} input The index of the input to disconnect
+ */
 AudioletGroup.prototype.disconnect = function(node, output, input) {
     this.outputs[output || 0].disconnect(node, 0, input);
 };
 
+/**
+ * Remove the group completely from the processing graph, disconnecting all
+ * of its inputs and outputs
+ */
 AudioletGroup.prototype.remove = function() {
     var numberOfInputs = this.inputs.length;
     for (var i = 0; i < numberOfInputs; i++) {
