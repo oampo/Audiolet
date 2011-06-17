@@ -1,3 +1,17 @@
 #! /bin/bash
-dox --title 'Audiolet Core' --desc 'Core Audiolet classes' ../trunk/src/core/AbstractAudioletDevice.js > core.html
-dox --title 'Audiolet DSP Nodes' --desc 'AudioletNodes for synthesis and processing of audio' ../trunk/src/dsp/Sine.js > dsp.html
+oxo -t 'Audiolet API Documentation' \
+    -d 'JavaScript library for audio synthesis and composition.' \
+    -s 'Core' \
+    -a 'Core Audiolet classes' \
+    -i ../trunk/src/core/AudioletNode.js \
+       ../trunk/src/core/AudioletGroup.js \
+    -s 'DSP' \
+    -a 'Audio generation and processing classes' \
+    -i ../trunk/src/dsp/Sine.js \
+       ../trunk/src/dsp/Triangle.js \
+       ../trunk/src/dsp/Saw.js \
+       ../trunk/src/dsp/Square.js \
+       ../trunk/src/dsp/BufferPlayer.js \
+       ../trunk/src/dsp/BandPassFilter.js \
+       ../trunk/src/dsp/BandRejectFilter.js \
+    -o api.html

@@ -1,0 +1,86 @@
+body {
+    line-height: 1.4;
+    font-family: 'MuseoSans500', 'Helvetica Neue', Arial, 'Liberation Sans', FreeSans, sans-serif;
+    font-size: 16px;
+}
+
+h1 {
+    font-size: 28px;
+    font-weight: normal;
+}
+
+h2 {
+    font-size: 24px;
+    font-weight: normal;
+}
+
+h3 {
+    font-size: 20px;
+    font-weight: normal;
+}
+
+p {
+    margin-bottom: 10px;
+}
+
+pre {
+    font-family: 'Inconsolata', monospace;
+    font-size: 12px;
+}
+
+hr {
+    width: 70%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+ul {
+    margin-bottom: 10px;
+}
+
+li {
+    margin-left: 20px;
+}
+
+strong {
+    font-weight: normal;
+    color: #CC0000;
+}
+
+div.block {
+    width: 100%;
+    clear: both;
+    border-bottom: 1px solid #CCC;
+}
+
+div.left {
+    width: 40%;
+    float: left;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+    border-right: 1px solid #CCC;
+}
+
+div.right {
+    width: 60%;
+    float: left;
+    background-color: #FFF;
+}
+
+div.left div {
+    padding: 6%;
+}
+
+div.right div {
+    padding: 6%;
+}
+
+div.clear {
+    clear: both;
+}
+
+div.file div.header div.right {
+    font-size: 12px;
+    font-style: italic;
+}
