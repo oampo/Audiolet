@@ -1,7 +1,29 @@
-/**
+/*!
  * @depends ../core/AudioletNode.js
  */
 
+/**
+ * A simple delay line.
+ *
+ * **Inputs**
+ *
+ * - Audio
+ * - Delay Time
+ *
+ * **Outputs**
+ *
+ * - Delayed audio
+ *
+ * **Parameters**
+ *
+ * - delayTime The delay time in seconds.  Linked to input 1.
+ *
+ * @constructor
+ * @extends AudioletNode
+ * @param {Audiolet} audiolet The audiolet object.
+ * @param {Number} maximumDelayTime The largest allowable delay time.
+ * @param {Number} delayTime The initial delay time.
+ */
 var Delay = function(audiolet, maximumDelayTime, delayTime) {
     AudioletNode.call(this, audiolet, 2, 1);
     this.linkNumberOfOutputChannels(0, 0);
@@ -13,6 +35,12 @@ var Delay = function(audiolet, maximumDelayTime, delayTime) {
 };
 extend(Delay, AudioletNode);
 
+/**
+ * Process a block of samples
+ *
+ * @param {AudioletBuffer[]} inputBuffers Samples received from the inputs.
+ * @param {AudioletBuffer[]} outputBuffers Samples to be sent to the outputs.
+ */
 Delay.prototype.generate = function(inputBuffers, outputBuffers) {
     var inputBuffer = inputBuffers[0];
     var outputBuffer = outputBuffers[0];
@@ -74,6 +102,11 @@ Delay.prototype.generate = function(inputBuffers, outputBuffers) {
     this.readWriteIndex = readWriteIndex;
 };
 
+/**
+ * toString
+ *
+ * @return {String} String representation.
+ */
 Delay.prototype.toString = function() {
     return 'Delay';
 };

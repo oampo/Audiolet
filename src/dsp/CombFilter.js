@@ -1,7 +1,32 @@
-/**
+/*!
  * @depends ../core/AudioletNode.js
  */
 
+/**
+ * Undamped comb filter
+ *
+ * **Inputs**
+ *
+ * - Audio
+ * - Delay Time
+ * - Decay Time
+ *
+ * **Outputs**
+ *
+ * - Filtered audio
+ *
+ * **Parameters**
+ *
+ * - delayTime The delay time in seconds.  Linked to input 1.
+ * - decayTime Time for the echoes to decay by 60dB.  Linked to input 0.
+ *
+ * @constructor
+ * @extends AudioletNode
+ * @param {Audiolet} audiolet The audiolet object.
+ * @param {Number} maximumDelayTime The largest allowable delay time.
+ * @param {Number} delayTime The initial delay time.
+ * @param {Number} decayTime The initial decay time.
+ */
 var CombFilter = function(audiolet, maximumDelayTime, delayTime, decayTime) {
     AudioletNode.call(this, audiolet, 3, 1);
     this.linkNumberOfOutputChannels(0, 0);
@@ -14,6 +39,12 @@ var CombFilter = function(audiolet, maximumDelayTime, delayTime, decayTime) {
 };
 extend(CombFilter, AudioletNode);
 
+/**
+ * Process a block of samples
+ *
+ * @param {AudioletBuffer[]} inputBuffers Samples received from the inputs.
+ * @param {AudioletBuffer[]} outputBuffers Samples to be sent to the outputs.
+ */
 CombFilter.prototype.generate = function(inputBuffers, outputBuffers) {
     var inputBuffer = inputBuffers[0];
     var outputBuffer = outputBuffers[0];
@@ -99,6 +130,11 @@ CombFilter.prototype.generate = function(inputBuffers, outputBuffers) {
     this.readWriteIndex = readWriteIndex;
 };
 
+/**
+ * toString
+ *
+ * @return {String} String representation.
+ */
 CombFilter.prototype.toString = function() {
     return 'Comb Filter';
 };

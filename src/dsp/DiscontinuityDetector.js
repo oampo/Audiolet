@@ -1,7 +1,25 @@
-/**
+/*!
  * @depends ../core/AudioletNode.js
  */
 
+/**
+ * Detect discontinuities in the input stream.  Looks for consecutive samples
+ * with a difference larger than a threshold value.
+ *
+ * **Inputs**
+ *
+ * - Audio
+ *
+ * **Outputs**
+ *
+ * - Audio
+ *
+ * @constructor
+ * @extends PassThroughNode
+ * @param {Audiolet} audiolet The audiolet object.
+ * @param {Number} [threshold=0.2] The threshold value.
+ * @param {Function} [callback] Function called if a discontinuity is detected.
+ */
 var DiscontinuityDetector = function(audiolet, threshold, callback) {
     AudioletNode.call(this, audiolet, 1, 1);
     this.linkNumberOfOutputChannels(0, 0);
@@ -15,12 +33,24 @@ var DiscontinuityDetector = function(audiolet, threshold, callback) {
 };
 extend(DiscontinuityDetector, AudioletNode);
 
-// Override me
+/**
+ * Default callback.  Logs the size and position of the discontinuity.
+ *
+ * @param {Number} size The size of the discontinuity.
+ * @param {Number} channel The index of the channel the samples were found in.
+ * @param {Number} index The sample index the discontinuity was found at.
+ */
 DiscontinuityDetector.prototype.callback = function(size, channel, index) {
     console.error('Discontinuity of ' + size + ' detected on channel ' +
                   channel + ' index ' + index);
 };
 
+/**
+ * Process a block of samples
+ *
+ * @param {AudioletBuffer[]} inputBuffers Samples received from the inputs.
+ * @param {AudioletBuffer[]} outputBuffers Samples to be sent to the outputs.
+ */
 DiscontinuityDetector.prototype.generate = function(inputBuffers,
                                                     outputBuffers) {
     var inputBuffer = inputBuffers[0];
@@ -57,6 +87,11 @@ DiscontinuityDetector.prototype.generate = function(inputBuffers,
     }
 };
 
+/**
+ * toString
+ *
+ * @return {String} String representation.
+ */
 DiscontinuityDetector.prototype.toString = function() {
     return 'Discontinuity Detector';
 };

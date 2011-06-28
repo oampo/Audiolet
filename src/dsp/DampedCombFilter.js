@@ -1,7 +1,35 @@
-/**
+/*!
  * @depends ../core/AudioletNode.js
  */
 
+/**
+ * Damped comb filter
+ *
+ * **Inputs**
+ *
+ * - Audio
+ * - Delay Time
+ * - Decay Time
+ * - Damping
+ *
+ * **Outputs**
+ *
+ * - Filtered audio
+ *
+ * **Parameters**
+ *
+ * - delayTime The delay time in seconds.  Linked to input 1.
+ * - decayTime Time for the echoes to decay by 60dB.  Linked to input 2.
+ * - damping The amount of high-frequency damping of echoes.  Linked to input 3.
+ *
+ * @constructor
+ * @extends AudioletNode
+ * @param {Audiolet} audiolet The audiolet object.
+ * @param {Number} maximumDelayTime The largest allowable delay time.
+ * @param {Number} delayTime The initial delay time.
+ * @param {Number} decayTime The initial decay time.
+ * @param {Number} damping The initial amount of damping.
+ */
 var DampedCombFilter = function(audiolet, maximumDelayTime, delayTime,
                                 decayTime, damping) {
     AudioletNode.call(this, audiolet, 4, 1);
@@ -17,6 +45,12 @@ var DampedCombFilter = function(audiolet, maximumDelayTime, delayTime,
 };
 extend(DampedCombFilter, AudioletNode);
 
+/**
+ * Process a block of samples
+ *
+ * @param {AudioletBuffer[]} inputBuffers Samples received from the inputs.
+ * @param {AudioletBuffer[]} outputBuffers Samples to be sent to the outputs.
+ */
 DampedCombFilter.prototype.generate = function(inputBuffers, outputBuffers) {
     var inputBuffer = inputBuffers[0];
     var outputBuffer = outputBuffers[0];
@@ -119,6 +153,11 @@ DampedCombFilter.prototype.generate = function(inputBuffers, outputBuffers) {
     this.filterStore = filterStore;
 };
 
+/**
+ * toString
+ *
+ * @return {String} String representation.
+ */
 DampedCombFilter.prototype.toString = function() {
     return 'Damped Comb Filter';
 };
