@@ -1,11 +1,39 @@
-/**
+/*!
+ * @depends ../core/AudioletNode.js
  * @depends ../core/AudioletGroup.js
  */
 
-// Schroder/Moorer Reverb Unit based on Freeverb
-// https://ccrma.stanford.edu/~jos/pasp/Freeverb.html has a good description
-// of how it all works
-
+/**
+ * Port of the Freeverb Schrodoer/Moorer reverb model.  See
+ * https://ccrma.stanford.edu/~jos/pasp/Freeverb.html for a description of how
+ * each part works.
+ *
+ * **Inputs**
+ *
+ * - Audio
+ * - Mix
+ * - Room Size
+ * - Damping
+ *
+ * **Outputs**
+ *
+ * - Reverberated Audio
+ *
+ * **Parameters**
+ *
+ * - mix The wet/dry mix.  Values between 0 and 1.  Linked to input 1.
+ * - roomSize The reverb's room size.  Values between 0 and 1.  Linked to input
+ * 2.
+ * - damping The amount of high-frequency damping.  Values between 0 and 1.
+ * Linked to input 3.
+ *
+ * @constructor
+ * @extends AudioletGroup
+ * @param {Audiolet} audiolet The audiolet object.
+ * @param {Number} [mix=0.33] The initial wet/dry mix.
+ * @param {Number} [roomSize=0.5] The initial room size.
+ * @param {Number} [damping=0.5] The initial damping amount.
+ */
 var Reverb = function(audiolet, mix, roomSize, damping) {
     AudioletGroup.call(this, audiolet, 4, 1);
 
@@ -14,7 +42,7 @@ var Reverb = function(audiolet, mix, roomSize, damping) {
     this.fixedGain = 0.015;
     this.initialDamping = 0.5;
     this.scaleDamping = 0.4;
-    this.initialRoom = 0.5;
+    this.initialRoomSize = 0.5;
     this.scaleRoom = 0.28;
     this.offsetRoom = 0.7;
 
@@ -106,11 +134,31 @@ var Reverb = function(audiolet, mix, roomSize, damping) {
 };
 extend(Reverb, AudioletGroup);
 
+/**
+ * toString
+ *
+ * @return {String} String representation.
+ */
 Reverb.prototype.toString = function() {
     return 'Reverb';
 };
 
-// Converts a feedback gain multiplier to a 60db decay time
+/**
+ * Helper node to convert a feedback gain multiplier to a 60db decay time.
+ *
+ * **Inputs**
+ *
+ * - Feedback gain
+ *
+ * **Outputs**
+ *
+ * - Decay time
+ *
+ * @constructor
+ * @extends AudioletNode
+ * @param {Audiolet} audiolet The audiolet object.
+ * @param {Number} delayTime The delay time in seconds
+ */
 var FeedbackGainToDecayTime = function(audiolet, delayTime) {
     AudioletNode.call(this, audiolet, 1, 1);
     this.delayTime = delayTime;
@@ -119,6 +167,12 @@ var FeedbackGainToDecayTime = function(audiolet, delayTime) {
 };
 extend(FeedbackGainToDecayTime, AudioletNode);
 
+/**
+ * Process a block of samples
+ *
+ * @param {AudioletBuffer[]} inputBuffers Samples received from the inputs.
+ * @param {AudioletBuffer[]} outputBuffers Samples to be sent to the outputs.
+ */
 FeedbackGainToDecayTime.prototype.generate = function(inputBuffers,
                                                       outputBuffers) {
     var inputBuffer = inputBuffers[0];
