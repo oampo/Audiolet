@@ -1,7 +1,28 @@
-/**
+/*!
  * @depends AudioletNode.js
  */
 
+/**
+ * A sample-accurate scheduler built as an AudioletNode.  The scheduler works
+ * by storing a queue of events, and subdividing the tick call from the
+ * AudioletDevice if an event is scheduled to happen during the tick.  Any
+ * buffers obtained in subdivided ticks are finally merged to produce the
+ * single buffer expected at the output.  All timing and events are handled in
+ * beats, which are converted to sample positions using a master tempo.
+ *
+ * **Inputs**
+ *
+ * - Audio
+ *
+ * **Outputs**
+ *
+ * - Audio
+ *
+ * @constructor
+ * @extends AudioletNode
+ * @param {Audiolet} audiolet The audiolet object.
+ * @param {Number} [bpm=120] Initial tempo.
+ */
 var Scheduler = function(audiolet, bpm) {
     AudioletNode.call(this, audiolet, 1, 1);
     this.linkNumberOfOutputChannels(0, 0);
@@ -24,11 +45,23 @@ var Scheduler = function(audiolet, bpm) {
 };
 extend(Scheduler, AudioletNode);
 
+/**
+ * Set the tempo of the scheduler.
+ *
+ * @param {Number} bpm The tempo in beats per minute.
+ */
 Scheduler.prototype.setTempo = function(bpm) {
     this.bpm = bpm;
     this.beatLength = 60 / this.bpm * this.audiolet.device.sampleRate;
 };
 
+/**
+ * Add an event relative to the current write position
+ *
+ * @param {Number} beats How many beats in the future to schedule the event.
+ * @param {Function} callback A function called when it is time for the event.
+ * @return {Object} The event object.
+ */
 Scheduler.prototype.addRelative = function(beats, callback) {
     var event = {};
     event.callback = callback;
@@ -37,6 +70,13 @@ Scheduler.prototype.addRelative = function(beats, callback) {
     return event;
 };
 
+/**
+ * Add an event at an absolute beat position
+ *
+ * @param {Number} beat The beat at which the event should take place.
+ * @param {Function} callback A function called when it is time for the event.
+ * @return {Object} The event object.
+ */
 Scheduler.prototype.addAbsolute = function(beat, callback) {
     if (beat < this.beat ||
         beat == this.beat && this.time > this.lastBeatTime) {
@@ -50,6 +90,16 @@ Scheduler.prototype.addAbsolute = function(beat, callback) {
     return event;
 };
 
+/**
+ * Schedule patterns to play, and provide the values generated to a callback.
+ * The durationPattern argument can be either a number, giving a constant time
+ * between each event, or a pattern, allowing varying time difference.
+ *
+ * @param {Pattern[]} patterns An array of patterns to play.
+ * @param {Pattern|Number} durationPattern The number of beats between events.
+ * @param {Function} callback Function called with the generated pattern values.
+ * @return {Object} The event object.
+ */
 Scheduler.prototype.play = function(patterns, durationPattern, callback) {
     var event = {};
     event.patterns = patterns;
@@ -61,6 +111,11 @@ Scheduler.prototype.play = function(patterns, durationPattern, callback) {
     return event;
 };
 
+/**
+ * Remove a scheduled event from the scheduler
+ *
+ * @param {Object} event The event to remove.
+ */
 Scheduler.prototype.remove = function(event) {
     var idx = this.queue.heap.indexOf(event);
     if (idx != -1) {
@@ -72,10 +127,24 @@ Scheduler.prototype.remove = function(event) {
     }
 };
 
+/**
+ * Alias for remove, so for simple events we have add/remove, and for patterns
+ * we have play/stop.
+ *
+ * @param {Object} event The event to remove.
+ */
 Scheduler.prototype.stop = function(event) {
     this.remove(event);
 };
 
+/**
+ * Overridden tick method.  This is where the scheduler magic of splitting down
+ * blocks allows sample-accurate changes to happen, and also where we process
+ * the events themselves.
+ *
+ * @param {Number} length The number of samples to process.
+ * @param {Number} timestamp A timestamp for the block of samples.
+ */
 Scheduler.prototype.tick = function(length, timestamp) {
     // The time at the beginning of the block
     var startTime = this.audiolet.device.getWriteTime();
@@ -144,6 +213,11 @@ Scheduler.prototype.tick = function(length, timestamp) {
     }
 };
 
+/**
+ * Update the various representations of time within the scheduler.
+ *
+ * @param {Number} time The current write position in samples.
+ */
 Scheduler.prototype.updateClock = function(time) {
     this.time = time;
     this.seconds = this.time * this.audiolet.device.sampleRate;
@@ -158,6 +232,12 @@ Scheduler.prototype.updateClock = function(time) {
     }
 };
 
+/**
+ * Process a single event, grabbing any necessary values, calling the event's
+ * callback, and rescheduling it if necessary.
+ *
+ * @param {Object} event The event to process.
+ */
 Scheduler.prototype.processEvent = function(event) {
     var durationPattern = event.durationPattern;
     if (durationPattern) {
@@ -199,6 +279,15 @@ Scheduler.prototype.processEvent = function(event) {
     }
 };
 
+/**
+ * Overridden function reading from the input buffers, and putting new values
+ * into sections of the output buffers.  Also handles buffers which are flagged
+ * as being empty, converting them into actual zeroed buffers.
+ *
+ * @param {AudioletBuffer[]} inputBuffers Samples received from the inputs.
+ * @param {AudioletBuffer[]} outputBuffers Samples to be sent to the outputs.
+ * @param {Number} offset Sample offset for writing to the output buffers.
+ */
 Scheduler.prototype.generate = function(inputBuffers, outputBuffers, offset) {
     var inputBuffer = inputBuffers[0];
     var outputBuffer = outputBuffers[0];
@@ -221,6 +310,11 @@ Scheduler.prototype.generate = function(inputBuffers, outputBuffers, offset) {
     }
 };
 
+/**
+ * toString
+ *
+ * @return {String} String representation.
+ */
 Scheduler.prototype.toString = function() {
     return 'Scheduler';
 };
