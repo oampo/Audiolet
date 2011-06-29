@@ -1,15 +1,43 @@
-/**
+/*!
  * @depends ../core/AudioletNode.js
  */
 
-var Pan = function(audiolet) {
+/**
+ * Position a single-channel input in stereo space
+ *
+ * **Inputs**
+ *
+ * - Audio
+ * - Pan Position
+ *
+ * **Outputs**
+ *
+ * - Panned audio
+ *
+ * **Parameters**
+ *
+ * - pan The pan position.  Values between 0 (hard-left) and 1 (hard-right).
+ * Linked to input 1.
+ *
+ * @constructor
+ * @extends AudioletNode
+ * @param {Audiolet} audiolet The audiolet object.
+ * @param {Number} [pan=0.5] The initial pan position.
+ */
+var Pan = function(audiolet, pan) {
     AudioletNode.call(this, audiolet, 2, 1);
     // Hardcode two output channels
     this.setNumberOfOutputChannels(0, 2);
-    this.pan = new AudioletParameter(this, 1, 0.5);
+    this.pan = new AudioletParameter(this, 1, pan || 0.5);
 };
 extend(Pan, AudioletNode);
 
+/**
+ * Process a block of samples
+ *
+ * @param {AudioletBuffer[]} inputBuffers Samples received from the inputs.
+ * @param {AudioletBuffer[]} outputBuffers Samples to be sent to the outputs.
+ */
 Pan.prototype.generate = function(inputBuffers, outputBuffers) {
     var inputBuffer = inputBuffers[0];
     var outputBuffer = outputBuffers[0];
@@ -46,6 +74,11 @@ Pan.prototype.generate = function(inputBuffers, outputBuffers) {
     }
 };
 
+/**
+ * toString
+ *
+ * @return {String} String representation.
+ */
 Pan.prototype.toString = function() {
     return 'Stereo Panner';
 };
