@@ -753,6 +753,168 @@ of its inputs and outputs</p>
                     <div class="header block">
                         <div class="left">
                             <div>
+                                <h3>TableLookupOscillator</h3>
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                ../trunk/src/dsp/TableLookupOscillator.js
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+
+                <!-- File contents -->
+                    <div class="content block">
+                        <div class="left">
+                            <div>
+                                <p>Oscillator which reads waveform values from a look-up table</p>
+
+<p><strong>Inputs</strong></p>
+
+<ul>
+<li>Frequency</li>
+</ul>
+
+<p><strong>Outputs</strong></p>
+
+<ul>
+<li>Waveform</li>
+</ul>
+
+<p><strong>Parameters</strong></p>
+
+<ul>
+<li>frequency The oscillator frequency.  Linked to input 0.</li>
+</ul>
+
+                                <hr />
+                                <ul>
+                                    <li>
+                                        <strong>constructor</strong>
+                                    </li>
+                                    <li>
+                                        <strong>extends</strong> AudioletNode
+                                    </li>
+                                    <li>
+                                        <strong>param</strong> <em>Audiolet</em> audiolet The audiolet object.
+                                    </li>
+                                    <li>
+                                        <strong>param</strong> <em>Number</em> [frequency=440] The initial frequency.
+                                    </li>
+                                    
+                                </ul>
+                                
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                <div class="highlight"><pre><span class="kd">var</span> <span class="nx">TableLookupOscillator</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">audiolet</span><span class="p">,</span> <span class="nx">table</span><span class="p">,</span> <span class="nx">frequency</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">AudioletNode</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="nx">audiolet</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">table</span> <span class="o">=</span> <span class="nx">table</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">frequency</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">AudioletParameter</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">frequency</span> <span class="o">||</span> <span class="mi">440</span><span class="p">);</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">phase</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">};</span>
+<span class="nx">extend</span><span class="p">(</span><span class="nx">TableLookupOscillator</span><span class="p">,</span> <span class="nx">AudioletNode</span><span class="p">);</span>
+</pre></div>
+
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    <div class="content block">
+                        <div class="left">
+                            <div>
+                                <p>Process a block of samples</p>
+
+                                <hr />
+                                <ul>
+                                    <li>
+                                        <strong>param</strong> <em>AudioletBuffer[]</em> inputBuffers Samples received from the inputs.
+                                    </li>
+                                    <li>
+                                        <strong>param</strong> <em>AudioletBuffer[]</em> outputBuffers Samples to be sent to the outputs.
+                                    </li>
+                                    
+                                </ul>
+                                
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                <div class="highlight"><pre><span class="nx">TableLookupOscillator</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">generate</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">inputBuffers</span><span class="p">,</span>
+                                                    <span class="nx">outputBuffers</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">buffer</span> <span class="o">=</span> <span class="nx">outputBuffers</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+    <span class="kd">var</span> <span class="nx">channel</span> <span class="o">=</span> <span class="nx">buffer</span><span class="p">.</span><span class="nx">getChannelData</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+
+    <span class="c1">// Make processing variables local</span>
+    <span class="kd">var</span> <span class="nx">sampleRate</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">audiolet</span><span class="p">.</span><span class="nx">device</span><span class="p">.</span><span class="nx">sampleRate</span><span class="p">;</span>
+    <span class="kd">var</span> <span class="nx">table</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">table</span><span class="p">;</span>
+    <span class="kd">var</span> <span class="nx">tableSize</span> <span class="o">=</span> <span class="nx">table</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span>
+    <span class="kd">var</span> <span class="nx">phase</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">phase</span><span class="p">;</span>
+    <span class="kd">var</span> <span class="nx">frequencyParameter</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">frequency</span><span class="p">;</span>
+    <span class="kd">var</span> <span class="nx">frequency</span><span class="p">,</span> <span class="nx">frequencyChannel</span><span class="p">;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">frequencyParameter</span><span class="p">.</span><span class="nx">isStatic</span><span class="p">())</span> <span class="p">{</span>
+        <span class="nx">frequency</span> <span class="o">=</span> <span class="nx">frequencyParameter</span><span class="p">.</span><span class="nx">getValue</span><span class="p">();</span>
+    <span class="p">}</span>
+    <span class="k">else</span> <span class="p">{</span>
+        <span class="nx">frequencyChannel</span> <span class="o">=</span> <span class="nx">frequencyParameter</span><span class="p">.</span><span class="nx">getChannel</span><span class="p">();</span>
+    <span class="p">}</span>
+
+    <span class="c1">// Processing loop</span>
+    <span class="kd">var</span> <span class="nx">bufferLength</span> <span class="o">=</span> <span class="nx">buffer</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">bufferLength</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nx">frequencyChannel</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">frequency</span> <span class="o">=</span> <span class="nx">frequencyChannel</span><span class="p">[</span><span class="nx">i</span><span class="p">];</span>
+        <span class="p">}</span>
+        <span class="kd">var</span> <span class="nx">step</span> <span class="o">=</span> <span class="nx">frequency</span> <span class="o">*</span> <span class="nx">tableSize</span> <span class="o">/</span> <span class="nx">sampleRate</span><span class="p">;</span>
+        <span class="nx">phase</span> <span class="o">+=</span> <span class="nx">step</span><span class="p">;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nx">phase</span> <span class="o">&gt;=</span> <span class="nx">tableSize</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">phase</span> <span class="o">%=</span> <span class="nx">tableSize</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="nx">channel</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="o">=</span> <span class="nx">table</span><span class="p">[</span><span class="nb">Math</span><span class="p">.</span><span class="nx">floor</span><span class="p">(</span><span class="nx">phase</span><span class="p">)];</span>
+    <span class="p">}</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">phase</span> <span class="o">=</span> <span class="nx">phase</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    <div class="content block">
+                        <div class="left">
+                            <div>
+                                <p>toString</p>
+
+                                <hr />
+                                <ul>
+                                    <li>
+                                        <strong>return</strong> <em>String</em> String representation.
+                                    </li>
+                                    
+                                </ul>
+                                
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                <div class="highlight"><pre><span class="nx">TableLookupOscillator</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">toString</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="s1">&#39;Table Lookup Oscillator&#39;</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    
+                </div>
+                <!-- Title and filename -->
+                <div class="file">
+                    <div class="header block">
+                        <div class="left">
+                            <div>
                                 <h3>Sine</h3>
                             </div>
                         </div>
@@ -1233,6 +1395,126 @@ of its inputs and outputs</p>
 <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="mi">8192</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
     <span class="nx">Square</span><span class="p">.</span><span class="nx">TABLE</span><span class="p">.</span><span class="nx">push</span><span class="p">(((</span><span class="nx">i</span> <span class="o">-</span> <span class="mi">4096</span><span class="p">)</span> <span class="o">/</span> <span class="mi">8192</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="o">?</span> <span class="mi">1</span> <span class="o">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">);</span>
 <span class="p">}</span>
+</pre></div>
+
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    
+                </div>
+                <!-- Title and filename -->
+                <div class="file">
+                    <div class="header block">
+                        <div class="left">
+                            <div>
+                                <h3>WhiteNoise</h3>
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                ../trunk/src/dsp/WhiteNoise.js
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+
+                <!-- File contents -->
+                    <div class="content block">
+                        <div class="left">
+                            <div>
+                                <p>A white noise source</p>
+
+<p><strong>Outputs</strong></p>
+
+<ul>
+<li>White noise</li>
+</ul>
+
+                                <hr />
+                                <ul>
+                                    <li>
+                                        <strong>constructor</strong>
+                                    </li>
+                                    <li>
+                                        <strong>extends</strong> AudioletNode
+                                    </li>
+                                    <li>
+                                        <strong>param</strong> <em>Audiolet</em> audiolet The audiolet object.
+                                    </li>
+                                    
+                                </ul>
+                                
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                <div class="highlight"><pre><span class="kd">var</span> <span class="nx">WhiteNoise</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">audiolet</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">AudioletNode</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="nx">audiolet</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+<span class="p">};</span>
+<span class="nx">extend</span><span class="p">(</span><span class="nx">WhiteNoise</span><span class="p">,</span> <span class="nx">AudioletNode</span><span class="p">);</span>
+</pre></div>
+
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    <div class="content block">
+                        <div class="left">
+                            <div>
+                                <p>Process a block of samples</p>
+
+                                <hr />
+                                <ul>
+                                    <li>
+                                        <strong>param</strong> <em>AudioletBuffer[]</em> inputBuffers Samples received from the inputs.
+                                    </li>
+                                    <li>
+                                        <strong>param</strong> <em>AudioletBuffer[]</em> outputBuffers Samples to be sent to the outputs.
+                                    </li>
+                                    
+                                </ul>
+                                
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                <div class="highlight"><pre><span class="nx">WhiteNoise</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">generate</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">inputBuffers</span><span class="p">,</span> <span class="nx">outputBuffers</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">buffer</span> <span class="o">=</span> <span class="nx">outputBuffers</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+    <span class="kd">var</span> <span class="nx">channel</span> <span class="o">=</span> <span class="nx">buffer</span><span class="p">.</span><span class="nx">getChannelData</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+
+    <span class="c1">// Processing loop</span>
+    <span class="kd">var</span> <span class="nx">bufferLength</span> <span class="o">=</span> <span class="nx">buffer</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">bufferLength</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">channel</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="o">=</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">random</span><span class="p">()</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">};</span>
+</pre></div>
+
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    <div class="content block">
+                        <div class="left">
+                            <div>
+                                <p>toString</p>
+
+                                <hr />
+                                <ul>
+                                    <li>
+                                        <strong>return</strong> <em>String</em> String representation.
+                                    </li>
+                                    
+                                </ul>
+                                
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                <div class="highlight"><pre><span class="nx">WhiteNoise</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">toString</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="s1">&#39;White Noise&#39;</span><span class="p">;</span>
+<span class="p">};</span>
 </pre></div>
 
                             </div>
@@ -2227,6 +2509,772 @@ input 3</li>
                     <div class="header block">
                         <div class="left">
                             <div>
+                                <h3>Pan</h3>
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                ../trunk/src/dsp/Pan.js
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+
+                <!-- File contents -->
+                    <div class="content block">
+                        <div class="left">
+                            <div>
+                                <p>Position a single-channel input in stereo space</p>
+
+<p><strong>Inputs</strong></p>
+
+<ul>
+<li>Audio</li>
+<li>Pan Position</li>
+</ul>
+
+<p><strong>Outputs</strong></p>
+
+<ul>
+<li>Panned audio</li>
+</ul>
+
+<p><strong>Parameters</strong></p>
+
+<ul>
+<li>pan The pan position.  Values between 0 (hard-left) and 1 (hard-right).
+Linked to input 1.</li>
+</ul>
+
+                                <hr />
+                                <ul>
+                                    <li>
+                                        <strong>constructor</strong>
+                                    </li>
+                                    <li>
+                                        <strong>extends</strong> AudioletNode
+                                    </li>
+                                    <li>
+                                        <strong>param</strong> <em>Audiolet</em> audiolet The audiolet object.
+                                    </li>
+                                    <li>
+                                        <strong>param</strong> <em>Number</em> [pan=0.5] The initial pan position.
+                                    </li>
+                                    
+                                </ul>
+                                
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                <div class="highlight"><pre><span class="kd">var</span> <span class="nx">Pan</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">audiolet</span><span class="p">,</span> <span class="nx">pan</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">AudioletNode</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="nx">audiolet</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+    <span class="c1">// Hardcode two output channels</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">setNumberOfOutputChannels</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">);</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">pan</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">AudioletParameter</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="nx">pan</span> <span class="o">||</span> <span class="mf">0.5</span><span class="p">);</span>
+<span class="p">};</span>
+<span class="nx">extend</span><span class="p">(</span><span class="nx">Pan</span><span class="p">,</span> <span class="nx">AudioletNode</span><span class="p">);</span>
+</pre></div>
+
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    <div class="content block">
+                        <div class="left">
+                            <div>
+                                <p>Process a block of samples</p>
+
+                                <hr />
+                                <ul>
+                                    <li>
+                                        <strong>param</strong> <em>AudioletBuffer[]</em> inputBuffers Samples received from the inputs.
+                                    </li>
+                                    <li>
+                                        <strong>param</strong> <em>AudioletBuffer[]</em> outputBuffers Samples to be sent to the outputs.
+                                    </li>
+                                    
+                                </ul>
+                                
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                <div class="highlight"><pre><span class="nx">Pan</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">generate</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">inputBuffers</span><span class="p">,</span> <span class="nx">outputBuffers</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">inputBuffer</span> <span class="o">=</span> <span class="nx">inputBuffers</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+    <span class="kd">var</span> <span class="nx">outputBuffer</span> <span class="o">=</span> <span class="nx">outputBuffers</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="nx">inputBuffer</span><span class="p">.</span><span class="nx">isEmpty</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">outputBuffer</span><span class="p">.</span><span class="nx">isEmpty</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+        <span class="k">return</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="kd">var</span> <span class="nx">inputChannel</span> <span class="o">=</span> <span class="nx">inputBuffer</span><span class="p">.</span><span class="nx">getChannelData</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+    <span class="kd">var</span> <span class="nx">leftOutputChannel</span> <span class="o">=</span> <span class="nx">outputBuffer</span><span class="p">.</span><span class="nx">getChannelData</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+    <span class="kd">var</span> <span class="nx">rightOutputChannel</span> <span class="o">=</span> <span class="nx">outputBuffer</span><span class="p">.</span><span class="nx">getChannelData</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+
+    <span class="c1">// Local processing variables</span>
+    <span class="kd">var</span> <span class="nx">panParameter</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">pan</span><span class="p">;</span>
+    <span class="kd">var</span> <span class="nx">pan</span><span class="p">,</span> <span class="nx">panChannel</span><span class="p">;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">panParameter</span><span class="p">.</span><span class="nx">isStatic</span><span class="p">())</span> <span class="p">{</span>
+        <span class="nx">pan</span> <span class="o">=</span> <span class="nx">panParameter</span><span class="p">.</span><span class="nx">getValue</span><span class="p">();</span>
+    <span class="p">}</span>
+    <span class="k">else</span> <span class="p">{</span>
+        <span class="nx">panChannel</span> <span class="o">=</span> <span class="nx">panParameter</span><span class="p">.</span><span class="nx">getChannel</span><span class="p">();</span>
+    <span class="p">}</span>
+
+    <span class="kd">var</span> <span class="nx">bufferLength</span> <span class="o">=</span> <span class="nx">outputBuffer</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">bufferLength</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nx">panChannel</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">pan</span> <span class="o">=</span> <span class="nx">panChannel</span><span class="p">[</span><span class="nx">i</span><span class="p">];</span>
+        <span class="p">}</span>
+        <span class="kd">var</span> <span class="nx">scaledPan</span> <span class="o">=</span> <span class="nx">pan</span> <span class="o">*</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">PI</span> <span class="o">/</span> <span class="mi">2</span><span class="p">;</span>
+        <span class="kd">var</span> <span class="nx">value</span> <span class="o">=</span> <span class="nx">inputChannel</span><span class="p">[</span><span class="nx">i</span><span class="p">];</span>
+        <span class="c1">// TODO: Use sine/cos tables?</span>
+        <span class="nx">leftOutputChannel</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="o">=</span> <span class="nx">value</span> <span class="o">*</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">cos</span><span class="p">(</span><span class="nx">scaledPan</span><span class="p">);</span>
+        <span class="nx">rightOutputChannel</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="o">=</span> <span class="nx">value</span> <span class="o">*</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">sin</span><span class="p">(</span><span class="nx">scaledPan</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">};</span>
+</pre></div>
+
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    <div class="content block">
+                        <div class="left">
+                            <div>
+                                <p>toString</p>
+
+                                <hr />
+                                <ul>
+                                    <li>
+                                        <strong>return</strong> <em>String</em> String representation.
+                                    </li>
+                                    
+                                </ul>
+                                
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                <div class="highlight"><pre><span class="nx">Pan</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">toString</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="s1">&#39;Stereo Panner&#39;</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    
+                </div>
+                <!-- Title and filename -->
+                <div class="file">
+                    <div class="header block">
+                        <div class="left">
+                            <div>
+                                <h3>UpMixer</h3>
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                ../trunk/src/dsp/UpMixer.js
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+
+                <!-- File contents -->
+                    <div class="content block">
+                        <div class="left">
+                            <div>
+                                <p>Upmix an input to a constant number of output channels</p>
+
+<p><strong>Inputs</strong></p>
+
+<ul>
+<li>Audio</li>
+</ul>
+
+<p><strong>Outputs</strong></p>
+
+<ul>
+<li>Upmixed audio</li>
+</ul>
+
+                                <hr />
+                                <ul>
+                                    <li>
+                                        <strong>constructor</strong>
+                                    </li>
+                                    <li>
+                                        <strong>extends</strong> AudioletNode
+                                    </li>
+                                    <li>
+                                        <strong>param</strong> <em>Audiolet</em> audiolet The audiolet object.
+                                    </li>
+                                    <li>
+                                        <strong>param</strong> <em>Number</em> outputChannels The number of output channels.
+                                    </li>
+                                    
+                                </ul>
+                                
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                <div class="highlight"><pre><span class="kd">var</span> <span class="nx">UpMixer</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">audiolet</span><span class="p">,</span> <span class="nx">outputChannels</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">AudioletNode</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="nx">audiolet</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">outputChannels</span> <span class="o">=</span> <span class="nx">outputChannels</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">outputs</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">numberOfChannels</span> <span class="o">=</span> <span class="nx">outputChannels</span><span class="p">;</span>
+<span class="p">};</span>
+<span class="nx">extend</span><span class="p">(</span><span class="nx">UpMixer</span><span class="p">,</span> <span class="nx">AudioletNode</span><span class="p">);</span>
+</pre></div>
+
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    <div class="content block">
+                        <div class="left">
+                            <div>
+                                <p>Process a block of samples</p>
+
+                                <hr />
+                                <ul>
+                                    <li>
+                                        <strong>param</strong> <em>AudioletBuffer[]</em> inputBuffers Samples received from the inputs.
+                                    </li>
+                                    <li>
+                                        <strong>param</strong> <em>AudioletBuffer[]</em> outputBuffers Samples to be sent to the outputs.
+                                    </li>
+                                    
+                                </ul>
+                                
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                <div class="highlight"><pre><span class="nx">UpMixer</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">generate</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">inputBuffers</span><span class="p">,</span> <span class="nx">outputBuffers</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">inputBuffer</span> <span class="o">=</span> <span class="nx">inputBuffers</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+    <span class="kd">var</span> <span class="nx">outputBuffer</span> <span class="o">=</span> <span class="nx">outputBuffers</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="nx">inputBuffer</span><span class="p">.</span><span class="nx">isEmpty</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">outputBuffer</span><span class="p">.</span><span class="nx">isEmpty</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+        <span class="k">return</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="kd">var</span> <span class="nx">outputChannels</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">outputChannels</span><span class="p">;</span>
+
+    <span class="kd">var</span> <span class="nx">numberOfChannels</span> <span class="o">=</span> <span class="nx">inputBuffer</span><span class="p">.</span><span class="nx">numberOfChannels</span><span class="p">;</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">outputChannels</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">inputChannel</span> <span class="o">=</span> <span class="nx">inputBuffer</span><span class="p">.</span><span class="nx">getChannelData</span><span class="p">(</span><span class="nx">i</span> <span class="o">%</span> <span class="nx">numberOfChannels</span><span class="p">);</span>
+        <span class="kd">var</span> <span class="nx">outputChannel</span> <span class="o">=</span> <span class="nx">outputBuffer</span><span class="p">.</span><span class="nx">getChannelData</span><span class="p">(</span><span class="nx">i</span><span class="p">);</span>
+        <span class="nx">outputChannel</span><span class="p">.</span><span class="nx">set</span><span class="p">(</span><span class="nx">inputChannel</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">};</span>
+</pre></div>
+
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    <div class="content block">
+                        <div class="left">
+                            <div>
+                                <p>toString</p>
+
+                                <hr />
+                                <ul>
+                                    <li>
+                                        <strong>return</strong> <em>String</em> String representation.
+                                    </li>
+                                    
+                                </ul>
+                                
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                <div class="highlight"><pre><span class="nx">UpMixer</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">toString</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="s1">&#39;UpMixer&#39;</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    
+                </div>
+                <!-- Title and filename -->
+                <div class="file">
+                    <div class="header block">
+                        <div class="left">
+                            <div>
+                                <h3>LinearCrossFade</h3>
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                ../trunk/src/dsp/LinearCrossFade.js
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+
+                <!-- File contents -->
+                    <div class="content block">
+                        <div class="left">
+                            <div>
+                                <p>Linear cross-fade between two signals</p>
+
+<p><strong>Inputs</strong></p>
+
+<ul>
+<li>Audio 1</li>
+<li>Audio 2</li>
+<li>Fade Position</li>
+</ul>
+
+<p><strong>Outputs</strong></p>
+
+<ul>
+<li>Mixed audio</li>
+</ul>
+
+<p><strong>Parameters</strong></p>
+
+<ul>
+<li>position The fade position.  Values between 0 (Audio 1 only) and 1 (Audio
+2 only).  Linked to input 2.</li>
+</ul>
+
+                                <hr />
+                                <ul>
+                                    <li>
+                                        <strong>constructor</strong>
+                                    </li>
+                                    <li>
+                                        <strong>extends</strong> AudioletNode
+                                    </li>
+                                    <li>
+                                        <strong>param</strong> <em>Audiolet</em> audiolet The audiolet object.
+                                    </li>
+                                    <li>
+                                        <strong>param</strong> <em>Number</em> [position=0.5] The initial fade position.
+                                    </li>
+                                    
+                                </ul>
+                                
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                <div class="highlight"><pre><span class="kd">var</span> <span class="nx">LinearCrossFade</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">audiolet</span><span class="p">,</span> <span class="nx">position</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">AudioletNode</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="nx">audiolet</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">linkNumberOfOutputChannels</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">position</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">AudioletParameter</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="nx">position</span> <span class="o">||</span> <span class="mf">0.5</span><span class="p">);</span>
+<span class="p">};</span>
+<span class="nx">extend</span><span class="p">(</span><span class="nx">LinearCrossFade</span><span class="p">,</span> <span class="nx">AudioletNode</span><span class="p">);</span>
+</pre></div>
+
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    <div class="content block">
+                        <div class="left">
+                            <div>
+                                <p>Process a block of samples</p>
+
+                                <hr />
+                                <ul>
+                                    <li>
+                                        <strong>param</strong> <em>AudioletBuffer[]</em> inputBuffers Samples received from the inputs.
+                                    </li>
+                                    <li>
+                                        <strong>param</strong> <em>AudioletBuffer[]</em> outputBuffers Samples to be sent to the outputs.
+                                    </li>
+                                    
+                                </ul>
+                                
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                <div class="highlight"><pre><span class="nx">LinearCrossFade</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">generate</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">inputBuffers</span><span class="p">,</span> <span class="nx">outputBuffers</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">inputBufferA</span> <span class="o">=</span> <span class="nx">inputBuffers</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+    <span class="kd">var</span> <span class="nx">inputBufferB</span> <span class="o">=</span> <span class="nx">inputBuffers</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span>
+    <span class="kd">var</span> <span class="nx">outputBuffer</span> <span class="o">=</span> <span class="nx">outputBuffers</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+
+    <span class="kd">var</span> <span class="nx">inputChannelsA</span> <span class="o">=</span> <span class="nx">inputBufferA</span><span class="p">.</span><span class="nx">channels</span><span class="p">;</span>
+    <span class="kd">var</span> <span class="nx">inputChannelsB</span> <span class="o">=</span> <span class="nx">inputBufferB</span><span class="p">.</span><span class="nx">channels</span><span class="p">;</span>
+    <span class="kd">var</span> <span class="nx">outputChannels</span> <span class="o">=</span> <span class="nx">outputBuffer</span><span class="p">.</span><span class="nx">channels</span><span class="p">;</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="nx">inputBufferA</span><span class="p">.</span><span class="nx">isEmpty</span> <span class="o">||</span> <span class="nx">inputBufferB</span><span class="p">.</span><span class="nx">isEmpty</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">outputBuffer</span><span class="p">.</span><span class="nx">isEmpty</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+        <span class="k">return</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="c1">// Local processing variables</span>
+    <span class="kd">var</span> <span class="nx">positionParameter</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">position</span><span class="p">;</span>
+    <span class="kd">var</span> <span class="nx">position</span><span class="p">,</span> <span class="nx">positionChannel</span><span class="p">;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">positionParameter</span><span class="p">.</span><span class="nx">isStatic</span><span class="p">())</span> <span class="p">{</span>
+        <span class="nx">position</span> <span class="o">=</span> <span class="nx">positionParameter</span><span class="p">.</span><span class="nx">getValue</span><span class="p">();</span>
+    <span class="p">}</span>
+    <span class="k">else</span> <span class="p">{</span>
+        <span class="nx">positionChannel</span> <span class="o">=</span> <span class="nx">positionParameter</span><span class="p">.</span><span class="nx">getChannel</span><span class="p">();</span>
+    <span class="p">}</span>
+
+    <span class="kd">var</span> <span class="nx">bufferLength</span> <span class="o">=</span> <span class="nx">outputBuffer</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">bufferLength</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nx">positionChannel</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">position</span> <span class="o">=</span> <span class="nx">positionChannel</span><span class="p">[</span><span class="nx">i</span><span class="p">];</span>
+        <span class="p">}</span>
+
+        <span class="kd">var</span> <span class="nx">gainA</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="nx">position</span><span class="p">;</span>
+        <span class="kd">var</span> <span class="nx">gainB</span> <span class="o">=</span> <span class="nx">position</span><span class="p">;</span>
+
+        <span class="kd">var</span> <span class="nx">numberOfChannels</span> <span class="o">=</span> <span class="nx">inputBufferA</span><span class="p">.</span><span class="nx">numberOfChannels</span><span class="p">;</span>
+        <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">j</span> <span class="o">&lt;</span> <span class="nx">numberOfChannels</span><span class="p">;</span> <span class="nx">j</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">inputChannelA</span> <span class="o">=</span> <span class="nx">inputChannelsA</span><span class="p">[</span><span class="nx">j</span><span class="p">];</span>
+            <span class="kd">var</span> <span class="nx">inputChannelB</span> <span class="o">=</span> <span class="nx">inputChannelsB</span><span class="p">[</span><span class="nx">j</span><span class="p">];</span>
+            <span class="kd">var</span> <span class="nx">outputChannel</span> <span class="o">=</span> <span class="nx">outputChannels</span><span class="p">[</span><span class="nx">j</span><span class="p">];</span>
+
+            <span class="nx">outputChannel</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="o">=</span> <span class="nx">inputChannelA</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="o">*</span> <span class="nx">gainA</span> <span class="o">+</span>
+                               <span class="nx">inputChannelB</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="o">*</span> <span class="nx">gainB</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">};</span>
+</pre></div>
+
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    <div class="content block">
+                        <div class="left">
+                            <div>
+                                <p>toString</p>
+
+                                <hr />
+                                <ul>
+                                    <li>
+                                        <strong>return</strong> <em>String</em> String representation.
+                                    </li>
+                                    
+                                </ul>
+                                
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                <div class="highlight"><pre><span class="nx">LinearCrossFade</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">toString</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="s1">&#39;Linear Cross Fader&#39;</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    
+                </div>
+                <!-- Title and filename -->
+                <div class="file">
+                    <div class="header block">
+                        <div class="left">
+                            <div>
+                                <h3>Limiter</h3>
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                ../trunk/src/dsp/Limiter.js
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+
+                <!-- File contents -->
+                    <div class="content block">
+                        <div class="left">
+                            <div>
+                                <p>A simple (and frankly shoddy) zero-lookahead limiter.</p>
+
+<p><strong>Inputs</strong></p>
+
+<ul>
+<li>Audio</li>
+<li>Threshold</li>
+<li>Attack</li>
+<li>Release</li>
+</ul>
+
+<p><strong>Outputs</strong></p>
+
+<ul>
+<li>Limited audio</li>
+</ul>
+
+<p><strong>Parameters</strong></p>
+
+<ul>
+<li>threshold The limiter threshold.  Linked to input 1.</li>
+<li>attack The attack time in seconds. Linked to input 2.</li>
+<li>release The release time in seconds.  Linked to input 3.</li>
+</ul>
+
+                                <hr />
+                                <ul>
+                                    <li>
+                                        <strong>constructor</strong>
+                                    </li>
+                                    <li>
+                                        <strong>extends</strong> AudioletGroup
+                                    </li>
+                                    <li>
+                                        <strong>param</strong> <em>Audiolet</em> audiolet The audiolet object.
+                                    </li>
+                                    <li>
+                                        <strong>param</strong> <em>Number</em> [threshold=0.95] The initial threshold.
+                                    </li>
+                                    <li>
+                                        <strong>param</strong> <em>Number</em> [attack=0.01] The initial attack time.
+                                    </li>
+                                    <li>
+                                        <strong>param</strong> <em>Number</em> [release=0.4] The initial release time.
+                                    </li>
+                                    
+                                </ul>
+                                
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                <div class="highlight"><pre><span class="kd">var</span> <span class="nx">Limiter</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">audiolet</span><span class="p">,</span> <span class="nx">threshold</span><span class="p">,</span> <span class="nx">attack</span><span class="p">,</span> <span class="nx">release</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">AudioletGroup</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="nx">audiolet</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+
+    <span class="c1">// Parameters</span>
+    <span class="kd">var</span> <span class="nx">attack</span> <span class="o">=</span> <span class="nx">attack</span> <span class="o">||</span> <span class="mf">0.01</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">attackNode</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ParameterNode</span><span class="p">(</span><span class="nx">audiolet</span><span class="p">,</span> <span class="nx">attack</span><span class="p">);</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">attack</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">attackNode</span><span class="p">.</span><span class="nx">parameter</span><span class="p">;</span>
+
+    <span class="kd">var</span> <span class="nx">release</span> <span class="o">=</span> <span class="nx">release</span> <span class="o">||</span> <span class="mf">0.4</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">releaseNode</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ParameterNode</span><span class="p">(</span><span class="nx">audiolet</span><span class="p">,</span> <span class="nx">release</span><span class="p">);</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">release</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">releaseNode</span><span class="p">.</span><span class="nx">parameter</span><span class="p">;</span>
+
+    <span class="k">this</span><span class="p">.</span><span class="nx">amplitude</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Amplitude</span><span class="p">(</span><span class="nx">audiolet</span><span class="p">);</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">limitFromAmplitude</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">LimitFromAmplitude</span><span class="p">(</span><span class="nx">audiolet</span><span class="p">,</span> <span class="nx">threshold</span><span class="p">);</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">threshold</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">limitFromAmplitude</span><span class="p">.</span><span class="nx">threshold</span><span class="p">;</span>
+
+    <span class="k">this</span><span class="p">.</span><span class="nx">inputs</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">connect</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">amplitude</span><span class="p">);</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">inputs</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">connect</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">limitFromAmplitude</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">inputs</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="nx">connect</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">limitFromAmplitude</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">);</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">inputs</span><span class="p">[</span><span class="mi">2</span><span class="p">].</span><span class="nx">connect</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">attackNode</span><span class="p">);</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">inputs</span><span class="p">[</span><span class="mi">3</span><span class="p">].</span><span class="nx">connect</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">releaseNode</span><span class="p">);</span>
+
+    <span class="k">this</span><span class="p">.</span><span class="nx">attackNode</span><span class="p">.</span><span class="nx">connect</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">amplitude</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">releaseNode</span><span class="p">.</span><span class="nx">connect</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">amplitude</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">);</span>
+
+    <span class="k">this</span><span class="p">.</span><span class="nx">amplitude</span><span class="p">.</span><span class="nx">connect</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">limitFromAmplitude</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">limitFromAmplitude</span><span class="p">.</span><span class="nx">connect</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">outputs</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
+<span class="p">};</span>
+<span class="nx">extend</span><span class="p">(</span><span class="nx">Limiter</span><span class="p">,</span> <span class="nx">AudioletGroup</span><span class="p">);</span>
+</pre></div>
+
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    <div class="content block">
+                        <div class="left">
+                            <div>
+                                <p>toString</p>
+
+                                <hr />
+                                <ul>
+                                    <li>
+                                        <strong>return</strong> <em>String</em> String representation.
+                                    </li>
+                                    
+                                </ul>
+                                
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                <div class="highlight"><pre><span class="nx">Limiter</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">toString</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="s1">&#39;Limiter&#39;</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    <div class="content block">
+                        <div class="left">
+                            <div>
+                                <p>Helper node which limits a signal based on an amplitude input.</p>
+
+<p><strong>Inputs</strong></p>
+
+<ul>
+<li>Audio</li>
+<li>Amplitude</li>
+<li>Threshold</li>
+</ul>
+
+<p><strong>Outputs</strong></p>
+
+<ul>
+<li>Limited audio</li>
+</ul>
+
+<p><strong>Parameters</strong></p>
+
+<ul>
+<li>threshold The limiter threshold.  Linked to input 2.</li>
+</ul>
+
+                                <hr />
+                                <ul>
+                                    <li>
+                                        <strong>constructor</strong>
+                                    </li>
+                                    <li>
+                                        <strong>extends</strong> AudioletNode
+                                    </li>
+                                    <li>
+                                        <strong>param</strong> <em>Audiolet</em> audiolet The audiolet object.
+                                    </li>
+                                    <li>
+                                        <strong>param</strong> <em>Number</em> [threshold=0.95] The initial threshold.
+                                    </li>
+                                    
+                                </ul>
+                                
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                <div class="highlight"><pre><span class="kd">var</span> <span class="nx">LimitFromAmplitude</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">audiolet</span><span class="p">,</span> <span class="nx">threshold</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">AudioletNode</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="nx">audiolet</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">linkNumberOfOutputChannels</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">threshold</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">AudioletParameter</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="nx">threshold</span> <span class="o">||</span> <span class="mf">0.95</span><span class="p">);</span>
+<span class="p">};</span>
+<span class="nx">extend</span><span class="p">(</span><span class="nx">LimitFromAmplitude</span><span class="p">,</span> <span class="nx">AudioletNode</span><span class="p">);</span>
+</pre></div>
+
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    <div class="content block">
+                        <div class="left">
+                            <div>
+                                <p>Process a block of samples</p>
+
+                                <hr />
+                                <ul>
+                                    <li>
+                                        <strong>param</strong> <em>AudioletBuffer[]</em> inputBuffers Samples received from the inputs.
+                                    </li>
+                                    <li>
+                                        <strong>param</strong> <em>AudioletBuffer[]</em> outputBuffers Samples to be sent to the outputs.
+                                    </li>
+                                    
+                                </ul>
+                                
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                <div class="highlight"><pre><span class="nx">LimitFromAmplitude</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">generate</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">inputBuffers</span><span class="p">,</span> <span class="nx">outputBuffers</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">inputBuffer</span> <span class="o">=</span> <span class="nx">inputBuffers</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+    <span class="kd">var</span> <span class="nx">amplitudeBuffer</span> <span class="o">=</span> <span class="nx">inputBuffers</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span>
+    <span class="kd">var</span> <span class="nx">amplitudeChannel</span> <span class="o">=</span> <span class="nx">inputBuffer</span><span class="p">.</span><span class="nx">getChannelData</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+    <span class="kd">var</span> <span class="nx">outputBuffer</span> <span class="o">=</span> <span class="nx">outputBuffers</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="nx">inputBuffer</span><span class="p">.</span><span class="nx">isEmpty</span> <span class="o">||</span> <span class="nx">amplitudeBuffer</span><span class="p">.</span><span class="nx">isEmpty</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">outputBuffer</span><span class="p">.</span><span class="nx">isEmpty</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+        <span class="k">return</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="c1">// Local processing variables</span>
+    <span class="kd">var</span> <span class="nx">thresholdParameter</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">threshold</span><span class="p">;</span>
+    <span class="kd">var</span> <span class="nx">threshold</span><span class="p">,</span> <span class="nx">thresholdChannel</span><span class="p">;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">thresholdParameter</span><span class="p">.</span><span class="nx">isStatic</span><span class="p">())</span> <span class="p">{</span>
+        <span class="nx">threshold</span> <span class="o">=</span> <span class="nx">thresholdParameter</span><span class="p">.</span><span class="nx">getValue</span><span class="p">();</span>
+    <span class="p">}</span>
+    <span class="k">else</span> <span class="p">{</span>
+        <span class="nx">thresholdChannel</span> <span class="o">=</span> <span class="nx">thresholdParameter</span><span class="p">.</span><span class="nx">getChannel</span><span class="p">();</span>
+    <span class="p">}</span>
+
+    <span class="kd">var</span> <span class="nx">numberOfChannels</span> <span class="o">=</span> <span class="nx">inputBuffer</span><span class="p">.</span><span class="nx">numberOfChannels</span><span class="p">;</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">numberOfChannels</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">inputChannel</span> <span class="o">=</span> <span class="nx">inputBuffer</span><span class="p">.</span><span class="nx">getChannelData</span><span class="p">(</span><span class="nx">i</span><span class="p">);</span>
+        <span class="kd">var</span> <span class="nx">outputChannel</span> <span class="o">=</span> <span class="nx">outputBuffer</span><span class="p">.</span><span class="nx">getChannelData</span><span class="p">(</span><span class="nx">i</span><span class="p">);</span>
+        <span class="kd">var</span> <span class="nx">bufferLength</span> <span class="o">=</span> <span class="nx">inputBuffer</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span>
+        <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">j</span> <span class="o">&lt;</span> <span class="nx">bufferLength</span><span class="p">;</span> <span class="nx">j</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">value</span> <span class="o">=</span> <span class="nx">inputChannel</span><span class="p">[</span><span class="nx">j</span><span class="p">];</span>
+            <span class="kd">var</span> <span class="nx">amplitude</span> <span class="o">=</span> <span class="nx">amplitudeChannel</span><span class="p">[</span><span class="nx">j</span><span class="p">];</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">thresholdChannel</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">threshold</span> <span class="o">=</span> <span class="nx">thresholdChannel</span><span class="p">[</span><span class="nx">j</span><span class="p">];</span>
+            <span class="p">}</span>
+
+            <span class="kd">var</span> <span class="nx">diff</span> <span class="o">=</span> <span class="nx">amplitude</span> <span class="o">-</span> <span class="nx">threshold</span><span class="p">;</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">diff</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">outputChannel</span><span class="p">[</span><span class="nx">j</span><span class="p">]</span> <span class="o">=</span> <span class="nx">inputChannel</span><span class="p">[</span><span class="nx">j</span><span class="p">]</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="nx">diff</span><span class="p">);</span>
+            <span class="p">}</span>
+            <span class="k">else</span> <span class="p">{</span>
+                <span class="nx">outputChannel</span><span class="p">[</span><span class="nx">j</span><span class="p">]</span> <span class="o">=</span> <span class="nx">inputChannel</span><span class="p">[</span><span class="nx">j</span><span class="p">];</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">};</span>
+</pre></div>
+
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    <div class="content block">
+                        <div class="left">
+                            <div>
+                                <p>toString</p>
+
+                                <hr />
+                                <ul>
+                                    <li>
+                                        <strong>return</strong> <em>String</em> String representation.
+                                    </li>
+                                    
+                                </ul>
+                                
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                <div class="highlight"><pre><span class="nx">LimitFromAmplitude</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">toString</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="p">(</span><span class="s1">&#39;Limit From Amplitude&#39;</span><span class="p">);</span>
+<span class="p">};</span>
+</pre></div>
+
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    
+                </div>
+                <!-- Title and filename -->
+                <div class="file">
+                    <div class="header block">
+                        <div class="left">
+                            <div>
                                 <h3>BiquadFilter</h3>
                             </div>
                         </div>
@@ -2475,6 +3523,282 @@ will be called automatically when new values are needed.</p>
                             <div>
                                 <div class="highlight"><pre><span class="nx">BiquadFilter</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">toString</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
     <span class="k">return</span> <span class="s1">&#39;Biquad Filter&#39;</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    
+                </div>
+                <!-- Title and filename -->
+                <div class="file">
+                    <div class="header block">
+                        <div class="left">
+                            <div>
+                                <h3>LowPassFilter</h3>
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                ../trunk/src/dsp/LowPassFilter.js
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+
+                <!-- File contents -->
+                    <div class="content block">
+                        <div class="left">
+                            <div>
+                                <p>Low-pass filter</p>
+
+<p><strong>Inputs</strong></p>
+
+<ul>
+<li>Audio</li>
+<li>Filter frequency</li>
+</ul>
+
+<p><strong>Outputs</strong></p>
+
+<ul>
+<li>Filtered audio</li>
+</ul>
+
+<p><strong>Parameters</strong></p>
+
+<ul>
+<li>frequency The filter frequency.  Linked to input 1.</li>
+</ul>
+
+                                <hr />
+                                <ul>
+                                    <li>
+                                        <strong>constructor</strong>
+                                    </li>
+                                    <li>
+                                        <strong>extends</strong> BiquadFilter
+                                    </li>
+                                    <li>
+                                        <strong>param</strong> <em>Audiolet</em> audiolet The audiolet object.
+                                    </li>
+                                    <li>
+                                        <strong>param</strong> <em>Number</em> frequency The initial frequency.
+                                    </li>
+                                    
+                                </ul>
+                                
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                <div class="highlight"><pre><span class="kd">var</span> <span class="nx">LowPassFilter</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">audiolet</span><span class="p">,</span> <span class="nx">frequency</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">BiquadFilter</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="nx">audiolet</span><span class="p">,</span> <span class="nx">frequency</span><span class="p">);</span>
+<span class="p">};</span>
+<span class="nx">extend</span><span class="p">(</span><span class="nx">LowPassFilter</span><span class="p">,</span> <span class="nx">BiquadFilter</span><span class="p">);</span>
+</pre></div>
+
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    <div class="content block">
+                        <div class="left">
+                            <div>
+                                <p>Calculate the biquad filter coefficients using maths from
+http://www.musicdsp.org/files/Audio-EQ-Cookbook.txt</p>
+
+                                <hr />
+                                <ul>
+                                    <li>
+                                        <strong>param</strong> <em>Number</em> frequency The filter frequency.
+                                    </li>
+                                    
+                                </ul>
+                                
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                <div class="highlight"><pre><span class="nx">LowPassFilter</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">calculateCoefficients</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">frequency</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">w0</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">PI</span> <span class="o">*</span> <span class="nx">frequency</span> <span class="o">/</span>
+             <span class="k">this</span><span class="p">.</span><span class="nx">audiolet</span><span class="p">.</span><span class="nx">device</span><span class="p">.</span><span class="nx">sampleRate</span><span class="p">;</span>
+    <span class="kd">var</span> <span class="nx">cosw0</span> <span class="o">=</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">cos</span><span class="p">(</span><span class="nx">w0</span><span class="p">);</span>
+    <span class="kd">var</span> <span class="nx">sinw0</span> <span class="o">=</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">sin</span><span class="p">(</span><span class="nx">w0</span><span class="p">);</span>
+    <span class="kd">var</span> <span class="nx">alpha</span> <span class="o">=</span> <span class="nx">sinw0</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">/</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">));</span>
+
+    <span class="k">this</span><span class="p">.</span><span class="nx">b0</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="nx">cosw0</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">b1</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="nx">cosw0</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">b2</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">b0</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">a0</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="nx">alpha</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">a1</span> <span class="o">=</span> <span class="o">-</span><span class="mi">2</span> <span class="o">*</span> <span class="nx">cosw0</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">a2</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="nx">alpha</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    <div class="content block">
+                        <div class="left">
+                            <div>
+                                <p>toString</p>
+
+                                <hr />
+                                <ul>
+                                    <li>
+                                        <strong>return</strong> <em>String</em> String representation.
+                                    </li>
+                                    
+                                </ul>
+                                
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                <div class="highlight"><pre><span class="nx">LowPassFilter</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">toString</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="s1">&#39;Low Pass Filter&#39;</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    
+                </div>
+                <!-- Title and filename -->
+                <div class="file">
+                    <div class="header block">
+                        <div class="left">
+                            <div>
+                                <h3>HighPassFilter</h3>
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                ../trunk/src/dsp/HighPassFilter.js
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+
+                <!-- File contents -->
+                    <div class="content block">
+                        <div class="left">
+                            <div>
+                                <p>High-pass filter</p>
+
+<p><strong>Inputs</strong></p>
+
+<ul>
+<li>Audio</li>
+<li>Filter frequency</li>
+</ul>
+
+<p><strong>Outputs</strong></p>
+
+<ul>
+<li>Filtered audio</li>
+</ul>
+
+<p><strong>Parameters</strong></p>
+
+<ul>
+<li>frequency The filter frequency.  Linked to input 1.</li>
+</ul>
+
+                                <hr />
+                                <ul>
+                                    <li>
+                                        <strong>constructor</strong>
+                                    </li>
+                                    <li>
+                                        <strong>extends</strong> BiquadFilter
+                                    </li>
+                                    <li>
+                                        <strong>param</strong> <em>Audiolet</em> audiolet The audiolet object.
+                                    </li>
+                                    <li>
+                                        <strong>param</strong> <em>Number</em> frequency The initial frequency.
+                                    </li>
+                                    
+                                </ul>
+                                
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                <div class="highlight"><pre><span class="kd">var</span> <span class="nx">HighPassFilter</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">audiolet</span><span class="p">,</span> <span class="nx">frequency</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">BiquadFilter</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="nx">audiolet</span><span class="p">,</span> <span class="nx">frequency</span><span class="p">);</span>
+<span class="p">};</span>
+<span class="nx">extend</span><span class="p">(</span><span class="nx">HighPassFilter</span><span class="p">,</span> <span class="nx">BiquadFilter</span><span class="p">);</span>
+</pre></div>
+
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    <div class="content block">
+                        <div class="left">
+                            <div>
+                                <p>Calculate the biquad filter coefficients using maths from
+http://www.musicdsp.org/files/Audio-EQ-Cookbook.txt</p>
+
+                                <hr />
+                                <ul>
+                                    <li>
+                                        <strong>param</strong> <em>Number</em> frequency The filter frequency.
+                                    </li>
+                                    
+                                </ul>
+                                
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                <div class="highlight"><pre><span class="nx">HighPassFilter</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">calculateCoefficients</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">frequency</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">w0</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">PI</span> <span class="o">*</span> <span class="nx">frequency</span> <span class="o">/</span>
+             <span class="k">this</span><span class="p">.</span><span class="nx">audiolet</span><span class="p">.</span><span class="nx">device</span><span class="p">.</span><span class="nx">sampleRate</span><span class="p">;</span>
+    <span class="kd">var</span> <span class="nx">cosw0</span> <span class="o">=</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">cos</span><span class="p">(</span><span class="nx">w0</span><span class="p">);</span>
+    <span class="kd">var</span> <span class="nx">sinw0</span> <span class="o">=</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">sin</span><span class="p">(</span><span class="nx">w0</span><span class="p">);</span>
+    <span class="kd">var</span> <span class="nx">alpha</span> <span class="o">=</span> <span class="nx">sinw0</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">/</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">));</span>
+
+    <span class="k">this</span><span class="p">.</span><span class="nx">b0</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="nx">cosw0</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">b1</span> <span class="o">=</span> <span class="o">-</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="nx">cosw0</span><span class="p">);</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">b2</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">b0</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">a0</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="nx">alpha</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">a1</span> <span class="o">=</span> <span class="o">-</span><span class="mi">2</span> <span class="o">*</span> <span class="nx">cosw0</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">a2</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="nx">alpha</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    <div class="content block">
+                        <div class="left">
+                            <div>
+                                <p>toString</p>
+
+                                <hr />
+                                <ul>
+                                    <li>
+                                        <strong>return</strong> <em>String</em> String representation.
+                                    </li>
+                                    
+                                </ul>
+                                
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                <div class="highlight"><pre><span class="nx">HighPassFilter</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">toString</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="s1">&#39;High Pass Filter&#39;</span><span class="p">;</span>
 <span class="p">};</span>
 </pre></div>
 
@@ -2750,6 +4074,186 @@ http://www.musicdsp.org/files/Audio-EQ-Cookbook.txt</p>
                             <div>
                                 <div class="highlight"><pre><span class="nx">BandRejectFilter</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">toString</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
     <span class="k">return</span> <span class="s1">&#39;Band Reject Filter&#39;</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    
+                </div>
+                <!-- Title and filename -->
+                <div class="file">
+                    <div class="header block">
+                        <div class="left">
+                            <div>
+                                <h3>Lag</h3>
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                ../trunk/src/dsp/Lag.js
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+
+                <!-- File contents -->
+                    <div class="content block">
+                        <div class="left">
+                            <div>
+                                <p>Exponential lag for smoothing signals.</p>
+
+<p><strong>Inputs</strong></p>
+
+<ul>
+<li>Value</li>
+<li>Lag time</li>
+</ul>
+
+<p><strong>Outputs</strong></p>
+
+<ul>
+<li>Lagged value</li>
+</ul>
+
+<p><strong>Parameters</strong></p>
+
+<ul>
+<li>value The value to lag.  Linked to input 0.</li>
+<li>lag The 60dB lag time. Linked to input 1.</li>
+</ul>
+
+                                <hr />
+                                <ul>
+                                    <li>
+                                        <strong>constructor</strong>
+                                    </li>
+                                    <li>
+                                        <strong>extends</strong> AudioletNode
+                                    </li>
+                                    <li>
+                                        <strong>param</strong> <em>Audiolet</em> audiolet The audiolet object.
+                                    </li>
+                                    <li>
+                                        <strong>param</strong> <em>Number</em> [value=0] The initial value.
+                                    </li>
+                                    <li>
+                                        <strong>param</strong> <em>Number</em> [lagTime=1] The initial lag time.
+                                    </li>
+                                    
+                                </ul>
+                                
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                <div class="highlight"><pre><span class="kd">var</span> <span class="nx">Lag</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">audiolet</span><span class="p">,</span> <span class="nx">value</span><span class="p">,</span> <span class="nx">lagTime</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">AudioletNode</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="nx">audiolet</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">value</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">AudioletParameter</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">value</span> <span class="o">||</span> <span class="mi">0</span><span class="p">);</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">lag</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">AudioletParameter</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="nx">lagTime</span> <span class="o">||</span> <span class="mi">1</span><span class="p">);</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">lastValue</span> <span class="o">=</span> <span class="nx">value</span> <span class="o">||</span> <span class="mi">0</span><span class="p">;</span>
+
+    <span class="k">this</span><span class="p">.</span><span class="nx">log001</span> <span class="o">=</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="mf">0.001</span><span class="p">);</span>
+<span class="p">};</span>
+<span class="nx">extend</span><span class="p">(</span><span class="nx">Lag</span><span class="p">,</span> <span class="nx">AudioletNode</span><span class="p">);</span>
+</pre></div>
+
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    <div class="content block">
+                        <div class="left">
+                            <div>
+                                <p>Process a block of samples</p>
+
+                                <hr />
+                                <ul>
+                                    <li>
+                                        <strong>param</strong> <em>AudioletBuffer[]</em> inputBuffers Samples received from the inputs.
+                                    </li>
+                                    <li>
+                                        <strong>param</strong> <em>AudioletBuffer[]</em> outputBuffers Samples to be sent to the outputs.
+                                    </li>
+                                    
+                                </ul>
+                                
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                <div class="highlight"><pre><span class="nx">Lag</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">generate</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">inputBuffers</span><span class="p">,</span> <span class="nx">outputBuffers</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">outputBuffer</span> <span class="o">=</span> <span class="nx">outputBuffers</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+    <span class="kd">var</span> <span class="nx">outputChannel</span> <span class="o">=</span> <span class="nx">outputBuffer</span><span class="p">.</span><span class="nx">getChannelData</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+
+    <span class="kd">var</span> <span class="nx">sampleRate</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">audiolet</span><span class="p">.</span><span class="nx">device</span><span class="p">.</span><span class="nx">sampleRate</span><span class="p">;</span>
+    <span class="kd">var</span> <span class="nx">log001</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">log001</span><span class="p">;</span>
+
+    <span class="kd">var</span> <span class="nx">valueParameter</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">value</span><span class="p">;</span>
+    <span class="kd">var</span> <span class="nx">value</span><span class="p">,</span> <span class="nx">valueChannel</span><span class="p">;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">valueParameter</span><span class="p">.</span><span class="nx">isStatic</span><span class="p">())</span> <span class="p">{</span>
+        <span class="nx">value</span> <span class="o">=</span> <span class="nx">valueParameter</span><span class="p">.</span><span class="nx">getValue</span><span class="p">();</span>
+    <span class="p">}</span>
+    <span class="k">else</span> <span class="p">{</span>
+        <span class="nx">valueChannel</span> <span class="o">=</span> <span class="nx">valueParameter</span><span class="p">.</span><span class="nx">getChannel</span><span class="p">();</span>
+    <span class="p">}</span>
+
+    <span class="kd">var</span> <span class="nx">lagParameter</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">lag</span><span class="p">;</span>
+    <span class="kd">var</span> <span class="nx">lag</span><span class="p">,</span> <span class="nx">lagChannel</span><span class="p">,</span> <span class="nx">coefficient</span><span class="p">;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">lagParameter</span><span class="p">.</span><span class="nx">isStatic</span><span class="p">())</span> <span class="p">{</span>
+        <span class="nx">lag</span> <span class="o">=</span> <span class="nx">lagParameter</span><span class="p">.</span><span class="nx">getValue</span><span class="p">();</span>
+        <span class="nx">coefficient</span> <span class="o">=</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">exp</span><span class="p">(</span><span class="nx">log001</span> <span class="o">/</span> <span class="p">(</span><span class="nx">lag</span> <span class="o">*</span> <span class="nx">sampleRate</span><span class="p">));</span>
+    <span class="p">}</span>
+    <span class="k">else</span> <span class="p">{</span>
+        <span class="nx">lagChannel</span> <span class="o">=</span> <span class="nx">lagParameter</span><span class="p">.</span><span class="nx">getChannel</span><span class="p">();</span>
+    <span class="p">}</span>
+
+    <span class="kd">var</span> <span class="nx">lastValue</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">lastValue</span><span class="p">;</span>
+
+    <span class="kd">var</span> <span class="nx">bufferLength</span> <span class="o">=</span> <span class="nx">outputBuffer</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">bufferLength</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nx">valueChannel</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">value</span> <span class="o">=</span> <span class="nx">valueChannel</span><span class="p">[</span><span class="nx">i</span><span class="p">];</span>
+            <span class="nx">coefficient</span> <span class="o">=</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">exp</span><span class="p">(</span><span class="nx">log001</span> <span class="o">/</span> <span class="p">(</span><span class="nx">lag</span> <span class="o">*</span> <span class="nx">sampleRate</span><span class="p">));</span>
+        <span class="p">}</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="nx">lagChannel</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">lag</span> <span class="o">=</span> <span class="nx">lagChannel</span><span class="p">[</span><span class="nx">i</span><span class="p">];</span>
+        <span class="p">}</span>
+        <span class="kd">var</span> <span class="nx">output</span> <span class="o">=</span> <span class="p">((</span><span class="mi">1</span> <span class="o">-</span> <span class="nx">coefficient</span><span class="p">)</span> <span class="o">*</span> <span class="nx">value</span><span class="p">)</span> <span class="o">+</span>
+                     <span class="p">(</span><span class="nx">coefficient</span> <span class="o">*</span> <span class="nx">lastValue</span><span class="p">);</span>
+        <span class="nx">outputChannel</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="o">=</span> <span class="nx">output</span><span class="p">;</span>
+        <span class="nx">lastValue</span> <span class="o">=</span> <span class="nx">output</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">lastValue</span> <span class="o">=</span> <span class="nx">lastValue</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    <div class="content block">
+                        <div class="left">
+                            <div>
+                                <p>toString</p>
+
+                                <hr />
+                                <ul>
+                                    <li>
+                                        <strong>return</strong> <em>String</em> String representation.
+                                    </li>
+                                    
+                                </ul>
+                                
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                <div class="highlight"><pre><span class="nx">Lag</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">toString</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="s1">&#39;Lag&#39;</span><span class="p">;</span>
 <span class="p">};</span>
 </pre></div>
 
@@ -3434,6 +4938,461 @@ http://www.musicdsp.org/files/Audio-EQ-Cookbook.txt</p>
                     <div class="header block">
                         <div class="left">
                             <div>
+                                <h3>Reverb</h3>
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                ../trunk/src/dsp/Reverb.js
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+
+                <!-- File contents -->
+                    <div class="content block">
+                        <div class="left">
+                            <div>
+                                <p>Port of the Freeverb Schrodoer/Moorer reverb model.  See
+https://ccrma.stanford.edu/~jos/pasp/Freeverb.html for a description of how
+each part works.</p>
+
+<p><strong>Inputs</strong></p>
+
+<ul>
+<li>Audio</li>
+<li>Mix</li>
+<li>Room Size</li>
+<li>Damping</li>
+</ul>
+
+<p><strong>Outputs</strong></p>
+
+<ul>
+<li>Reverberated Audio</li>
+</ul>
+
+<p><strong>Parameters</strong></p>
+
+<ul>
+<li>mix The wet/dry mix.  Values between 0 and 1.  Linked to input 1.</li>
+<li>roomSize The reverb's room size.  Values between 0 and 1.  Linked to input
+2.</li>
+<li>damping The amount of high-frequency damping.  Values between 0 and 1.
+Linked to input 3.</li>
+</ul>
+
+                                <hr />
+                                <ul>
+                                    <li>
+                                        <strong>constructor</strong>
+                                    </li>
+                                    <li>
+                                        <strong>extends</strong> AudioletGroup
+                                    </li>
+                                    <li>
+                                        <strong>param</strong> <em>Audiolet</em> audiolet The audiolet object.
+                                    </li>
+                                    <li>
+                                        <strong>param</strong> <em>Number</em> [mix=0.33] The initial wet/dry mix.
+                                    </li>
+                                    <li>
+                                        <strong>param</strong> <em>Number</em> [roomSize=0.5] The initial room size.
+                                    </li>
+                                    <li>
+                                        <strong>param</strong> <em>Number</em> [damping=0.5] The initial damping amount.
+                                    </li>
+                                    
+                                </ul>
+                                
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                <div class="highlight"><pre><span class="kd">var</span> <span class="nx">Reverb</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">audiolet</span><span class="p">,</span> <span class="nx">mix</span><span class="p">,</span> <span class="nx">roomSize</span><span class="p">,</span> <span class="nx">damping</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">AudioletGroup</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="nx">audiolet</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+
+    <span class="c1">// Constants</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">initialMix</span> <span class="o">=</span> <span class="mf">0.33</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">fixedGain</span> <span class="o">=</span> <span class="mf">0.015</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">initialDamping</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">scaleDamping</span> <span class="o">=</span> <span class="mf">0.4</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">initialRoomSize</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">scaleRoom</span> <span class="o">=</span> <span class="mf">0.28</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">offsetRoom</span> <span class="o">=</span> <span class="mf">0.7</span><span class="p">;</span>
+
+    <span class="c1">// Parameters: for 44.1k or 48k</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">combTuning</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1116</span><span class="p">,</span> <span class="mi">1188</span><span class="p">,</span> <span class="mi">1277</span><span class="p">,</span> <span class="mi">1356</span><span class="p">,</span> <span class="mi">1422</span><span class="p">,</span> <span class="mi">1491</span><span class="p">,</span> <span class="mi">1557</span><span class="p">,</span> <span class="mi">1617</span><span class="p">];</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">allPassTuning</span> <span class="o">=</span> <span class="p">[</span><span class="mi">556</span><span class="p">,</span> <span class="mi">441</span><span class="p">,</span> <span class="mi">341</span><span class="p">,</span> <span class="mi">225</span><span class="p">];</span>
+
+    <span class="c1">// Controls</span>
+    <span class="c1">// Room size control</span>
+    <span class="kd">var</span> <span class="nx">roomSize</span> <span class="o">=</span> <span class="nx">roomSize</span> <span class="o">||</span> <span class="k">this</span><span class="p">.</span><span class="nx">initialRoomSize</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">roomSizeNode</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ParameterNode</span><span class="p">(</span><span class="nx">audiolet</span><span class="p">,</span> <span class="nx">roomSize</span><span class="p">);</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">roomSizeMulAdd</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">MulAdd</span><span class="p">(</span><span class="nx">audiolet</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">scaleRoom</span><span class="p">,</span>
+                                     <span class="k">this</span><span class="p">.</span><span class="nx">offsetRoom</span><span class="p">);</span>
+
+    <span class="c1">// Damping control</span>
+    <span class="kd">var</span> <span class="nx">damping</span> <span class="o">=</span> <span class="nx">damping</span> <span class="o">||</span> <span class="k">this</span><span class="p">.</span><span class="nx">initialDamping</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">dampingNode</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">ParameterNode</span><span class="p">(</span><span class="nx">audiolet</span><span class="p">,</span> <span class="nx">damping</span><span class="p">);</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">dampingMulAdd</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">MulAdd</span><span class="p">(</span><span class="nx">audiolet</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">scaleDamping</span><span class="p">);</span>
+
+    <span class="c1">// Access the controls as if this is an AudioletNode, and they are it&#39;s</span>
+    <span class="c1">// parameters.</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">roomSize</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">roomSizeNode</span><span class="p">.</span><span class="nx">parameter</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">damping</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">dampingNode</span><span class="p">.</span><span class="nx">parameter</span><span class="p">;</span>
+
+    <span class="c1">// Initial gain control</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">gain</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Gain</span><span class="p">(</span><span class="nx">audiolet</span><span class="p">,</span> <span class="k">this</span><span class="p">.</span><span class="nx">fixedGain</span><span class="p">);</span>
+
+    <span class="c1">// Eight comb filters and feedback gain converters</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">combFilters</span> <span class="o">=</span> <span class="p">[];</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">fgConverters</span> <span class="o">=</span> <span class="p">[];</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="k">this</span><span class="p">.</span><span class="nx">combTuning</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">delayTime</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">combTuning</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="o">/</span>
+                        <span class="k">this</span><span class="p">.</span><span class="nx">audiolet</span><span class="p">.</span><span class="nx">device</span><span class="p">.</span><span class="nx">sampleRate</span><span class="p">;</span>
+        <span class="k">this</span><span class="p">.</span><span class="nx">combFilters</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">DampedCombFilter</span><span class="p">(</span><span class="nx">audiolet</span><span class="p">,</span> <span class="nx">delayTime</span><span class="p">,</span>
+                                                   <span class="nx">delayTime</span><span class="p">);</span>
+
+        <span class="k">this</span><span class="p">.</span><span class="nx">fgConverters</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">FeedbackGainToDecayTime</span><span class="p">(</span><span class="nx">audiolet</span><span class="p">,</span>
+                                                           <span class="nx">delayTime</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="c1">// Four allpass filters</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">allPassFilters</span> <span class="o">=</span> <span class="p">[];</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="k">this</span><span class="p">.</span><span class="nx">allPassTuning</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">this</span><span class="p">.</span><span class="nx">allPassFilters</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">AllPassFilter</span><span class="p">(</span><span class="nx">audiolet</span><span class="p">,</span>
+                                                   <span class="k">this</span><span class="p">.</span><span class="nx">allPassTuning</span><span class="p">[</span><span class="nx">i</span><span class="p">]);</span>
+    <span class="p">}</span>
+
+    <span class="c1">// Mixer</span>
+    <span class="kd">var</span> <span class="nx">mix</span> <span class="o">=</span> <span class="nx">mix</span> <span class="o">||</span> <span class="k">this</span><span class="p">.</span><span class="nx">initialMix</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">mixer</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">LinearCrossFade</span><span class="p">(</span><span class="nx">audiolet</span><span class="p">,</span> <span class="nx">mix</span><span class="p">);</span>
+
+    <span class="k">this</span><span class="p">.</span><span class="nx">mix</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">mixer</span><span class="p">.</span><span class="nx">position</span><span class="p">;</span>
+
+    <span class="c1">// Connect up the controls</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">inputs</span><span class="p">[</span><span class="mi">1</span><span class="p">].</span><span class="nx">connect</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">mixer</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">);</span>
+
+    <span class="k">this</span><span class="p">.</span><span class="nx">inputs</span><span class="p">[</span><span class="mi">2</span><span class="p">].</span><span class="nx">connect</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">roomSizeNode</span><span class="p">);</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">roomSizeNode</span><span class="p">.</span><span class="nx">connect</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">roomSizeMulAdd</span><span class="p">);</span>
+
+    <span class="k">this</span><span class="p">.</span><span class="nx">inputs</span><span class="p">[</span><span class="mi">3</span><span class="p">].</span><span class="nx">connect</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">dampingNode</span><span class="p">);</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">dampingNode</span><span class="p">.</span><span class="nx">connect</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">dampingMulAdd</span><span class="p">);</span>
+
+    <span class="c1">// Connect up the gain</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">inputs</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">connect</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">gain</span><span class="p">);</span>
+
+    <span class="c1">// Connect up the comb filters</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="k">this</span><span class="p">.</span><span class="nx">combFilters</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">this</span><span class="p">.</span><span class="nx">gain</span><span class="p">.</span><span class="nx">connect</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">combFilters</span><span class="p">[</span><span class="nx">i</span><span class="p">]);</span>
+        <span class="k">this</span><span class="p">.</span><span class="nx">combFilters</span><span class="p">[</span><span class="nx">i</span><span class="p">].</span><span class="nx">connect</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">allPassFilters</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
+
+        <span class="c1">// Controls</span>
+        <span class="k">this</span><span class="p">.</span><span class="nx">roomSizeMulAdd</span><span class="p">.</span><span class="nx">connect</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">fgConverters</span><span class="p">[</span><span class="nx">i</span><span class="p">]);</span>
+        <span class="k">this</span><span class="p">.</span><span class="nx">fgConverters</span><span class="p">[</span><span class="nx">i</span><span class="p">].</span><span class="nx">connect</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">combFilters</span><span class="p">[</span><span class="nx">i</span><span class="p">],</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">);</span>
+
+        <span class="k">this</span><span class="p">.</span><span class="nx">dampingMulAdd</span><span class="p">.</span><span class="nx">connect</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">combFilters</span><span class="p">[</span><span class="nx">i</span><span class="p">],</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">3</span><span class="p">);</span>
+    <span class="p">}</span>
+
+    <span class="c1">// Connect up the all pass filters</span>
+    <span class="kd">var</span> <span class="nx">numberOfAllPassFilters</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">allPassFilters</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">numberOfAllPassFilters</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">this</span><span class="p">.</span><span class="nx">allPassFilters</span><span class="p">[</span><span class="nx">i</span><span class="p">].</span><span class="nx">connect</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">allPassFilters</span><span class="p">[</span><span class="nx">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]);</span>
+    <span class="p">}</span>
+
+    <span class="k">this</span><span class="p">.</span><span class="nx">inputs</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nx">connect</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">mixer</span><span class="p">);</span>
+    <span class="kd">var</span> <span class="nx">lastAllPassIndex</span> <span class="o">=</span> <span class="nx">numberOfAllPassFilters</span> <span class="o">-</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">allPassFilters</span><span class="p">[</span><span class="nx">lastAllPassIndex</span><span class="p">].</span><span class="nx">connect</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">mixer</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+
+    <span class="k">this</span><span class="p">.</span><span class="nx">mixer</span><span class="p">.</span><span class="nx">connect</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">outputs</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
+<span class="p">};</span>
+<span class="nx">extend</span><span class="p">(</span><span class="nx">Reverb</span><span class="p">,</span> <span class="nx">AudioletGroup</span><span class="p">);</span>
+</pre></div>
+
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    <div class="content block">
+                        <div class="left">
+                            <div>
+                                <p>toString</p>
+
+                                <hr />
+                                <ul>
+                                    <li>
+                                        <strong>return</strong> <em>String</em> String representation.
+                                    </li>
+                                    
+                                </ul>
+                                
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                <div class="highlight"><pre><span class="nx">Reverb</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">toString</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="s1">&#39;Reverb&#39;</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    <div class="content block">
+                        <div class="left">
+                            <div>
+                                <p>Helper node to convert a feedback gain multiplier to a 60db decay time.</p>
+
+<p><strong>Inputs</strong></p>
+
+<ul>
+<li>Feedback gain</li>
+</ul>
+
+<p><strong>Outputs</strong></p>
+
+<ul>
+<li>Decay time</li>
+</ul>
+
+                                <hr />
+                                <ul>
+                                    <li>
+                                        <strong>constructor</strong>
+                                    </li>
+                                    <li>
+                                        <strong>extends</strong> AudioletNode
+                                    </li>
+                                    <li>
+                                        <strong>param</strong> <em>Audiolet</em> audiolet The audiolet object.
+                                    </li>
+                                    <li>
+                                        <strong>param</strong> <em>Number</em> delayTime The delay time in seconds
+                                    </li>
+                                    
+                                </ul>
+                                
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                <div class="highlight"><pre><span class="kd">var</span> <span class="nx">FeedbackGainToDecayTime</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">audiolet</span><span class="p">,</span> <span class="nx">delayTime</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">AudioletNode</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="nx">audiolet</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">delayTime</span> <span class="o">=</span> <span class="nx">delayTime</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">lastFeedbackGain</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">decayTime</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+<span class="p">};</span>
+<span class="nx">extend</span><span class="p">(</span><span class="nx">FeedbackGainToDecayTime</span><span class="p">,</span> <span class="nx">AudioletNode</span><span class="p">);</span>
+</pre></div>
+
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    <div class="content block">
+                        <div class="left">
+                            <div>
+                                <p>Process a block of samples</p>
+
+                                <hr />
+                                <ul>
+                                    <li>
+                                        <strong>param</strong> <em>AudioletBuffer[]</em> inputBuffers Samples received from the inputs.
+                                    </li>
+                                    <li>
+                                        <strong>param</strong> <em>AudioletBuffer[]</em> outputBuffers Samples to be sent to the outputs.
+                                    </li>
+                                    
+                                </ul>
+                                
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                <div class="highlight"><pre><span class="nx">FeedbackGainToDecayTime</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">generate</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">inputBuffers</span><span class="p">,</span>
+                                                      <span class="nx">outputBuffers</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">inputBuffer</span> <span class="o">=</span> <span class="nx">inputBuffers</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+    <span class="kd">var</span> <span class="nx">outputBuffer</span> <span class="o">=</span> <span class="nx">outputBuffers</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+    <span class="kd">var</span> <span class="nx">inputChannel</span> <span class="o">=</span> <span class="nx">inputBuffer</span><span class="p">.</span><span class="nx">channels</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+    <span class="kd">var</span> <span class="nx">outputChannel</span> <span class="o">=</span> <span class="nx">outputBuffer</span><span class="p">.</span><span class="nx">channels</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+
+    <span class="kd">var</span> <span class="nx">delayTime</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">lastDelayTime</span><span class="p">;</span>
+    <span class="kd">var</span> <span class="nx">decayTime</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">decayTime</span><span class="p">;</span>
+    <span class="kd">var</span> <span class="nx">lastFeedbackGain</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">lastFeedbackGain</span><span class="p">;</span>
+
+    <span class="kd">var</span> <span class="nx">bufferLength</span> <span class="o">=</span> <span class="nx">outputBuffer</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">bufferLength</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">feedbackGain</span> <span class="o">=</span> <span class="nx">inputChannel</span><span class="p">[</span><span class="nx">i</span><span class="p">];</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nx">feedbackGain</span> <span class="o">!=</span> <span class="nx">lastFeedbackGain</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">decayTime</span> <span class="o">=</span> <span class="o">-</span> <span class="mi">3</span> <span class="o">*</span> <span class="nx">delayTime</span> <span class="o">/</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">feedbackGain</span><span class="p">);</span>
+            <span class="nx">lastFeedbackGain</span> <span class="o">=</span> <span class="nx">feedbackGain</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="nx">outputChannel</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="o">=</span> <span class="nx">feedbackGain</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="k">this</span><span class="p">.</span><span class="nx">decayTime</span> <span class="o">=</span> <span class="nx">decayTime</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">lastFeedbackGain</span> <span class="o">=</span> <span class="nx">lastFeedbackGain</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    
+                </div>
+                <!-- Title and filename -->
+                <div class="file">
+                    <div class="header block">
+                        <div class="left">
+                            <div>
+                                <h3>SoftClip</h3>
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                ../trunk/src/dsp/SoftClip.js
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+
+                <!-- File contents -->
+                    <div class="content block">
+                        <div class="left">
+                            <div>
+                                <p>A soft-clipper, which distorts at values over +-0.5.</p>
+
+<p><strong>Inputs</strong></p>
+
+<ul>
+<li>Audio</li>
+</ul>
+
+<p><strong>Outputs</strong></p>
+
+<ul>
+<li>Clipped audio</li>
+</ul>
+
+                                <hr />
+                                <ul>
+                                    <li>
+                                        <strong>constructor</strong>
+                                    </li>
+                                    <li>
+                                        <strong>extends</strong> AudioletNode
+                                    </li>
+                                    <li>
+                                        <strong>param</strong> <em>Audiolet</em> audiolet The audiolet object.
+                                    </li>
+                                    
+                                </ul>
+                                
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                <div class="highlight"><pre><span class="kd">var</span> <span class="nx">SoftClip</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">audiolet</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">AudioletNode</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="nx">audiolet</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">linkNumberOfOutputChannels</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">);</span>
+<span class="p">};</span>
+<span class="nx">extend</span><span class="p">(</span><span class="nx">SoftClip</span><span class="p">,</span> <span class="nx">AudioletNode</span><span class="p">);</span>
+</pre></div>
+
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    <div class="content block">
+                        <div class="left">
+                            <div>
+                                <p>Process a block of samples</p>
+
+                                <hr />
+                                <ul>
+                                    <li>
+                                        <strong>param</strong> <em>AudioletBuffer[]</em> inputBuffers Samples received from the inputs.
+                                    </li>
+                                    <li>
+                                        <strong>param</strong> <em>AudioletBuffer[]</em> outputBuffers Samples to be sent to the outputs.
+                                    </li>
+                                    
+                                </ul>
+                                
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                <div class="highlight"><pre><span class="nx">SoftClip</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">generate</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">inputBuffers</span><span class="p">,</span> <span class="nx">outputBuffers</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">inputBuffer</span> <span class="o">=</span> <span class="nx">inputBuffers</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+    <span class="kd">var</span> <span class="nx">outputBuffer</span> <span class="o">=</span> <span class="nx">outputBuffers</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+
+    <span class="k">if</span> <span class="p">(</span><span class="nx">inputBuffer</span><span class="p">.</span><span class="nx">isEmpty</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">outputBuffer</span><span class="p">.</span><span class="nx">isEmpty</span> <span class="o">=</span> <span class="kc">true</span><span class="p">;</span>
+        <span class="k">return</span><span class="p">;</span>
+    <span class="p">}</span>
+
+    <span class="kd">var</span> <span class="nx">numberOfChannels</span> <span class="o">=</span> <span class="nx">inputBuffer</span><span class="p">.</span><span class="nx">numberOfChannels</span><span class="p">;</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">numberOfChannels</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">inputChannel</span> <span class="o">=</span> <span class="nx">inputBuffer</span><span class="p">.</span><span class="nx">getChannelData</span><span class="p">(</span><span class="nx">i</span><span class="p">);</span>
+        <span class="kd">var</span> <span class="nx">outputChannel</span> <span class="o">=</span> <span class="nx">outputBuffer</span><span class="p">.</span><span class="nx">getChannelData</span><span class="p">(</span><span class="nx">i</span><span class="p">);</span>
+        <span class="kd">var</span> <span class="nx">bufferLength</span> <span class="o">=</span> <span class="nx">inputBuffer</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span>
+        <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">j</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">j</span> <span class="o">&lt;</span> <span class="nx">bufferLength</span><span class="p">;</span> <span class="nx">j</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+            <span class="kd">var</span> <span class="nx">value</span> <span class="o">=</span> <span class="nx">inputChannel</span><span class="p">[</span><span class="nx">j</span><span class="p">];</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">value</span> <span class="o">&gt;</span> <span class="mf">0.5</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">outputChannel</span><span class="p">[</span><span class="nx">j</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="nx">value</span> <span class="o">-</span> <span class="mf">0.25</span><span class="p">)</span> <span class="o">/</span> <span class="nx">value</span><span class="p">;</span>
+            <span class="p">}</span>
+            <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="nx">value</span> <span class="o">&lt;</span> <span class="o">-</span><span class="mf">0.5</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">outputChannel</span><span class="p">[</span><span class="nx">j</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="nx">value</span> <span class="o">-</span> <span class="mf">0.25</span><span class="p">)</span> <span class="o">/</span> <span class="nx">value</span><span class="p">;</span>
+            <span class="p">}</span>
+            <span class="k">else</span> <span class="p">{</span>
+                <span class="nx">outputChannel</span><span class="p">[</span><span class="nx">j</span><span class="p">]</span> <span class="o">=</span> <span class="nx">value</span><span class="p">;</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">};</span>
+</pre></div>
+
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    <div class="content block">
+                        <div class="left">
+                            <div>
+                                <p>toString</p>
+
+                                <hr />
+                                <ul>
+                                    <li>
+                                        <strong>return</strong> <em>String</em> String representation.
+                                    </li>
+                                    
+                                </ul>
+                                
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                <div class="highlight"><pre><span class="nx">SoftClip</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">toString</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="p">(</span><span class="s1">&#39;SoftClip&#39;</span><span class="p">);</span>
+<span class="p">};</span>
+</pre></div>
+
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    
+                </div>
+                <!-- Title and filename -->
+                <div class="file">
+                    <div class="header block">
+                        <div class="left">
+                            <div>
                                 <h3>Amplitude</h3>
                             </div>
                         </div>
@@ -4003,6 +5962,146 @@ undefineds, nulls, NaNs and Infinities.</p>
                             <div>
                                 <div class="highlight"><pre><span class="nx">BadValueDetector</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">toString</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
     <span class="k">return</span> <span class="s1">&#39;Bad Value Detector&#39;</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    
+                </div>
+                <!-- Title and filename -->
+                <div class="file">
+                    <div class="header block">
+                        <div class="left">
+                            <div>
+                                <h3>TriggerControl</h3>
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                ../trunk/src/dsp/TriggerControl.js
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+
+                <!-- File contents -->
+                    <div class="content block">
+                        <div class="left">
+                            <div>
+                                <p>Simple trigger which allows you to set a single sample to be 1 at the start
+of a processing block</p>
+
+<p><strong>Outputs</strong></p>
+
+<ul>
+<li>Triggers</li>
+</ul>
+
+<p><strong>Parameters</strong></p>
+
+<ul>
+<li>trigger Set to 1 to fire a trigger.</li>
+</ul>
+
+                                <hr />
+                                <ul>
+                                    <li>
+                                        <strong>constructor</strong>
+                                    </li>
+                                    <li>
+                                        <strong>extends</strong> AudioletNode
+                                    </li>
+                                    <li>
+                                        <strong>param</strong> <em>Audiolet</em> audiolet The audiolet object.
+                                    </li>
+                                    <li>
+                                        <strong>param</strong> <em>Number</em> [trigger=0] The initial trigger state.
+                                    </li>
+                                    
+                                </ul>
+                                
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                <div class="highlight"><pre><span class="kd">var</span> <span class="nx">TriggerControl</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">audiolet</span><span class="p">,</span> <span class="nx">trigger</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">AudioletNode</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="nx">audiolet</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">trigger</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">AudioletParameter</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="kc">null</span><span class="p">,</span> <span class="nx">trigger</span> <span class="o">||</span> <span class="mi">0</span><span class="p">);</span>
+<span class="p">};</span>
+<span class="nx">extend</span><span class="p">(</span><span class="nx">TriggerControl</span><span class="p">,</span> <span class="nx">AudioletNode</span><span class="p">);</span>
+</pre></div>
+
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    <div class="content block">
+                        <div class="left">
+                            <div>
+                                <p>Process a block of samples</p>
+
+                                <hr />
+                                <ul>
+                                    <li>
+                                        <strong>param</strong> <em>AudioletBuffer[]</em> inputBuffers Samples received from the inputs.
+                                    </li>
+                                    <li>
+                                        <strong>param</strong> <em>AudioletBuffer[]</em> outputBuffers Samples to be sent to the outputs.
+                                    </li>
+                                    
+                                </ul>
+                                
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                <div class="highlight"><pre><span class="nx">TriggerControl</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">generate</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">inputBuffers</span><span class="p">,</span> <span class="nx">outputBuffers</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">buffer</span> <span class="o">=</span> <span class="nx">outputBuffers</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+    <span class="kd">var</span> <span class="nx">channel</span> <span class="o">=</span> <span class="nx">buffer</span><span class="p">.</span><span class="nx">getChannelData</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+
+    <span class="kd">var</span> <span class="nx">triggerParameter</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">trigger</span><span class="p">;</span>
+    <span class="kd">var</span> <span class="nx">trigger</span> <span class="o">=</span> <span class="nx">triggerParameter</span><span class="p">.</span><span class="nx">getValue</span><span class="p">();</span>
+
+    <span class="kd">var</span> <span class="nx">bufferLength</span> <span class="o">=</span> <span class="nx">buffer</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">bufferLength</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nx">trigger</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">channel</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+            <span class="nx">triggerParameter</span><span class="p">.</span><span class="nx">setValue</span><span class="p">(</span><span class="mi">0</span><span class="p">);</span>
+            <span class="nx">trigger</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="k">else</span> <span class="p">{</span>
+            <span class="nx">channel</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">};</span>
+</pre></div>
+
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    <div class="content block">
+                        <div class="left">
+                            <div>
+                                <p>toString</p>
+
+                                <hr />
+                                <ul>
+                                    <li>
+                                        <strong>return</strong> <em>String</em> String representation.
+                                    </li>
+                                    
+                                </ul>
+                                
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                <div class="highlight"><pre><span class="nx">TriggerControl</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">toString</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="s1">&#39;Trigger Control&#39;</span><span class="p">;</span>
 <span class="p">};</span>
 </pre></div>
 

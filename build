@@ -7,22 +7,34 @@ oxo -t 'Audiolet API Documentation' \
        ../trunk/src/core/AudioletGroup.js \
     -s 'DSP' \
     -a 'Audio generation and processing classes' \
-    -i ../trunk/src/dsp/Sine.js \
+    -i ../trunk/src/dsp/TableLookupOscillator.js \
+       ../trunk/src/dsp/Sine.js \
        ../trunk/src/dsp/Triangle.js \
        ../trunk/src/dsp/Saw.js \
        ../trunk/src/dsp/Square.js \
+       ../trunk/src/dsp/WhiteNoise.js \
        ../trunk/src/dsp/Envelope.js \
        ../trunk/src/dsp/ADSREnvelope.js \
        ../trunk/src/dsp/PercussiveEnvelope.js \
        ../trunk/src/dsp/BufferPlayer.js \
        ../trunk/src/dsp/Gain.js \
+       ../trunk/src/dsp/Pan.js \
+       ../trunk/src/dsp/UpMixer.js \
+       ../trunk/src/dsp/LinearCrossFade.js \
+       ../trunk/src/dsp/Limiter.js \
        ../trunk/src/dsp/BiquadFilter.js \
+       ../trunk/src/dsp/LowPassFilter.js \
+       ../trunk/src/dsp/HighPassFilter.js \
        ../trunk/src/dsp/BandPassFilter.js \
        ../trunk/src/dsp/BandRejectFilter.js \
+       ../trunk/src/dsp/Lag.js \
        ../trunk/src/dsp/Delay.js \
        ../trunk/src/dsp/CombFilter.js \
        ../trunk/src/dsp/DampedCombFilter.js \
+       ../trunk/src/dsp/Reverb.js \
+       ../trunk/src/dsp/SoftClip.js \
        ../trunk/src/dsp/Amplitude.js \
        ../trunk/src/dsp/DiscontinuityDetector.js \
        ../trunk/src/dsp/BadValueDetector.js \
+       ../trunk/src/dsp/TriggerControl.js \
     -o api.html
