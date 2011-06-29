@@ -23,7 +23,7 @@ p {
     margin-bottom: 10px;
 }
 
-pre {
+pre, code {
     font-family: 'Inconsolata', monospace;
     font-size: 12px;
 }

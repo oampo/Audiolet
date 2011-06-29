@@ -5,6 +5,10 @@ oxo -t 'Audiolet API Documentation' \
     -a 'Core Audiolet classes' \
     -i ../trunk/src/core/AudioletNode.js \
        ../trunk/src/core/AudioletGroup.js \
+       ../trunk/src/core/AudioletParameter.js \
+       ../trunk/src/core/Scheduler.js \
+       ../trunk/src/core/PassThroughNode.js \
+       ../trunk/src/core/ParameterNode.js \
     -s 'DSP' \
     -a 'Audio generation and processing classes' \
     -i ../trunk/src/dsp/TableLookupOscillator.js \
