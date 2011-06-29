@@ -1,5 +1,26 @@
-/**
+/*!
  * @depends ../core/AudioletNode.js
+ */
+
+/**
+ * Oscillator which reads waveform values from a look-up table
+ *
+ * **Inputs**
+ *
+ * - Frequency
+ *
+ * **Outputs**
+ *
+ * - Waveform
+ *
+ * **Parameters**
+ *
+ * - frequency The oscillator frequency.  Linked to input 0.
+ *
+ * @constructor
+ * @extends AudioletNode
+ * @param {Audiolet} audiolet The audiolet object.
+ * @param {Number} [frequency=440] The initial frequency.
  */
 var TableLookupOscillator = function(audiolet, table, frequency) {
     AudioletNode.call(this, audiolet, 1, 1);
@@ -9,6 +30,12 @@ var TableLookupOscillator = function(audiolet, table, frequency) {
 };
 extend(TableLookupOscillator, AudioletNode);
 
+/**
+ * Process a block of samples
+ *
+ * @param {AudioletBuffer[]} inputBuffers Samples received from the inputs.
+ * @param {AudioletBuffer[]} outputBuffers Samples to be sent to the outputs.
+ */
 TableLookupOscillator.prototype.generate = function(inputBuffers,
                                                     outputBuffers) {
     var buffer = outputBuffers[0];
@@ -44,6 +71,11 @@ TableLookupOscillator.prototype.generate = function(inputBuffers,
     this.phase = phase;
 };
 
+/**
+ * toString
+ *
+ * @return {String} String representation.
+ */
 TableLookupOscillator.prototype.toString = function() {
     return 'Table Lookup Oscillator';
 };

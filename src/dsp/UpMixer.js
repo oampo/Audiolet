@@ -1,7 +1,23 @@
-/**
+/*!
  * @depends ../core/AudioletNode.js
  */
 
+/**
+ * Upmix an input to a constant number of output channels
+ *
+ * **Inputs**
+ *
+ * - Audio
+ *
+ * **Outputs**
+ *
+ * - Upmixed audio
+ *
+ * @constructor
+ * @extends AudioletNode
+ * @param {Audiolet} audiolet The audiolet object.
+ * @param {Number} outputChannels The number of output channels.
+ */
 var UpMixer = function(audiolet, outputChannels) {
     AudioletNode.call(this, audiolet, 1, 1);
     this.outputChannels = outputChannels;
@@ -9,6 +25,12 @@ var UpMixer = function(audiolet, outputChannels) {
 };
 extend(UpMixer, AudioletNode);
 
+/**
+ * Process a block of samples
+ *
+ * @param {AudioletBuffer[]} inputBuffers Samples received from the inputs.
+ * @param {AudioletBuffer[]} outputBuffers Samples to be sent to the outputs.
+ */
 UpMixer.prototype.generate = function(inputBuffers, outputBuffers) {
     var inputBuffer = inputBuffers[0];
     var outputBuffer = outputBuffers[0];
@@ -28,6 +50,11 @@ UpMixer.prototype.generate = function(inputBuffers, outputBuffers) {
     }
 };
 
+/**
+ * toString
+ *
+ * @return {String} String representation.
+ */
 UpMixer.prototype.toString = function() {
     return 'UpMixer';
 };

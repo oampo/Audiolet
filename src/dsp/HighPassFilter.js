@@ -1,13 +1,39 @@
-/**
+/*!
  * @depends BiquadFilter.js
  */
 
-// Maths from http://www.musicdsp.org/files/Audio-EQ-Cookbook.txt
+/**
+ * High-pass filter
+ *
+ * **Inputs**
+ *
+ * - Audio
+ * - Filter frequency
+ *
+ * **Outputs**
+ *
+ * - Filtered audio
+ *
+ * **Parameters**
+ *
+ * - frequency The filter frequency.  Linked to input 1.
+ *
+ * @constructor
+ * @extends BiquadFilter
+ * @param {Audiolet} audiolet The audiolet object.
+ * @param {Number} frequency The initial frequency.
+ */
 var HighPassFilter = function(audiolet, frequency) {
     BiquadFilter.call(this, audiolet, frequency);
 };
 extend(HighPassFilter, BiquadFilter);
 
+/**
+ * Calculate the biquad filter coefficients using maths from
+ * http://www.musicdsp.org/files/Audio-EQ-Cookbook.txt
+ *
+ * @param {Number} frequency The filter frequency.
+ */
 HighPassFilter.prototype.calculateCoefficients = function(frequency) {
     var w0 = 2 * Math.PI * frequency /
              this.audiolet.device.sampleRate;
@@ -23,6 +49,11 @@ HighPassFilter.prototype.calculateCoefficients = function(frequency) {
     this.a2 = 1 - alpha;
 };
 
+/**
+ * toString
+ *
+ * @return {String} String representation.
+ */
 HighPassFilter.prototype.toString = function() {
     return 'High Pass Filter';
 };

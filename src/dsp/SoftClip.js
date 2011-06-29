@@ -1,5 +1,21 @@
-/**
+/*!
  * @depends ../core/AudioletNode.js
+ */
+
+/**
+ * A soft-clipper, which distorts at values over +-0.5.
+ *
+ * **Inputs**
+ *
+ * - Audio
+ *
+ * **Outputs**
+ *
+ * - Clipped audio
+ *
+ * @constructor
+ * @extends AudioletNode
+ * @param {Audiolet} audiolet The audiolet object.
  */
 
 var SoftClip = function(audiolet) {
@@ -8,6 +24,12 @@ var SoftClip = function(audiolet) {
 };
 extend(SoftClip, AudioletNode);
 
+/**
+ * Process a block of samples
+ *
+ * @param {AudioletBuffer[]} inputBuffers Samples received from the inputs.
+ * @param {AudioletBuffer[]} outputBuffers Samples to be sent to the outputs.
+ */
 SoftClip.prototype.generate = function(inputBuffers, outputBuffers) {
     var inputBuffer = inputBuffers[0];
     var outputBuffer = outputBuffers[0];
@@ -37,6 +59,11 @@ SoftClip.prototype.generate = function(inputBuffers, outputBuffers) {
     }
 };
 
+/**
+ * toString
+ *
+ * @return {String} String representation.
+ */
 SoftClip.prototype.toString = function() {
     return ('SoftClip');
 };

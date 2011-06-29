@@ -1,7 +1,30 @@
-/**
+/*!
  * @depends ../core/AudioletNode.js
  */
 
+/**
+ * Exponential lag for smoothing signals.
+ *
+ * **Inputs**
+ *
+ * - Value
+ * - Lag time
+ *
+ * **Outputs**
+ *
+ * - Lagged value
+ *
+ * **Parameters**
+ *
+ * - value The value to lag.  Linked to input 0.
+ * - lag The 60dB lag time. Linked to input 1.
+ *
+ * @constructor
+ * @extends AudioletNode
+ * @param {Audiolet} audiolet The audiolet object.
+ * @param {Number} [value=0] The initial value.
+ * @param {Number} [lagTime=1] The initial lag time.
+ */
 var Lag = function(audiolet, value, lagTime) {
     AudioletNode.call(this, audiolet, 2, 1);
     this.value = new AudioletParameter(this, 0, value || 0);
@@ -12,6 +35,12 @@ var Lag = function(audiolet, value, lagTime) {
 };
 extend(Lag, AudioletNode);
 
+/**
+ * Process a block of samples
+ *
+ * @param {AudioletBuffer[]} inputBuffers Samples received from the inputs.
+ * @param {AudioletBuffer[]} outputBuffers Samples to be sent to the outputs.
+ */
 Lag.prototype.generate = function(inputBuffers, outputBuffers) {
     var outputBuffer = outputBuffers[0];
     var outputChannel = outputBuffer.getChannelData(0);
@@ -58,6 +87,11 @@ Lag.prototype.generate = function(inputBuffers, outputBuffers) {
     this.lastValue = lastValue;
 };
 
+/**
+ * toString
+ *
+ * @return {String} String representation.
+ */
 Lag.prototype.toString = function() {
     return 'Lag';
 };

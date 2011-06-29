@@ -1,7 +1,34 @@
-/**
+/*!
  * @depends ../core/AudioletGroup.js
  */
 
+/**
+ * A simple (and frankly shoddy) zero-lookahead limiter.
+ *
+ * **Inputs**
+ *
+ * - Audio
+ * - Threshold
+ * - Attack
+ * - Release
+ *
+ * **Outputs**
+ *
+ * - Limited audio
+ *
+ * **Parameters**
+ *
+ * - threshold The limiter threshold.  Linked to input 1.
+ * - attack The attack time in seconds. Linked to input 2.
+ * - release The release time in seconds.  Linked to input 3.
+ *
+ * @constructor
+ * @extends AudioletGroup
+ * @param {Audiolet} audiolet The audiolet object.
+ * @param {Number} [threshold=0.95] The initial threshold.
+ * @param {Number} [attack=0.01] The initial attack time.
+ * @param {Number} [release=0.4] The initial release time.
+ */
 var Limiter = function(audiolet, threshold, attack, release) {
     AudioletGroup.call(this, audiolet, 4, 1);
 
@@ -32,10 +59,37 @@ var Limiter = function(audiolet, threshold, attack, release) {
 };
 extend(Limiter, AudioletGroup);
 
+/**
+ * toString
+ *
+ * @return {String} String representation.
+ */
 Limiter.prototype.toString = function() {
     return 'Limiter';
 };
 
+/**
+ * Helper node which limits a signal based on an amplitude input.
+ *
+ * **Inputs**
+ *
+ * - Audio
+ * - Amplitude
+ * - Threshold
+ *
+ * **Outputs**
+ *
+ * - Limited audio
+ *
+ * **Parameters**
+ *
+ * - threshold The limiter threshold.  Linked to input 2.
+ *
+ * @constructor
+ * @extends AudioletNode
+ * @param {Audiolet} audiolet The audiolet object.
+ * @param {Number} [threshold=0.95] The initial threshold.
+ */
 var LimitFromAmplitude = function(audiolet, threshold) {
     AudioletNode.call(this, audiolet, 3, 1);
     this.linkNumberOfOutputChannels(0, 0);
@@ -43,6 +97,12 @@ var LimitFromAmplitude = function(audiolet, threshold) {
 };
 extend(LimitFromAmplitude, AudioletNode);
 
+/**
+ * Process a block of samples
+ *
+ * @param {AudioletBuffer[]} inputBuffers Samples received from the inputs.
+ * @param {AudioletBuffer[]} outputBuffers Samples to be sent to the outputs.
+ */
 LimitFromAmplitude.prototype.generate = function(inputBuffers, outputBuffers) {
     var inputBuffer = inputBuffers[0];
     var amplitudeBuffer = inputBuffers[1];
@@ -87,6 +147,11 @@ LimitFromAmplitude.prototype.generate = function(inputBuffers, outputBuffers) {
     }
 };
 
+/**
+ * toString
+ *
+ * @return {String} String representation.
+ */
 LimitFromAmplitude.prototype.toString = function() {
     return ('Limit From Amplitude');
 };
