@@ -1,7 +1,24 @@
-/**
+/*!
  * @depends AudioletGroup.js
  */
 
+/**
+ * Group containing all of the components for the Audiolet output chain.  The
+ * chain consists of:
+ *
+ *     Input => Block Size Limiter => Scheduler => UpMixer => Output
+ *
+ * **Inputs**
+ *
+ * - Audio
+ *
+ * @constructor
+ * @extends AudioletGroup
+ * @param {Audiolet} audiolet The audiolet object.
+ * @param {Number} [sampleRate=44100] The sample rate to run at.
+ * @param {Number} [numberOfChannels=2] The number of output channels.
+ * @param {Number} [bufferSize=8192] A fixed buffer size to use.
+ */
 var AudioletDestination = function(audiolet, sampleRate, numberOfChannels,
                                    bufferSize) {
     AudioletGroup.call(this, audiolet, 1, 0);
@@ -25,6 +42,11 @@ var AudioletDestination = function(audiolet, sampleRate, numberOfChannels,
 };
 extend(AudioletDestination, AudioletGroup);
 
+/**
+ * toString
+ *
+ * @return {String} String representation.
+ */
 AudioletDestination.prototype.toString = function() {
     return 'Destination';
 };

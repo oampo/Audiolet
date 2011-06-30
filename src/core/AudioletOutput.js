@@ -1,3 +1,10 @@
+/**
+ * Class representing a single output of an AudioletNode
+ *
+ * @constructor
+ * @param {AudioletNode} node The node which the input belongs to.
+ * @param {Number} index The index of the input.
+ */
 var AudioletOutput = function(node, index) {
     this.node = node;
     this.index = index;
@@ -16,10 +23,20 @@ var AudioletOutput = function(node, index) {
     this.timestamp = null;
 };
 
+/**
+ * Connect the output to an input
+ *
+ * @param {AudioletInput} input The input to connect to.
+ */
 AudioletOutput.prototype.connect = function(input) {
     this.connectedTo.push(input);
 };
 
+/**
+ * Disconnect the output from an input
+ *
+ * @param {AudioletInput} input The input to disconnect from.
+ */
 AudioletOutput.prototype.disconnect = function(input) {
     var numberOfStreams = this.connectedTo.length;
     for (var i = 0; i < numberOfStreams; i++) {
@@ -30,18 +47,38 @@ AudioletOutput.prototype.disconnect = function(input) {
     }
 };
 
+/**
+ * Check whether the input is connected
+ *
+ * @return {Boolean} True if the output is connected.
+ */
 AudioletOutput.prototype.isConnected = function() {
     return (this.connectedTo.length > 0);
 };
 
+/**
+ * Link the output to an input, forcing the output to always contain the
+ * same number of channels as the input.
+ *
+ * @param {AudioletInput} input The input to link to.
+ */
 AudioletOutput.prototype.linkNumberOfChannels = function(input) {
     this.linkedInput = input;
 };
 
+/**
+ * Unlink the output from its linked input
+ */
 AudioletOutput.prototype.unlinkNumberOfChannels = function() {
     this.linkedInput = null;
 };
 
+/**
+ * Get the number of output channels, taking the value from the input if the
+ * output is linked.
+ *
+ * @return {Number} The number of output channels.
+ */
 AudioletOutput.prototype.getNumberOfChannels = function() {
     if (this.linkedInput && this.linkedInput.isConnected()) {
         return (this.linkedInput.buffer.numberOfChannels);
@@ -49,6 +86,18 @@ AudioletOutput.prototype.getNumberOfChannels = function() {
     return (this.numberOfChannels);
 };
 
+/**
+ * Get the output buffer.  This is more complicated than it seems, as in
+ * feedback loops we try to get data from the previous tick, which was often
+ * a different length to the current tick.  In order to get round this we keepi
+ * a fixed length FIFO buffer of the output and limit the size of blocks we
+ * request to the size of the buffer.  This means that we never overflow the
+ * buffer, so output data is always available.  The price we pay for this is
+ * introducing extra latency equal to the length of the FIFO.
+ *
+ * @param {Number} length The number of samples requested.
+ * @return {AudioletBuffer} The output buffer.
+ */
 AudioletOutput.prototype.getBuffer = function(length) {
     var buffer = this.buffer;
     if (buffer.length == length && !this.suppliesFeedbackLoop) {
@@ -96,6 +145,11 @@ AudioletOutput.prototype.getBuffer = function(length) {
     }
 };
 
+/**
+ * toString
+ *
+ * @return {String} String representation.
+ */
 AudioletOutput.prototype.toString = function() {
     return this.node.toString() + 'Output #' + this.index + ' - ';
 };

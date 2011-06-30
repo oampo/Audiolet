@@ -1,4 +1,7 @@
-// Shim for subarray/slice
+/**
+ * Bidirectional shim for the renaming of slice to subarray.  Provides
+ * backwards compatibility with old browser releases
+ */
 var Int8Array, Uint8Array, Int16Array, Uint16Array;
 var Int32Array, Uint32Array, Float32Array, Float64Array;
 var types = [Int8Array, Uint8Array, Int16Array, Uint16Array,

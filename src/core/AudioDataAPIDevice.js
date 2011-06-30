@@ -1,7 +1,22 @@
-/**
+/*!
  * @depends AbstractAudioletDevice.js
  */
 
+/**
+ * Audio device using the Audio Data API.  If bufferSize is undefined,
+ * automatically tries to work out the best value.
+ *
+ * **Inputs**
+ *
+ * - Audio
+ *
+ * @constructor
+ * @extends AbstractAudioletDevice
+ * @param {Audiolet} audiolet The audiolet object.
+ * @param {Number} [sampleRate=44100] The sample rate to run at.
+ * @param {Number} [numberOfChannels=2] The number of output channels.
+ * @param {Number} [bufferSize] A fixed buffer size to use.
+ */
 var AudioDataAPIDevice = function(audiolet, sampleRate, numberOfChannels,
                                   bufferSize) {
     AbstractAudioletDevice.call(this, audiolet);
@@ -30,6 +45,10 @@ var AudioDataAPIDevice = function(audiolet, sampleRate, numberOfChannels,
 };
 extend(AudioDataAPIDevice, AbstractAudioletDevice);
 
+/**
+ * Overridden tick function.  Pulls data from the input and writes it to the
+ * device
+ */
 AudioDataAPIDevice.prototype.tick = function() {
     var outputPosition = this.output.mozCurrentSampleOffset();
     // Check if some data was not written in previous attempts
@@ -87,14 +106,29 @@ AudioDataAPIDevice.prototype.tick = function() {
     }
 };
 
+/**
+ * Get the current output position
+ *
+ * @return {Number} Output position in samples.
+ */
 AudioDataAPIDevice.prototype.getPlaybackTime = function() {
     return this.output.mozCurrentSampleOffset() / this.numberOfChannels;
 };
 
+/**
+ * Get the current write position
+ *
+ * @return {Number} Write position in samples.
+ */
 AudioDataAPIDevice.prototype.getWriteTime = function() {
     return this.writePosition / this.numberOfChannels;
 };
 
+/**
+ * toString
+ *
+ * @return {String} String representation.
+ */
 AudioDataAPIDevice.prototype.toString = function() {
     return 'Audio Data API Device';
 };

@@ -1,7 +1,21 @@
-/**
+/*!
  * @depends AbstractAudioletDevice.js
  */
 
+/**
+ * Audio device using the Web Audio API.  Sample rate is ignored.
+ *
+ * **Inputs**
+ *
+ * - Audio
+ *
+ * @constructor
+ * @extends AbstractAudioletDevice
+ * @param {Audiolet} audiolet The audiolet object.
+ * @param {Number} [sampleRate=44100] The sample rate to run at.
+ * @param {Number} [numberOfChannels=2] The number of output channels.
+ * @param {Number} [bufferSize=8192] A fixed buffer size to use.
+ */
 var WebAudioAPIDevice = function(audiolet, sampleRate, numberOfChannels,
                                  bufferSize) {
     // Call Super class contructor
@@ -32,6 +46,12 @@ var WebAudioAPIDevice = function(audiolet, sampleRate, numberOfChannels,
 };
 extend(WebAudioAPIDevice, AbstractAudioletDevice);
 
+/**
+ * Overridden tick function.  Pulls data from the input and writes it to the
+ * device.
+ *
+ * @param {AudioProcessingEvent} event Processing event from the JSAudioNode.
+ */
 WebAudioAPIDevice.prototype.tick = function(event) {
     var buffer = event.outputBuffer;
     var samplesNeeded = buffer.length;
@@ -44,14 +64,29 @@ WebAudioAPIDevice.prototype.tick = function(event) {
     this.writePosition += samplesNeeded;
 };
 
+/**
+ * Get the current output position
+ *
+ * @return {Number} Output position in samples.
+ */
 WebAudioAPIDevice.prototype.getPlaybackTime = function() {
     return this.context.currentTime * this.sampleRate;
 };
 
+/**
+ * Get the current write position
+ *
+ * @return {Number} Write position in samples.
+ */
 WebAudioAPIDevice.prototype.getWriteTime = function() {
     return this.writePosition;
 };
 
+/**
+ * toString
+ *
+ * @return {String} String representation.
+ */
 WebAudioAPIDevice.prototype.toString = function() {
     return 'Web Audio API Device';
 };

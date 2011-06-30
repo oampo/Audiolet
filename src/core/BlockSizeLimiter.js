@@ -1,7 +1,25 @@
-/**
+/*!
  * @depends AudioletNode.js
  */
 
+/**
+ * Node to limit the size of sample blocks which are processed.  Any larger
+ * blocks requested are split into smaller blocks and recombined at the end
+ * of a tick call.
+ *
+ * **Inputs**
+ *
+ * - Audio
+ *
+ * **Outputs**
+ *
+ * - Audio
+ *
+ * @constructor
+ * @extends AudioletNode
+ * @param {Audiolet} audiolet The audiolet object.
+ * @param {Number} maximumBlockSize The largest allowed block size.
+ */
 var BlockSizeLimiter = function(audiolet, maximumBlockSize) {
     AudioletNode.call(this, audiolet, 1, 1);
     this.maximumBlockSize = maximumBlockSize;
@@ -9,6 +27,14 @@ var BlockSizeLimiter = function(audiolet, maximumBlockSize) {
 };
 extend(BlockSizeLimiter, AudioletNode);
 
+/**
+ * Overridden tick method.  Splits any calls with length larger than the
+ * maximum block size into chunks smaller than the maximum, combining the
+ * chunks in the output buffers.
+ *
+ * @param {Number} length The number of samples to process.
+ * @param {Number} timestamp A timestamp for the block of samples.
+ */
 BlockSizeLimiter.prototype.tick = function(length, timestamp) {
     var maximumBlockSize = this.maximumBlockSize;
     if (length < maximumBlockSize) {
@@ -47,6 +73,14 @@ BlockSizeLimiter.prototype.tick = function(length, timestamp) {
     }
 };
 
+/**
+ * Overridden function reading from the input buffers, and putting new values
+ * into sections of the output buffers.
+ *
+ * @param {AudioletBuffer[]} inputBuffers Samples received from the inputs.
+ * @param {AudioletBuffer[]} outputBuffers Samples to be sent to the outputs.
+ * @param {Number} offset Sample offset for writing to the output buffers.
+ */
 BlockSizeLimiter.prototype.generate = function(inputBuffers, outputBuffers,
                                                offset) {
     offset = offset || 0;
@@ -60,6 +94,11 @@ BlockSizeLimiter.prototype.generate = function(inputBuffers, outputBuffers,
                             0, offset);
 };
 
+/**
+ * toString
+ *
+ * @return {String} String representation.
+ */
 BlockSizeLimiter.prototype.toString = function() {
     return 'Block Size Limiter';
 };

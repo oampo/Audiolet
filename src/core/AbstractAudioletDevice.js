@@ -5,6 +5,10 @@
 /**
  * An abstract base class for audio output devices
  *
+ * **Inputs**
+ *
+ * - Audio
+ *
  * @constructor
  * @extends AudioletNode
  * @param {Audiolet} audiolet The audiolet object.
