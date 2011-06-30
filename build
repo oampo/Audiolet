@@ -3,12 +3,26 @@ oxo -t 'Audiolet API Documentation' \
     -d 'JavaScript library for audio synthesis and composition.' \
     -s 'Core' \
     -a 'Core Audiolet classes' \
-    -i ../trunk/src/core/AudioletNode.js \
+    -i ../trunk/src/core/Audiolet.js \
+       ../trunk/src/core/AudioletNode.js \
        ../trunk/src/core/AudioletGroup.js \
+       ../trunk/src/core/AudioletBuffer.js \
        ../trunk/src/core/AudioletParameter.js \
+       ../trunk/src/core/AudioletInput.js \
+       ../trunk/src/core/AudioletOutput.js \
+       ../trunk/src/core/AudioletDestination.js \
+       ../trunk/src/core/AudioletDevice.js \
+       ../trunk/src/core/AbstractAudioletDevice.js \
+       ../trunk/src/core/AudioDataAPIDevice.js \
+       ../trunk/src/core/WebAudioAPIDevice.js \
+       ../trunk/src/core/DummyDevice.js \
        ../trunk/src/core/Scheduler.js \
        ../trunk/src/core/PassThroughNode.js \
        ../trunk/src/core/ParameterNode.js \
+       ../trunk/src/core/BlockSizeLimiter.js \
+       ../trunk/src/core/PriorityQueue.js \
+       ../trunk/src/core/Extend.js \
+       ../trunk/src/core/TypedArrayShim.js \
     -s 'DSP' \
     -a 'Audio generation and processing classes' \
     -i ../trunk/src/dsp/TableLookupOscillator.js \
