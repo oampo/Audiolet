@@ -74,4 +74,15 @@ oxo -t 'Audiolet API Documentation' \
     -a 'Musical tunings' \
     -i ../trunk/src/tuning/Tuning.js \
        ../trunk/src/tuning/EqualTemeperamentTuning.js \
+    -s 'Patterns' \
+    -a 'Schedulable patterns of values' \
+    -i ../trunk/src/pattern/Pattern.js \
+       ../trunk/src/pattern/PSequence.js \
+       ../trunk/src/pattern/PSeries.js \
+       ../trunk/src/pattern/PShuffle.js \
+       ../trunk/src/pattern/PArithmetic.js \
+       ../trunk/src/pattern/PGeometric.js \
+       ../trunk/src/pattern/PChoose.js \
+       ../trunk/src/pattern/PRandom.js \
+       ../trunk/src/pattern/PProxy.js \
     -o api.html

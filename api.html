@@ -11579,6 +11579,1331 @@ specific tunings.</p>
                 </div>
                 
             </div>
+            <div class="section">
+                <div class="header block">
+                    <div class="left">
+                        <div>
+                            <h2>Patterns</h2>
+                        </div>
+                    </div>
+                    <div class="right">
+                        <div><p>Schedulable patterns of values</p>
+</div>
+                    </div>
+                    <div class="clear"></div>
+                </div>
+
+                <!-- Title and filename -->
+                <div class="file">
+                    <div class="header block">
+                        <div class="left">
+                            <div>
+                                <h3>Pattern</h3>
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                ../trunk/src/pattern/Pattern.js
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+
+                <!-- File contents -->
+                    <div class="content block">
+                        <div class="left">
+                            <div>
+                                <p>A generic pattern.  Patterns are simple classes which return the next value
+in a sequence when the next function is called.  Patterns can be embedded
+inside other patterns to produce complex sequences of values.  When a
+pattern is finished its next function returns null.</p>
+
+                                <hr />
+                                <ul>
+                                    <li>
+                                        <strong>constructor</strong>
+                                    </li>
+                                    
+                                </ul>
+                                
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                <div class="highlight"><pre><span class="kd">var</span> <span class="nx">Pattern</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+<span class="p">};</span>
+</pre></div>
+
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    <div class="content block">
+                        <div class="left">
+                            <div>
+                                <p>Default next function.</p>
+
+                                <hr />
+                                <ul>
+                                    <li>
+                                        <strong>return</strong> <em>null</em> Null.
+                                    </li>
+                                    
+                                </ul>
+                                
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                <div class="highlight"><pre><span class="nx">Pattern</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">next</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">return</span> <span class="kc">null</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    <div class="content block">
+                        <div class="left">
+                            <div>
+                                <p>Return the current value of an item contained in a pattern.</p>
+
+                                <hr />
+                                <ul>
+                                    <li>
+                                        <strong>param</strong> <em>Pattern|Object</em> The item.
+                                    </li>
+                                    <li>
+                                        <strong>return</strong> <em>Object</em> The value of the item.
+                                    </li>
+                                    
+                                </ul>
+                                
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                <div class="highlight"><pre><span class="nx">Pattern</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">valueOf</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">item</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">item</span> <span class="k">instanceof</span> <span class="nx">Pattern</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="p">(</span><span class="nx">item</span><span class="p">.</span><span class="nx">next</span><span class="p">());</span>
+    <span class="p">}</span>
+    <span class="k">else</span> <span class="p">{</span>
+        <span class="k">return</span> <span class="p">(</span><span class="nx">item</span><span class="p">);</span>
+    <span class="p">}</span>
+<span class="p">};</span>
+</pre></div>
+
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    <div class="content block">
+                        <div class="left">
+                            <div>
+                                <p>Default reset function.</p>
+
+                                <hr />
+                                <ul>
+                                    
+                                </ul>
+                                
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                <div class="highlight"><pre><span class="nx">Pattern</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">reset</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+<span class="p">};</span>
+</pre></div>
+
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    
+                </div>
+                <!-- Title and filename -->
+                <div class="file">
+                    <div class="header block">
+                        <div class="left">
+                            <div>
+                                <h3>PSequence</h3>
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                ../trunk/src/pattern/PSequence.js
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+
+                <!-- File contents -->
+                    <div class="content block">
+                        <div class="left">
+                            <div>
+                                <p>Iterate through a list of values.</p>
+
+                                <hr />
+                                <ul>
+                                    <li>
+                                        <strong>constructor</strong>
+                                    </li>
+                                    <li>
+                                        <strong>extends</strong> Pattern
+                                    </li>
+                                    <li>
+                                        <strong>param</strong> <em>Object[]</em> list Array of values.
+                                    </li>
+                                    <li>
+                                        <strong>param</strong> <em>Number</em> [repeats=1] Number of times to loop through the array.
+                                    </li>
+                                    <li>
+                                        <strong>param</strong> <em>Number</em> [offset=0] Index to start from.
+                                    </li>
+                                    
+                                </ul>
+                                
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                <div class="highlight"><pre><span class="kd">var</span> <span class="nx">PSequence</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">list</span><span class="p">,</span> <span class="nx">repeats</span><span class="p">,</span> <span class="nx">offset</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">Pattern</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="k">this</span><span class="p">);</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">list</span> <span class="o">=</span> <span class="nx">list</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">repeats</span> <span class="o">=</span> <span class="nx">repeats</span> <span class="o">||</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">position</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">offset</span> <span class="o">=</span> <span class="nx">offset</span> <span class="o">||</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">};</span>
+<span class="nx">extend</span><span class="p">(</span><span class="nx">PSequence</span><span class="p">,</span> <span class="nx">Pattern</span><span class="p">);</span>
+</pre></div>
+
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    <div class="content block">
+                        <div class="left">
+                            <div>
+                                <p>Generate the next value in the pattern.</p>
+
+                                <hr />
+                                <ul>
+                                    <li>
+                                        <strong>return</strong> <em>Number</em> The next value.
+                                    </li>
+                                    
+                                </ul>
+                                
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                <div class="highlight"><pre><span class="nx">PSequence</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">next</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">returnValue</span><span class="p">;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">position</span> <span class="o">&lt;</span> <span class="k">this</span><span class="p">.</span><span class="nx">repeats</span> <span class="o">*</span> <span class="k">this</span><span class="p">.</span><span class="nx">list</span><span class="p">.</span><span class="nx">length</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">index</span> <span class="o">=</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">position</span> <span class="o">+</span> <span class="k">this</span><span class="p">.</span><span class="nx">offset</span><span class="p">)</span> <span class="o">%</span> <span class="k">this</span><span class="p">.</span><span class="nx">list</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span>
+        <span class="kd">var</span> <span class="nx">item</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">list</span><span class="p">[</span><span class="nx">index</span><span class="p">];</span>
+        <span class="kd">var</span> <span class="nx">value</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">valueOf</span><span class="p">(</span><span class="nx">item</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nx">value</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="p">(</span><span class="nx">item</span> <span class="k">instanceof</span> <span class="nx">Pattern</span><span class="p">))</span> <span class="p">{</span>
+                <span class="k">this</span><span class="p">.</span><span class="nx">position</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">;</span>
+            <span class="p">}</span>
+            <span class="nx">returnValue</span> <span class="o">=</span> <span class="nx">value</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="k">else</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">item</span> <span class="k">instanceof</span> <span class="nx">Pattern</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">item</span><span class="p">.</span><span class="nx">reset</span><span class="p">();</span>
+            <span class="p">}</span>
+            <span class="k">this</span><span class="p">.</span><span class="nx">position</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">;</span>
+            <span class="nx">returnValue</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">next</span><span class="p">();</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="k">else</span> <span class="p">{</span>
+        <span class="nx">returnValue</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="p">(</span><span class="nx">returnValue</span><span class="p">);</span>
+<span class="p">};</span>
+</pre></div>
+
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    <div class="content block">
+                        <div class="left">
+                            <div>
+                                <p>Reset the pattern</p>
+
+                                <hr />
+                                <ul>
+                                    
+                                </ul>
+                                
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                <div class="highlight"><pre><span class="nx">PSequence</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">reset</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">position</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="k">this</span><span class="p">.</span><span class="nx">list</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">item</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">list</span><span class="p">[</span><span class="nx">i</span><span class="p">];</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nx">item</span> <span class="k">instanceof</span> <span class="nx">Pattern</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">item</span><span class="p">.</span><span class="nx">reset</span><span class="p">();</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">};</span>
+</pre></div>
+
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    <div class="content block">
+                        <div class="left">
+                            <div>
+                                <p>Supercollider alias</p>
+
+                                <hr />
+                                <ul>
+                                    
+                                </ul>
+                                
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                <div class="highlight"><pre><span class="kd">var</span> <span class="nx">Pseq</span> <span class="o">=</span> <span class="nx">PSequence</span><span class="p">;</span>
+</pre></div>
+
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    
+                </div>
+                <!-- Title and filename -->
+                <div class="file">
+                    <div class="header block">
+                        <div class="left">
+                            <div>
+                                <h3>PSeries</h3>
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                ../trunk/src/pattern/PSeries.js
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+
+                <!-- File contents -->
+                    <div class="content block">
+                        <div class="left">
+                            <div>
+                                <p>Iterate through a list of values.</p>
+
+                                <hr />
+                                <ul>
+                                    <li>
+                                        <strong>constructor</strong>
+                                    </li>
+                                    <li>
+                                        <strong>extends</strong> Pattern
+                                    </li>
+                                    <li>
+                                        <strong>param</strong> <em>Object[]</em> list Array of values.
+                                    </li>
+                                    <li>
+                                        <strong>param</strong> <em>Number</em> [repeats=1] Number of values to generate.
+                                    </li>
+                                    <li>
+                                        <strong>param</strong> <em>Number</em> [offset=0] Index to start from.
+                                    </li>
+                                    
+                                </ul>
+                                
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                <div class="highlight"><pre><span class="kd">var</span> <span class="nx">PSeries</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">list</span><span class="p">,</span> <span class="nx">repeats</span><span class="p">,</span> <span class="nx">offset</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">Pattern</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="k">this</span><span class="p">);</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">list</span> <span class="o">=</span> <span class="nx">list</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">repeats</span> <span class="o">=</span> <span class="nx">repeats</span> <span class="o">||</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">position</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">offset</span> <span class="o">=</span> <span class="nx">offset</span> <span class="o">||</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">};</span>
+<span class="nx">extend</span><span class="p">(</span><span class="nx">PSeries</span><span class="p">,</span> <span class="nx">Pattern</span><span class="p">);</span>
+</pre></div>
+
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    <div class="content block">
+                        <div class="left">
+                            <div>
+                                <p>Generate the next value in the pattern.</p>
+
+                                <hr />
+                                <ul>
+                                    <li>
+                                        <strong>return</strong> <em>Number</em> The next value.
+                                    </li>
+                                    
+                                </ul>
+                                
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                <div class="highlight"><pre><span class="nx">PSeries</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">next</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">returnValue</span><span class="p">;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">position</span> <span class="o">&lt;</span> <span class="k">this</span><span class="p">.</span><span class="nx">repeats</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">index</span> <span class="o">=</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">position</span> <span class="o">+</span> <span class="k">this</span><span class="p">.</span><span class="nx">offset</span><span class="p">)</span> <span class="o">%</span> <span class="k">this</span><span class="p">.</span><span class="nx">list</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span>
+        <span class="kd">var</span> <span class="nx">item</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">list</span><span class="p">[</span><span class="nx">index</span><span class="p">];</span>
+        <span class="kd">var</span> <span class="nx">value</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">valueOf</span><span class="p">(</span><span class="nx">item</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nx">value</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="p">(</span><span class="nx">item</span> <span class="k">instanceof</span> <span class="nx">Pattern</span><span class="p">))</span> <span class="p">{</span>
+                <span class="k">this</span><span class="p">.</span><span class="nx">position</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">;</span>
+            <span class="p">}</span>
+            <span class="nx">returnValue</span> <span class="o">=</span> <span class="nx">value</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="k">else</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">item</span> <span class="k">instanceof</span> <span class="nx">Pattern</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">item</span><span class="p">.</span><span class="nx">reset</span><span class="p">();</span>
+            <span class="p">}</span>
+            <span class="k">this</span><span class="p">.</span><span class="nx">position</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">;</span>
+            <span class="nx">returnValue</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">next</span><span class="p">();</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="k">else</span> <span class="p">{</span>
+        <span class="nx">returnValue</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="p">(</span><span class="nx">returnValue</span><span class="p">);</span>
+<span class="p">};</span>
+</pre></div>
+
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    <div class="content block">
+                        <div class="left">
+                            <div>
+                                <p>Reset the pattern</p>
+
+                                <hr />
+                                <ul>
+                                    
+                                </ul>
+                                
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                <div class="highlight"><pre><span class="nx">PSeries</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">reset</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">position</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="k">this</span><span class="p">.</span><span class="nx">list</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">item</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">list</span><span class="p">[</span><span class="nx">i</span><span class="p">];</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nx">item</span> <span class="k">instanceof</span> <span class="nx">Pattern</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">item</span><span class="p">.</span><span class="nx">reset</span><span class="p">();</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">};</span>
+</pre></div>
+
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    <div class="content block">
+                        <div class="left">
+                            <div>
+                                <p>Supercollider alias</p>
+
+                                <hr />
+                                <ul>
+                                    
+                                </ul>
+                                
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                <div class="highlight"><pre><span class="kd">var</span> <span class="nx">Pser</span> <span class="o">=</span> <span class="nx">PSeries</span><span class="p">;</span>
+</pre></div>
+
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    
+                </div>
+                <!-- Title and filename -->
+                <div class="file">
+                    <div class="header block">
+                        <div class="left">
+                            <div>
+                                <h3>PShuffle</h3>
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                ../trunk/src/pattern/PShuffle.js
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+
+                <!-- File contents -->
+                    <div class="content block">
+                        <div class="left">
+                            <div>
+                                <p>Reorder an array, then iterate through it's values.</p>
+
+                                <hr />
+                                <ul>
+                                    <li>
+                                        <strong>constructor</strong>
+                                    </li>
+                                    <li>
+                                        <strong>extends</strong> Pattern
+                                    </li>
+                                    <li>
+                                        <strong>param</strong> <em>Object[]</em> list Array of values.
+                                    </li>
+                                    <li>
+                                        <strong>param</strong> <em>Number</em> repeats Number of times to loop through the array.
+                                    </li>
+                                    
+                                </ul>
+                                
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                <div class="highlight"><pre><span class="kd">var</span> <span class="nx">PShuffle</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">list</span><span class="p">,</span> <span class="nx">repeats</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">Pattern</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="k">this</span><span class="p">);</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">list</span> <span class="o">=</span> <span class="p">[];</span>
+    <span class="c1">// Shuffle values into new list</span>
+    <span class="k">while</span> <span class="p">(</span><span class="nx">list</span><span class="p">.</span><span class="nx">length</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">index</span> <span class="o">=</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">floor</span><span class="p">(</span><span class="nb">Math</span><span class="p">.</span><span class="nx">random</span><span class="p">()</span> <span class="o">*</span> <span class="nx">list</span><span class="p">.</span><span class="nx">length</span><span class="p">);</span>
+        <span class="kd">var</span> <span class="nx">value</span> <span class="o">=</span> <span class="nx">list</span><span class="p">.</span><span class="nx">splice</span><span class="p">(</span><span class="nx">index</span><span class="p">,</span> <span class="mi">1</span><span class="p">);</span>
+        <span class="k">this</span><span class="p">.</span><span class="nx">list</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">value</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">repeats</span> <span class="o">=</span> <span class="nx">repeats</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">position</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">};</span>
+<span class="nx">extend</span><span class="p">(</span><span class="nx">PShuffle</span><span class="p">,</span> <span class="nx">Pattern</span><span class="p">);</span>
+</pre></div>
+
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    <div class="content block">
+                        <div class="left">
+                            <div>
+                                <p>Generate the next value in the pattern.</p>
+
+                                <hr />
+                                <ul>
+                                    <li>
+                                        <strong>return</strong> <em>Number</em> The next value.
+                                    </li>
+                                    
+                                </ul>
+                                
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                <div class="highlight"><pre><span class="nx">PShuffle</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">next</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">returnValue</span><span class="p">;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">position</span> <span class="o">&lt;</span> <span class="k">this</span><span class="p">.</span><span class="nx">repeats</span> <span class="o">*</span> <span class="k">this</span><span class="p">.</span><span class="nx">list</span><span class="p">.</span><span class="nx">length</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">index</span> <span class="o">=</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">position</span> <span class="o">+</span> <span class="k">this</span><span class="p">.</span><span class="nx">offset</span><span class="p">)</span> <span class="o">%</span> <span class="k">this</span><span class="p">.</span><span class="nx">list</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span>
+        <span class="kd">var</span> <span class="nx">item</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">list</span><span class="p">[</span><span class="nx">index</span><span class="p">];</span>
+        <span class="kd">var</span> <span class="nx">value</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">valueOf</span><span class="p">(</span><span class="nx">item</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nx">value</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="p">(</span><span class="nx">item</span> <span class="k">instanceof</span> <span class="nx">Pattern</span><span class="p">))</span> <span class="p">{</span>
+                <span class="k">this</span><span class="p">.</span><span class="nx">position</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">;</span>
+            <span class="p">}</span>
+            <span class="nx">returnValue</span> <span class="o">=</span> <span class="nx">value</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="k">else</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">item</span> <span class="k">instanceof</span> <span class="nx">Pattern</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">item</span><span class="p">.</span><span class="nx">reset</span><span class="p">();</span>
+            <span class="p">}</span>
+            <span class="k">this</span><span class="p">.</span><span class="nx">position</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">;</span>
+            <span class="nx">returnValue</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">next</span><span class="p">();</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="k">else</span> <span class="p">{</span>
+        <span class="nx">returnValue</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="p">(</span><span class="nx">returnValue</span><span class="p">);</span>
+<span class="p">};</span>
+</pre></div>
+
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    <div class="content block">
+                        <div class="left">
+                            <div>
+                                <p>Supercollider alias</p>
+
+                                <hr />
+                                <ul>
+                                    
+                                </ul>
+                                
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                <div class="highlight"><pre><span class="kd">var</span> <span class="nx">Pshuffle</span> <span class="o">=</span> <span class="nx">PShuffle</span><span class="p">;</span>
+</pre></div>
+
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    
+                </div>
+                <!-- Title and filename -->
+                <div class="file">
+                    <div class="header block">
+                        <div class="left">
+                            <div>
+                                <h3>PArithmetic</h3>
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                ../trunk/src/pattern/PArithmetic.js
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+
+                <!-- File contents -->
+                    <div class="content block">
+                        <div class="left">
+                            <div>
+                                <p>Arithmetic sequence.  Adds a value to a running total on each next call.</p>
+
+                                <hr />
+                                <ul>
+                                    <li>
+                                        <strong>constructor</strong>
+                                    </li>
+                                    <li>
+                                        <strong>extends</strong> Pattern
+                                    </li>
+                                    <li>
+                                        <strong>param</strong> <em>Number</em> start Starting value.
+                                    </li>
+                                    <li>
+                                        <strong>param</strong> <em>Pattern|Number</em> step Value to add.
+                                    </li>
+                                    <li>
+                                        <strong>param</strong> <em>Number</em> repeats Number of values to generate.
+                                    </li>
+                                    
+                                </ul>
+                                
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                <div class="highlight"><pre><span class="kd">var</span> <span class="nx">PArithmetic</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">start</span><span class="p">,</span> <span class="nx">step</span><span class="p">,</span> <span class="nx">repeats</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">Pattern</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="k">this</span><span class="p">);</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">start</span> <span class="o">=</span> <span class="nx">start</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">value</span> <span class="o">=</span> <span class="nx">start</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">step</span> <span class="o">=</span> <span class="nx">step</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">repeats</span> <span class="o">=</span> <span class="nx">repeats</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">position</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">};</span>
+<span class="nx">extend</span><span class="p">(</span><span class="nx">PArithmetic</span><span class="p">,</span> <span class="nx">Pattern</span><span class="p">);</span>
+</pre></div>
+
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    <div class="content block">
+                        <div class="left">
+                            <div>
+                                <p>Generate the next value in the pattern.</p>
+
+                                <hr />
+                                <ul>
+                                    <li>
+                                        <strong>return</strong> <em>Number</em> The next value.
+                                    </li>
+                                    
+                                </ul>
+                                
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                <div class="highlight"><pre><span class="nx">PArithmetic</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">next</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">returnValue</span><span class="p">;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">position</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">returnValue</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">value</span><span class="p">;</span>
+        <span class="k">this</span><span class="p">.</span><span class="nx">position</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">position</span> <span class="o">&lt;</span> <span class="k">this</span><span class="p">.</span><span class="nx">repeats</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">step</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">valueOf</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">step</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nx">step</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">this</span><span class="p">.</span><span class="nx">value</span> <span class="o">+=</span> <span class="nx">step</span><span class="p">;</span>
+            <span class="nx">returnValue</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">value</span><span class="p">;</span>
+            <span class="k">this</span><span class="p">.</span><span class="nx">position</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="k">else</span> <span class="p">{</span>
+            <span class="nx">returnValue</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="k">else</span> <span class="p">{</span>
+        <span class="nx">returnValue</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="p">(</span><span class="nx">returnValue</span><span class="p">);</span>
+<span class="p">};</span>
+</pre></div>
+
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    <div class="content block">
+                        <div class="left">
+                            <div>
+                                <p>Reset the pattern</p>
+
+                                <hr />
+                                <ul>
+                                    
+                                </ul>
+                                
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                <div class="highlight"><pre><span class="nx">PArithmetic</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">reset</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">value</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">start</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">position</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">step</span> <span class="k">instanceof</span> <span class="nx">Pattern</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">this</span><span class="p">.</span><span class="nx">step</span><span class="p">.</span><span class="nx">reset</span><span class="p">();</span>
+    <span class="p">}</span>
+<span class="p">};</span>
+</pre></div>
+
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    <div class="content block">
+                        <div class="left">
+                            <div>
+                                <p>Supercollider alias</p>
+
+                                <hr />
+                                <ul>
+                                    
+                                </ul>
+                                
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                <div class="highlight"><pre><span class="kd">var</span> <span class="nx">Pseries</span> <span class="o">=</span> <span class="nx">PArithmetic</span><span class="p">;</span>
+</pre></div>
+
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    
+                </div>
+                <!-- Title and filename -->
+                <div class="file">
+                    <div class="header block">
+                        <div class="left">
+                            <div>
+                                <h3>PGeometric</h3>
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                ../trunk/src/pattern/PGeometric.js
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+
+                <!-- File contents -->
+                    <div class="content block">
+                        <div class="left">
+                            <div>
+                                <p>Geometric sequence.  Multiplies a running total by a value on each next
+call.</p>
+
+                                <hr />
+                                <ul>
+                                    <li>
+                                        <strong>constructor</strong>
+                                    </li>
+                                    <li>
+                                        <strong>extends</strong> Pattern
+                                    </li>
+                                    <li>
+                                        <strong>param</strong> <em>Number</em> start Starting value.
+                                    </li>
+                                    <li>
+                                        <strong>param</strong> <em>Pattern|Number</em> step Value to multiply by.
+                                    </li>
+                                    <li>
+                                        <strong>param</strong> <em>Number</em> repeats Number of values to generate.
+                                    </li>
+                                    
+                                </ul>
+                                
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                <div class="highlight"><pre><span class="kd">var</span> <span class="nx">PGeometric</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">start</span><span class="p">,</span> <span class="nx">step</span><span class="p">,</span> <span class="nx">repeats</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">Pattern</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="k">this</span><span class="p">);</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">start</span> <span class="o">=</span> <span class="nx">start</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">value</span> <span class="o">=</span> <span class="nx">start</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">step</span> <span class="o">=</span> <span class="nx">step</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">repeats</span> <span class="o">=</span> <span class="nx">repeats</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">position</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">};</span>
+<span class="nx">extend</span><span class="p">(</span><span class="nx">PGeometric</span><span class="p">,</span> <span class="nx">Pattern</span><span class="p">);</span>
+</pre></div>
+
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    <div class="content block">
+                        <div class="left">
+                            <div>
+                                <p>Generate the next value in the pattern.</p>
+
+                                <hr />
+                                <ul>
+                                    <li>
+                                        <strong>return</strong> <em>Number</em> The next value.
+                                    </li>
+                                    
+                                </ul>
+                                
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                <div class="highlight"><pre><span class="nx">PGeometric</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">next</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">returnValue</span><span class="p">;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">position</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">returnValue</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">value</span><span class="p">;</span>
+        <span class="k">this</span><span class="p">.</span><span class="nx">position</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">else</span> <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">position</span> <span class="o">&lt;</span> <span class="k">this</span><span class="p">.</span><span class="nx">repeats</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">step</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">valueOf</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">step</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nx">step</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">this</span><span class="p">.</span><span class="nx">value</span> <span class="o">*=</span> <span class="nx">step</span><span class="p">;</span>
+            <span class="nx">returnValue</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">value</span><span class="p">;</span>
+            <span class="k">this</span><span class="p">.</span><span class="nx">position</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="k">else</span> <span class="p">{</span>
+            <span class="nx">returnValue</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="k">else</span> <span class="p">{</span>
+        <span class="nx">returnValue</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="p">(</span><span class="nx">returnValue</span><span class="p">);</span>
+<span class="p">};</span>
+</pre></div>
+
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    <div class="content block">
+                        <div class="left">
+                            <div>
+                                <p>Reset the pattern</p>
+
+                                <hr />
+                                <ul>
+                                    
+                                </ul>
+                                
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                <div class="highlight"><pre><span class="nx">PGeometric</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">reset</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">value</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">start</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">position</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">step</span> <span class="k">instanceof</span> <span class="nx">Pattern</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">this</span><span class="p">.</span><span class="nx">step</span><span class="p">.</span><span class="nx">reset</span><span class="p">();</span>
+    <span class="p">}</span>
+<span class="p">};</span>
+</pre></div>
+
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    <div class="content block">
+                        <div class="left">
+                            <div>
+                                <p>Supercollider alias</p>
+
+                                <hr />
+                                <ul>
+                                    
+                                </ul>
+                                
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                <div class="highlight"><pre><span class="kd">var</span> <span class="nx">Pgeom</span> <span class="o">=</span> <span class="nx">PGeometric</span><span class="p">;</span>
+</pre></div>
+
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    
+                </div>
+                <!-- Title and filename -->
+                <div class="file">
+                    <div class="header block">
+                        <div class="left">
+                            <div>
+                                <h3>PChoose</h3>
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                ../trunk/src/pattern/PChoose.js
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+
+                <!-- File contents -->
+                    <div class="content block">
+                        <div class="left">
+                            <div>
+                                <p>Choose a random value from an array.</p>
+
+                                <hr />
+                                <ul>
+                                    <li>
+                                        <strong>constructor</strong>
+                                    </li>
+                                    <li>
+                                        <strong>extends</strong> Pattern
+                                    </li>
+                                    <li>
+                                        <strong>param</strong> <em>Object[]</em> list Array of items to choose from.
+                                    </li>
+                                    <li>
+                                        <strong>param</strong> <em>Number</em> [repeats=1] Number of values to generate.
+                                    </li>
+                                    
+                                </ul>
+                                
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                <div class="highlight"><pre><span class="kd">var</span> <span class="nx">PChoose</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">list</span><span class="p">,</span> <span class="nx">repeats</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">Pattern</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="k">this</span><span class="p">);</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">list</span> <span class="o">=</span> <span class="nx">list</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">repeats</span> <span class="o">=</span> <span class="nx">repeats</span> <span class="o">||</span> <span class="mi">1</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">position</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">};</span>
+<span class="nx">extend</span><span class="p">(</span><span class="nx">PChoose</span><span class="p">,</span> <span class="nx">Pattern</span><span class="p">);</span>
+</pre></div>
+
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    <div class="content block">
+                        <div class="left">
+                            <div>
+                                <p>Generate the next value in the pattern.</p>
+
+                                <hr />
+                                <ul>
+                                    <li>
+                                        <strong>return</strong> <em>Number</em> The next value.
+                                    </li>
+                                    
+                                </ul>
+                                
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                <div class="highlight"><pre><span class="nx">PChoose</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">next</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">returnValue</span><span class="p">;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">position</span> <span class="o">&lt;</span> <span class="k">this</span><span class="p">.</span><span class="nx">repeats</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">index</span> <span class="o">=</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">floor</span><span class="p">(</span><span class="nb">Math</span><span class="p">.</span><span class="nx">random</span><span class="p">()</span> <span class="o">*</span> <span class="k">this</span><span class="p">.</span><span class="nx">list</span><span class="p">.</span><span class="nx">length</span><span class="p">);</span>
+        <span class="kd">var</span> <span class="nx">item</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">list</span><span class="p">[</span><span class="nx">index</span><span class="p">];</span>
+        <span class="kd">var</span> <span class="nx">value</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">valueOf</span><span class="p">(</span><span class="nx">item</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nx">value</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="o">!</span><span class="p">(</span><span class="nx">item</span> <span class="k">instanceof</span> <span class="nx">Pattern</span><span class="p">))</span> <span class="p">{</span>
+                <span class="k">this</span><span class="p">.</span><span class="nx">position</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">;</span>
+            <span class="p">}</span>
+            <span class="nx">returnValue</span> <span class="o">=</span> <span class="nx">value</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="k">else</span> <span class="p">{</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nx">item</span> <span class="k">instanceof</span> <span class="nx">Pattern</span><span class="p">)</span> <span class="p">{</span>
+                <span class="nx">item</span><span class="p">.</span><span class="nx">reset</span><span class="p">();</span>
+            <span class="p">}</span>
+            <span class="k">this</span><span class="p">.</span><span class="nx">position</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">;</span>
+            <span class="nx">returnValue</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">next</span><span class="p">();</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="k">else</span> <span class="p">{</span>
+        <span class="nx">returnValue</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="p">(</span><span class="nx">returnValue</span><span class="p">);</span>
+<span class="p">};</span>
+</pre></div>
+
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    <div class="content block">
+                        <div class="left">
+                            <div>
+                                <p>Reset the pattern</p>
+
+                                <hr />
+                                <ul>
+                                    
+                                </ul>
+                                
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                <div class="highlight"><pre><span class="nx">PChoose</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">reset</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">position</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="k">this</span><span class="p">.</span><span class="nx">list</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">item</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">list</span><span class="p">[</span><span class="nx">i</span><span class="p">];</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nx">item</span> <span class="k">instanceof</span> <span class="nx">Pattern</span><span class="p">)</span> <span class="p">{</span>
+            <span class="nx">item</span><span class="p">.</span><span class="nx">reset</span><span class="p">();</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+<span class="p">};</span>
+</pre></div>
+
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    <div class="content block">
+                        <div class="left">
+                            <div>
+                                <p>Supercollider alias</p>
+
+                                <hr />
+                                <ul>
+                                    
+                                </ul>
+                                
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                <div class="highlight"><pre><span class="kd">var</span> <span class="nx">Prand</span> <span class="o">=</span> <span class="nx">PChoose</span><span class="p">;</span>
+</pre></div>
+
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    
+                </div>
+                <!-- Title and filename -->
+                <div class="file">
+                    <div class="header block">
+                        <div class="left">
+                            <div>
+                                <h3>PRandom</h3>
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                ../trunk/src/pattern/PRandom.js
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+
+                <!-- File contents -->
+                    <div class="content block">
+                        <div class="left">
+                            <div>
+                                <p>Sequence of random numbers.</p>
+
+                                <hr />
+                                <ul>
+                                    <li>
+                                        <strong>constructor</strong>
+                                    </li>
+                                    <li>
+                                        <strong>extends</strong> Pattern
+                                    </li>
+                                    <li>
+                                        <strong>param</strong> <em>Number|Pattern</em> low Lowest possible value.
+                                    </li>
+                                    <li>
+                                        <strong>param</strong> <em>Number|Pattern</em> high Highest possible value.
+                                    </li>
+                                    <li>
+                                        <strong>param</strong> <em>Number</em> repeats Number of values to generate.
+                                    </li>
+                                    
+                                </ul>
+                                
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                <div class="highlight"><pre><span class="kd">var</span> <span class="nx">PRandom</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">low</span><span class="p">,</span> <span class="nx">high</span><span class="p">,</span> <span class="nx">repeats</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">Pattern</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="k">this</span><span class="p">);</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">low</span> <span class="o">=</span> <span class="nx">low</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">high</span> <span class="o">=</span> <span class="nx">high</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">repeats</span> <span class="o">=</span> <span class="nx">repeats</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">position</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">};</span>
+<span class="nx">extend</span><span class="p">(</span><span class="nx">PRandom</span><span class="p">,</span> <span class="nx">Pattern</span><span class="p">);</span>
+</pre></div>
+
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    <div class="content block">
+                        <div class="left">
+                            <div>
+                                <p>Generate the next value in the pattern.</p>
+
+                                <hr />
+                                <ul>
+                                    <li>
+                                        <strong>return</strong> <em>Number</em> The next value.
+                                    </li>
+                                    
+                                </ul>
+                                
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                <div class="highlight"><pre><span class="nx">PRandom</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">next</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">returnValue</span><span class="p">;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">position</span> <span class="o">&lt;</span> <span class="k">this</span><span class="p">.</span><span class="nx">repeats</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">low</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">valueOf</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">low</span><span class="p">);</span>
+        <span class="kd">var</span> <span class="nx">high</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">valueOf</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">high</span><span class="p">);</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nx">low</span> <span class="o">!=</span> <span class="kc">null</span> <span class="o">&amp;&amp;</span> <span class="nx">high</span> <span class="o">!=</span> <span class="kc">null</span><span class="p">)</span> <span class="p">{</span>
+            <span class="k">this</span><span class="p">.</span><span class="nx">value</span> <span class="o">*=</span> <span class="nx">step</span><span class="p">;</span>
+            <span class="nx">returnValue</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">value</span><span class="p">;</span>
+            <span class="k">this</span><span class="p">.</span><span class="nx">position</span> <span class="o">+=</span> <span class="mi">1</span><span class="p">;</span>
+        <span class="p">}</span>
+        <span class="k">else</span> <span class="p">{</span>
+            <span class="nx">returnValue</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+        <span class="p">}</span>
+    <span class="p">}</span>
+    <span class="k">else</span> <span class="p">{</span>
+        <span class="nx">returnValue</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="p">(</span><span class="nx">returnValue</span><span class="p">);</span>
+<span class="p">};</span>
+</pre></div>
+
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    <div class="content block">
+                        <div class="left">
+                            <div>
+                                <p>Reset the pattern</p>
+
+                                <hr />
+                                <ul>
+                                    
+                                </ul>
+                                
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                <div class="highlight"><pre><span class="nx">PRandom</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">reset</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">position</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    <div class="content block">
+                        <div class="left">
+                            <div>
+                                <p>Supercollider alias</p>
+
+                                <hr />
+                                <ul>
+                                    
+                                </ul>
+                                
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                <div class="highlight"><pre><span class="kd">var</span> <span class="nx">Pwhite</span> <span class="o">=</span> <span class="nx">PRandom</span><span class="p">;</span>
+</pre></div>
+
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    
+                </div>
+                <!-- Title and filename -->
+                <div class="file">
+                    <div class="header block">
+                        <div class="left">
+                            <div>
+                                <h3>PProxy</h3>
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                ../trunk/src/pattern/PProxy.js
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+
+                <!-- File contents -->
+                    <div class="content block">
+                        <div class="left">
+                            <div>
+                                <p>Proxy pattern.  Holds a pattern which can safely be replaced by a different
+pattern while it is running.</p>
+
+                                <hr />
+                                <ul>
+                                    <li>
+                                        <strong>constructor</strong>
+                                    </li>
+                                    <li>
+                                        <strong>extends</strong> Pattern
+                                    </li>
+                                    <li>
+                                        <strong>param</strong> <em>Pattern</em> pattern The initial pattern.
+                                    </li>
+                                    
+                                </ul>
+                                
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                <div class="highlight"><pre><span class="kd">var</span> <span class="nx">PProxy</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">pattern</span><span class="p">)</span> <span class="p">{</span>
+    <span class="nx">Pattern</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="k">this</span><span class="p">);</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nx">pattern</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">this</span><span class="p">.</span><span class="nx">pattern</span> <span class="o">=</span> <span class="nx">pattern</span><span class="p">;</span>
+    <span class="p">}</span>
+<span class="p">};</span>
+<span class="nx">extend</span><span class="p">(</span><span class="nx">PProxy</span><span class="p">,</span> <span class="nx">Pattern</span><span class="p">);</span>
+</pre></div>
+
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    <div class="content block">
+                        <div class="left">
+                            <div>
+                                <p>Generate the next value in the pattern.</p>
+
+                                <hr />
+                                <ul>
+                                    <li>
+                                        <strong>return</strong> <em>Number</em> The next value.
+                                    </li>
+                                    
+                                </ul>
+                                
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                <div class="highlight"><pre><span class="nx">PProxy</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">next</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">returnValue</span><span class="p">;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">pattern</span><span class="p">)</span> <span class="p">{</span>
+        <span class="kd">var</span> <span class="nx">returnValue</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">pattern</span><span class="p">.</span><span class="nx">next</span><span class="p">();</span>
+    <span class="p">}</span>
+    <span class="k">else</span> <span class="p">{</span>
+        <span class="nx">returnValue</span> <span class="o">=</span> <span class="kc">null</span><span class="p">;</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="nx">returnValue</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    <div class="content block">
+                        <div class="left">
+                            <div>
+                                <p>Alias</p>
+
+                                <hr />
+                                <ul>
+                                    
+                                </ul>
+                                
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                <div class="highlight"><pre><span class="kd">var</span> <span class="nx">Pp</span> <span class="o">=</span> <span class="nx">PProxy</span><span class="p">;</span>
+</pre></div>
+
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    
+                </div>
+                
+            </div>
             
         </div>
     </body>
