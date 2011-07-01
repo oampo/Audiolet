@@ -1,14 +1,41 @@
-/**
+/*!
  * @depends ../core/AudioletNode.js
  */
 
+/**
+ * Subtract values
+ *
+ * **Inputs**
+ *
+ * - Audio 1
+ * - Audio 2
+ *
+ * **Outputs**
+ *
+ * - Subtracted audio
+ *
+ * **Parameters**
+ *
+ * - value The value to subtract.  Linked to input 1.
+ *
+ * @constructor
+ * @extends AudioletNode
+ * @param {Audiolet} audiolet The audiolet object.
+ * @param {Number} [value=0] The initial value to subtract.
+ */
 var Subtract = function(audiolet, value) {
     AudioletNode.call(this, audiolet, 2, 1);
     this.linkNumberOfOutputChannels(0, 0);
-    this.value = new AudioletParameter(this, 1, value || 1);
+    this.value = new AudioletParameter(this, 1, value || 0);
 };
 extend(Subtract, AudioletNode);
 
+/**
+ * Process a block of samples
+ *
+ * @param {AudioletBuffer[]} inputBuffers Samples received from the inputs.
+ * @param {AudioletBuffer[]} outputBuffers Samples to be sent to the outputs.
+ */
 Subtract.prototype.generate = function(inputBuffers, outputBuffers) {
     var inputBuffer = inputBuffers[0];
     var outputBuffer = outputBuffers[0];
@@ -42,6 +69,11 @@ Subtract.prototype.generate = function(inputBuffers, outputBuffers) {
     }
 };
 
+/**
+ * toString
+ *
+ * @return {String} String representation.
+ */
 Subtract.prototype.toString = function() {
     return 'Subtract';
 };

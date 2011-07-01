@@ -1,7 +1,28 @@
-/**
+/*!
  * @depends ../core/AudioletNode.js
  */
 
+/**
+ * Divide values
+ *
+ * **Inputs**
+ *
+ * - Audio 1
+ * - Audio 2
+ *
+ * **Outputs**
+ *
+ * - Divided audio
+ *
+ * **Parameters**
+ *
+ * - value The value to divide by.  Linked to input 1.
+ *
+ * @constructor
+ * @extends AudioletNode
+ * @param {Audiolet} audiolet The audiolet object.
+ * @param {Number} [value=1] The initial value to divide by.
+ */
 var Divide = function(audiolet, value) {
     AudioletNode.call(this, audiolet, 2, 1);
     this.linkNumberOfOutputChannels(0, 0);
@@ -9,6 +30,12 @@ var Divide = function(audiolet, value) {
 };
 extend(Divide, AudioletNode);
 
+/**
+ * Process a block of samples
+ *
+ * @param {AudioletBuffer[]} inputBuffers Samples received from the inputs.
+ * @param {AudioletBuffer[]} outputBuffers Samples to be sent to the outputs.
+ */
 Divide.prototype.generate = function(inputBuffers, outputBuffers) {
     var inputBuffer = inputBuffers[0];
     var outputBuffer = outputBuffers[0];
@@ -42,6 +69,11 @@ Divide.prototype.generate = function(inputBuffers, outputBuffers) {
     }
 };
 
+/**
+ * toString
+ *
+ * @return {String} String representation.
+ */
 Divide.prototype.toString = function() {
     return 'Divide';
 };

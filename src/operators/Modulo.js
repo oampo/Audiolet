@@ -1,7 +1,28 @@
-/**
+/*!
  * @depends ../core/AudioletNode.js
  */
 
+/**
+ * Modulo values
+ *
+ * **Inputs**
+ *
+ * - Audio 1
+ * - Audio 2
+ *
+ * **Outputs**
+ *
+ * - Moduloed audio
+ *
+ * **Parameters**
+ *
+ * - value The value to modulo by.  Linked to input 1.
+ *
+ * @constructor
+ * @extends AudioletNode
+ * @param {Audiolet} audiolet The audiolet object.
+ * @param {Number} [value=1] The initial value to modulo by.
+ */
 var Modulo = function(audiolet, value) {
     AudioletNode.call(this, audiolet, 2, 1);
     this.linkNumberOfOutputChannels(0, 0);
@@ -9,6 +30,12 @@ var Modulo = function(audiolet, value) {
 };
 extend(Modulo, AudioletNode);
 
+/**
+ * Process a block of samples
+ *
+ * @param {AudioletBuffer[]} inputBuffers Samples received from the inputs.
+ * @param {AudioletBuffer[]} outputBuffers Samples to be sent to the outputs.
+ */
 Modulo.prototype.generate = function(inputBuffers, outputBuffers) {
     var inputBuffer = inputBuffers[0];
     var outputBuffer = outputBuffers[0];
@@ -42,6 +69,11 @@ Modulo.prototype.generate = function(inputBuffers, outputBuffers) {
     }
 };
 
+/**
+ * toString
+ *
+ * @return {String} String representation.
+ */
 Modulo.prototype.toString = function() {
     return 'Modulo';
 };

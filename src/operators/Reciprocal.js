@@ -1,13 +1,34 @@
-/**
+/*!
  * @depends ../core/AudioletNode.js
  */
 
-var Reciprocal = function(audiolet, value) {
+/**
+ * Reciprocal (1/x) of values
+ *
+ * **Inputs**
+ *
+ * - Audio
+ *
+ * **Outputs**
+ *
+ * - Reciprocal audio
+ *
+ * @constructor
+ * @extends AudioletNode
+ * @param {Audiolet} audiolet The audiolet object.
+ */
+var Reciprocal = function(audiolet) {
     AudioletNode.call(this, audiolet, 1, 1);
     this.linkNumberOfOutputChannels(0, 0);
 };
 extend(Reciprocal, AudioletNode);
 
+/**
+ * Process a block of samples
+ *
+ * @param {AudioletBuffer[]} inputBuffers Samples received from the inputs.
+ * @param {AudioletBuffer[]} outputBuffers Samples to be sent to the outputs.
+ */
 Reciprocal.prototype.generate = function(inputBuffers, outputBuffers) {
     var inputBuffer = inputBuffers[0];
     var outputBuffer = outputBuffers[0];
@@ -28,6 +49,11 @@ Reciprocal.prototype.generate = function(inputBuffers, outputBuffers) {
     }
 };
 
+/**
+ * toString
+ *
+ * @return {String} String representation.
+ */
 Reciprocal.prototype.toString = function() {
     return 'Reciprocal';
 };

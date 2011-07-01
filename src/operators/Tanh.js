@@ -2,12 +2,34 @@
  * @depends ../core/AudioletNode.js
  */
 
+/**
+ * Hyperbolic tangent of values.  Works nicely as a distortion function.
+ *
+ * **Inputs**
+ *
+ * - Audio
+ *
+ * **Outputs**
+ *
+ * - Tanh audio
+ *
+ * @constructor
+ * @extends AudioletNode
+ * @param {Audiolet} audiolet The audiolet object.
+ */
+
 var Tanh = function(audiolet) {
     AudioletNode.call(this, audiolet, 1, 1);
     this.linkNumberOfOutputChannels(0, 0);
 };
 extend(Tanh, AudioletNode);
 
+/**
+ * Process a block of samples
+ *
+ * @param {AudioletBuffer[]} inputBuffers Samples received from the inputs.
+ * @param {AudioletBuffer[]} outputBuffers Samples to be sent to the outputs.
+ */
 Tanh.prototype.generate = function(inputBuffers, outputBuffers) {
     var inputBuffer = inputBuffers[0];
     var outputBuffer = outputBuffers[0];
@@ -30,6 +52,11 @@ Tanh.prototype.generate = function(inputBuffers, outputBuffers) {
     }
 };
 
+/**
+ * toString
+ *
+ * @return {String} String representation.
+ */
 Tanh.prototype.toString = function() {
     return ('Tanh');
 };
