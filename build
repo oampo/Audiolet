@@ -24,7 +24,7 @@ oxo -t 'Audiolet API Documentation' \
        ../trunk/src/core/Extend.js \
        ../trunk/src/core/TypedArrayShim.js \
     -s 'DSP' \
-    -a 'Audio generation and processing classes' \
+    -a 'Audio generation and processing nodes' \
     -i ../trunk/src/dsp/TableLookupOscillator.js \
        ../trunk/src/dsp/Sine.js \
        ../trunk/src/dsp/Triangle.js \
@@ -55,4 +55,14 @@ oxo -t 'Audiolet API Documentation' \
        ../trunk/src/dsp/DiscontinuityDetector.js \
        ../trunk/src/dsp/BadValueDetector.js \
        ../trunk/src/dsp/TriggerControl.js \
+    -s 'Operators' \
+    -a 'Mathematical operator nodes' \
+    -i ../trunk/src/operators/Add.js \
+       ../trunk/src/operators/Subtract.js \
+       ../trunk/src/operators/Multiply.js \
+       ../trunk/src/operators/Divide.js \
+       ../trunk/src/operators/Modulo.js \
+       ../trunk/src/operators/Reciprocal.js \
+       ../trunk/src/operators/MulAdd.js \
+       ../trunk/src/operators/Tanh.js \
     -o api.html
