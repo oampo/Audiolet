@@ -1,3 +1,12 @@
+/**
+ *  Representation of a generic musical tuning.  Can be subclassed to produce
+ * specific tunings.
+ *
+ * @constructor
+ * @param {Number[]} semitones Array of semitone values for the tuning.
+ * @param {Number} [octaveRatio=2] Frequency ratio for notes an octave apart.
+ */
+
 var Tuning = function(semitones, octaveRatio) {
     this.semitones = semitones;
     this.octaveRatio = octaveRatio || 2;
