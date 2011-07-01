@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <meta name="description" content="A JavaScript library for real-time audio synthesis and composition from within the browser" />
+        <meta name="author" content="Joe Turner" />
+        <title>
+            Audiolet - JavaScript library for audio synthesis and composition
+        </title>
+        <link rel="stylesheet" href="css/html5reset-1.6.1.css" />
+        <link rel="stylesheet" href="css/main.css" />
+    </head>
+
+    <body>
+        <div id="header">
+            Audiolet is a JavaScript library for real-time audio <em>synthesis</em> and <em>composition</em>.
+        </div>
+
+        <div class="block">
+            You can download the latest version of Audiolet from <a href="https://github.com/oampo/Audiolet">GitHub</a>.
+        </div>
+
+        <div class="block">
+            Audiolet is <em>awesome</em>.  It uses <em>graph based routing</em> and has lots of <em>generators</em> and <em>effects</em> and a <em>sample-accurate scheduler</em> and it supports <em>sub-patches</em> and <em>pattern based composition</em> and <em>feedback routing</em> and <em>microtonal tunings</em> and lots of other cool stuff.
+        </div>
+
+        <div class="block">
+            Audiolet is <em>simple</em>.  This is all you need to start making noise:
+            <pre>
+    var audiolet = new Audiolet();
+    var sine = new Sine(audiolet, 440);
+    sine.connect(audiolet.output);
+            </pre>
+        </div>
+
+        <div class="block">
+            Audiolet is kinda cross-browser friendly.  It works on <a href="http://www.getfirefox.net/">Firefox</a> &gt;=4.0 and <a href="http://www.chromium.org/getting-involved/dev-channel">canary builds</a> of <a href="http://www.google.com/chrome/intl/en-GB/landing_tv.html">Chrome</a> with the <em>Web Audio API</em> enabled in about:flags.
+        </div>
+
+        <div class="block">
+            Audiolet even has some some <em>documentation</em>!  You can find a <a href="https://github.com/oampo/Audiolet/wiki/Start-Making-Noise">getting started guide</a> and other tutorials on the <a href="https://github.com/oampo/Audiolet/wiki">wiki</a>.  There is also <a href="api.html">API documentation</a> and <a href="https://github.com/oampo/Audiolet/tree/master/examples">examples</a> to help you on your way.
+        </div>
+
+        <div class="block">
+            Want to hear what Audiolet can do?  Have a listen to <em>examples</em> of it in action by clicking <a href="http://www.oampo.co.uk/labs/technocrat/">here</a> or <a href="http://automata.cc/lab/hear-the-img">here</a> or <a href="http://www.oampo.co.uk/labs/audiolet-demo/">here</a> or <a href="http://code.gregjopa.com/javascript/audio/musicjs/demo/">here</a> or <a href="http://automata.cc/src/vivace/experiments/matrix.html">here</a> or <a href="http://www.oampo.co.uk/labs/breakbeat/">here</a>.
+        </div>
+
+        <div class="block">
+            Audiolet was written by <a href="http://www.oampo.co.uk">Joe Turner</a> with the help of lots of amazing people.
+        </div>
+    </body>
+</html>
+
+

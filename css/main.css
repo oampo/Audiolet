@@ -1,0 +1,42 @@
+/**
+ * Dark blue: #25243D
+ * Light blue: #E1E0FF
+ * Mid blue: #9896FF
+ * Green: #96FF98
+ */
+body {
+    font-family: 'MuseoSans500', 'Helvetica Neue', Arial, 'Liberation Sans', FreeSans, sans-serif;
+    background-color: #FFFFFF;
+    color: #000000;
+    font-size: 25px;
+    text-transform: uppercase;
+    line-height: 1.25;
+}
+
+a {
+    font-weight: bold;
+    font-family: 'MuseoSans500Italic', 'Helvetica Neue', Arial, 'Liberation Sans', FreeSans, sans-serif;;
+    text-decoration: none;
+    color: #FF0000;
+}
+
+pre {
+    font-size: 18px;
+    text-transform: none;
+}
+
+em {
+    color: #FF0000;
+    font-style: normal;
+}
+
+div#header {
+    border-bottom: 20px solid #000000;
+    padding: 10px 20px;
+}
+
+div.block {
+    border-bottom: 10px solid #000000;
+    padding: 10px 20px;
+}
+
