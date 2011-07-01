@@ -1,7 +1,16 @@
-/**
+/*!
  * @depends Pattern.js
  */
 
+/**
+ * Arithmetic sequence.  Adds a value to a running total on each next call.
+ *
+ * @constructor
+ * @extends Pattern
+ * @param {Number} start Starting value.
+ * @param {Pattern|Number} step Value to add.
+ * @param {Number} repeats Number of values to generate.
+ */
 var PArithmetic = function(start, step, repeats) {
     Pattern.call(this);
     this.start = start;
@@ -12,6 +21,11 @@ var PArithmetic = function(start, step, repeats) {
 };
 extend(PArithmetic, Pattern);
 
+/**
+ * Generate the next value in the pattern.
+ *
+ * @return {Number} The next value.
+ */
 PArithmetic.prototype.next = function() {
     var returnValue;
     if (this.position == 0) {
@@ -35,6 +49,9 @@ PArithmetic.prototype.next = function() {
     return (returnValue);
 };
 
+/**
+ * Reset the pattern
+ */
 PArithmetic.prototype.reset = function() {
     this.value = this.start;
     this.position = 0;
@@ -43,5 +60,8 @@ PArithmetic.prototype.reset = function() {
     }
 };
 
+/**
+ * Supercollider alias
+ */
 var Pseries = PArithmetic;
 

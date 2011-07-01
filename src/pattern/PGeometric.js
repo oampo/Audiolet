@@ -1,7 +1,18 @@
-/**
+/*!
  * @depends Pattern.js
  */
 
+
+/**
+ * Geometric sequence.  Multiplies a running total by a value on each next
+ * call.
+ *
+ * @constructor
+ * @extends Pattern
+ * @param {Number} start Starting value.
+ * @param {Pattern|Number} step Value to multiply by.
+ * @param {Number} repeats Number of values to generate.
+ */
 var PGeometric = function(start, step, repeats) {
     Pattern.call(this);
     this.start = start;
@@ -12,6 +23,11 @@ var PGeometric = function(start, step, repeats) {
 };
 extend(PGeometric, Pattern);
 
+/**
+ * Generate the next value in the pattern.
+ *
+ * @return {Number} The next value.
+ */
 PGeometric.prototype.next = function() {
     var returnValue;
     if (this.position == 0) {
@@ -35,6 +51,9 @@ PGeometric.prototype.next = function() {
     return (returnValue);
 };
 
+/**
+ * Reset the pattern
+ */
 PGeometric.prototype.reset = function() {
     this.value = this.start;
     this.position = 0;
@@ -42,5 +61,9 @@ PGeometric.prototype.reset = function() {
         this.step.reset();
     }
 };
+
+/**
+ * Supercollider alias
+ */
 var Pgeom = PGeometric;
 

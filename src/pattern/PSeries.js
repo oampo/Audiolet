@@ -1,7 +1,16 @@
-/**
+/*!
  * @depends Pattern.js
  */
 
+/**
+ * Iterate through a list of values.
+ *
+ * @constructor
+ * @extends Pattern
+ * @param {Object[]} list Array of values.
+ * @param {Number} [repeats=1] Number of values to generate.
+ * @param {Number} [offset=0] Index to start from.
+ */
 var PSeries = function(list, repeats, offset) {
     Pattern.call(this);
     this.list = list;
@@ -11,6 +20,11 @@ var PSeries = function(list, repeats, offset) {
 };
 extend(PSeries, Pattern);
 
+/**
+ * Generate the next value in the pattern.
+ *
+ * @return {Number} The next value.
+ */
 PSeries.prototype.next = function() {
     var returnValue;
     if (this.position < this.repeats) {
@@ -37,6 +51,9 @@ PSeries.prototype.next = function() {
     return (returnValue);
 };
 
+/**
+ * Reset the pattern
+ */
 PSeries.prototype.reset = function() {
     this.position = 0;
     for (var i = 0; i < this.list.length; i++) {
@@ -46,5 +63,9 @@ PSeries.prototype.reset = function() {
         }
     }
 };
+
+/**
+ * Supercollider alias
+ */
 var Pser = PSeries;
 

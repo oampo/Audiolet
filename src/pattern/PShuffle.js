@@ -1,7 +1,15 @@
-/**
+/*!
  * @depends Pattern.js
  */
 
+/**
+ * Reorder an array, then iterate through it's values.
+ *
+ * @constructor
+ * @extends Pattern
+ * @param {Object[]} list Array of values.
+ * @param {Number} repeats Number of times to loop through the array.
+ */
 var PShuffle = function(list, repeats) {
     Pattern.call(this);
     this.list = [];
@@ -15,6 +23,12 @@ var PShuffle = function(list, repeats) {
     this.position = 0;
 };
 extend(PShuffle, Pattern);
+
+/**
+ * Generate the next value in the pattern.
+ *
+ * @return {Number} The next value.
+ */
 PShuffle.prototype.next = function() {
     var returnValue;
     if (this.position < this.repeats * this.list.length) {
@@ -40,5 +54,9 @@ PShuffle.prototype.next = function() {
     }
     return (returnValue);
 };
+
+/**
+ * Supercollider alias
+ */
 var Pshuffle = PShuffle;
 

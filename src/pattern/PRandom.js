@@ -1,7 +1,16 @@
-/**
+/*!
  * @depends Pattern.js
  */
 
+/**
+ * Sequence of random numbers.
+ *
+ * @constructor
+ * @extends Pattern
+ * @param {Number|Pattern} low Lowest possible value.
+ * @param {Number|Pattern} high Highest possible value.
+ * @param {Number} repeats Number of values to generate.
+ */
 var PRandom = function(low, high, repeats) {
     Pattern.call(this);
     this.low = low;
@@ -11,6 +20,11 @@ var PRandom = function(low, high, repeats) {
 };
 extend(PRandom, Pattern);
 
+/**
+ * Generate the next value in the pattern.
+ *
+ * @return {Number} The next value.
+ */
 PRandom.prototype.next = function() {
     var returnValue;
     if (this.position < this.repeats) {
@@ -31,8 +45,15 @@ PRandom.prototype.next = function() {
     return (returnValue);
 };
 
+/**
+ * Reset the pattern
+ */
 PRandom.prototype.reset = function() {
     this.position = 0;
 };
+
+/**
+ * Supercollider alias
+ */
 var Pwhite = PRandom;
 
