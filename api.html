@@ -11239,6 +11239,346 @@ of a processing block</p>
                 </div>
                 
             </div>
+            <div class="section">
+                <div class="header block">
+                    <div class="left">
+                        <div>
+                            <h2>Scales</h2>
+                        </div>
+                    </div>
+                    <div class="right">
+                        <div><p>Musical scales</p>
+</div>
+                    </div>
+                    <div class="clear"></div>
+                </div>
+
+                <!-- Title and filename -->
+                <div class="file">
+                    <div class="header block">
+                        <div class="left">
+                            <div>
+                                <h3>Scale</h3>
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                ../trunk/src/scale/Scale.js
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+
+                <!-- File contents -->
+                    <div class="content block">
+                        <div class="left">
+                            <div>
+                                <p>Representation of a generic musical scale.  Can be subclassed to produce
+specific scales.</p>
+
+                                <hr />
+                                <ul>
+                                    <li>
+                                        <strong>constructor</strong>
+                                    </li>
+                                    <li>
+                                        <strong>param</strong> <em>Number[]</em> degrees Array of integer degrees.
+                                    </li>
+                                    <li>
+                                        <strong>param</strong> <em>Tuning</em> [tuning] The scale's tuning. Defaults to 12-tone ET.
+                                    </li>
+                                    
+                                </ul>
+                                
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                <div class="highlight"><pre><span class="kd">var</span> <span class="nx">Scale</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">degrees</span><span class="p">,</span> <span class="nx">tuning</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">degrees</span> <span class="o">=</span> <span class="nx">degrees</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">tuning</span> <span class="o">=</span> <span class="nx">tuning</span> <span class="o">||</span> <span class="k">new</span> <span class="nx">EqualTemperamentTuning</span><span class="p">(</span><span class="mi">12</span><span class="p">);</span>
+<span class="p">};</span>
+</pre></div>
+
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    <div class="content block">
+                        <div class="left">
+                            <div>
+                                <p>Get the frequency of a note in the scale.</p>
+
+                                <hr />
+                                <ul>
+                                    <li>
+                                        <strong>constructor</strong>
+                                    </li>
+                                    <li>
+                                        <strong>param</strong> <em>Number</em> degree The note's degree.
+                                    </li>
+                                    <li>
+                                        <strong>param</strong> <em>Number</em> rootFrequency The root frequency of the scale.
+                                    </li>
+                                    <li>
+                                        <strong>param</strong> <em>Number</em> octave The octave of the note.
+                                    </li>
+                                    <li>
+                                        <strong>return</strong> <em>Number</em> The frequency of the note in hz.
+                                    </li>
+                                    
+                                </ul>
+                                
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                <div class="highlight"><pre><span class="nx">Scale</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">getFrequency</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">degree</span><span class="p">,</span> <span class="nx">rootFrequency</span><span class="p">,</span> <span class="nx">octave</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">frequency</span> <span class="o">=</span> <span class="nx">rootFrequency</span><span class="p">;</span>
+    <span class="nx">octave</span> <span class="o">+=</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">floor</span><span class="p">(</span><span class="nx">degree</span> <span class="o">/</span> <span class="k">this</span><span class="p">.</span><span class="nx">degrees</span><span class="p">.</span><span class="nx">length</span><span class="p">);</span>
+    <span class="nx">degree</span> <span class="o">%=</span> <span class="k">this</span><span class="p">.</span><span class="nx">degrees</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span>
+    <span class="nx">frequency</span> <span class="o">*=</span> <span class="nb">Math</span><span class="p">.</span><span class="nx">pow</span><span class="p">(</span><span class="k">this</span><span class="p">.</span><span class="nx">tuning</span><span class="p">.</span><span class="nx">octaveRatio</span><span class="p">,</span> <span class="nx">octave</span><span class="p">);</span>
+    <span class="nx">frequency</span> <span class="o">*=</span> <span class="k">this</span><span class="p">.</span><span class="nx">tuning</span><span class="p">.</span><span class="nx">ratios</span><span class="p">[</span><span class="k">this</span><span class="p">.</span><span class="nx">degrees</span><span class="p">[</span><span class="nx">degree</span><span class="p">]];</span>
+    <span class="k">return</span> <span class="nx">frequency</span><span class="p">;</span>
+<span class="p">};</span>
+</pre></div>
+
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    
+                </div>
+                <!-- Title and filename -->
+                <div class="file">
+                    <div class="header block">
+                        <div class="left">
+                            <div>
+                                <h3>MajorScale</h3>
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                ../trunk/src/scale/MajorScale.js
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+
+                <!-- File contents -->
+                    <div class="content block">
+                        <div class="left">
+                            <div>
+                                <p>Major scale.</p>
+
+                                <hr />
+                                <ul>
+                                    <li>
+                                        <strong>constructor</strong>
+                                    </li>
+                                    <li>
+                                        <strong>extends</strong> Scale
+                                    </li>
+                                    
+                                </ul>
+                                
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                <div class="highlight"><pre><span class="kd">var</span> <span class="nx">MajorScale</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="nx">Scale</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">11</span><span class="p">]);</span>
+<span class="p">};</span>
+<span class="nx">extend</span><span class="p">(</span><span class="nx">MajorScale</span><span class="p">,</span> <span class="nx">Scale</span><span class="p">);</span>
+</pre></div>
+
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    
+                </div>
+                <!-- Title and filename -->
+                <div class="file">
+                    <div class="header block">
+                        <div class="left">
+                            <div>
+                                <h3>MinorScale</h3>
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                ../trunk/src/scale/MinorScale.js
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+
+                <!-- File contents -->
+                    <div class="content block">
+                        <div class="left">
+                            <div>
+                                <p>Minor scale.</p>
+
+                                <hr />
+                                <ul>
+                                    <li>
+                                        <strong>constructor</strong>
+                                    </li>
+                                    <li>
+                                        <strong>extends</strong> Scale
+                                    </li>
+                                    
+                                </ul>
+                                
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                <div class="highlight"><pre><span class="kd">var</span> <span class="nx">MinorScale</span> <span class="o">=</span> <span class="kd">function</span><span class="p">()</span> <span class="p">{</span>
+    <span class="nx">Scale</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">10</span><span class="p">]);</span>
+<span class="p">};</span>
+<span class="nx">extend</span><span class="p">(</span><span class="nx">MinorScale</span><span class="p">,</span> <span class="nx">Scale</span><span class="p">);</span>
+</pre></div>
+
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    
+                </div>
+                
+            </div>
+            <div class="section">
+                <div class="header block">
+                    <div class="left">
+                        <div>
+                            <h2>Tunings</h2>
+                        </div>
+                    </div>
+                    <div class="right">
+                        <div><p>Musical tunings</p>
+</div>
+                    </div>
+                    <div class="clear"></div>
+                </div>
+
+                <!-- Title and filename -->
+                <div class="file">
+                    <div class="header block">
+                        <div class="left">
+                            <div>
+                                <h3>Tuning</h3>
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                ../trunk/src/tuning/Tuning.js
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+
+                <!-- File contents -->
+                    <div class="content block">
+                        <div class="left">
+                            <div>
+                                <p>Representation of a generic musical tuning.  Can be subclassed to produce
+specific tunings.</p>
+
+                                <hr />
+                                <ul>
+                                    <li>
+                                        <strong>constructor</strong>
+                                    </li>
+                                    <li>
+                                        <strong>param</strong> <em>Number[]</em> semitones Array of semitone values for the tuning.
+                                    </li>
+                                    <li>
+                                        <strong>param</strong> <em>Number</em> [octaveRatio=2] Frequency ratio for notes an octave apart.
+                                    </li>
+                                    
+                                </ul>
+                                
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                <div class="highlight"><pre><span class="kd">var</span> <span class="nx">Tuning</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">semitones</span><span class="p">,</span> <span class="nx">octaveRatio</span><span class="p">)</span> <span class="p">{</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">semitones</span> <span class="o">=</span> <span class="nx">semitones</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">octaveRatio</span> <span class="o">=</span> <span class="nx">octaveRatio</span> <span class="o">||</span> <span class="mi">2</span><span class="p">;</span>
+    <span class="k">this</span><span class="p">.</span><span class="nx">ratios</span> <span class="o">=</span> <span class="p">[];</span>
+    <span class="kd">var</span> <span class="nx">tuningLength</span> <span class="o">=</span> <span class="k">this</span><span class="p">.</span><span class="nx">semitones</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">tuningLength</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+        <span class="k">this</span><span class="p">.</span><span class="nx">ratios</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nb">Math</span><span class="p">.</span><span class="nx">pow</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="nx">i</span> <span class="o">/</span> <span class="nx">tuningLength</span><span class="p">));</span>
+    <span class="p">}</span>
+<span class="p">};</span>
+</pre></div>
+
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    
+                </div>
+                <!-- Title and filename -->
+                <div class="file">
+                    <div class="header block">
+                        <div class="left">
+                            <div>
+                                <h3>EqualTemeperamentTuning</h3>
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                ../trunk/src/tuning/EqualTemeperamentTuning.js
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+
+                <!-- File contents -->
+                    <div class="content block">
+                        <div class="left">
+                            <div>
+                                <p>Equal temperament tuning.</p>
+
+                                <hr />
+                                <ul>
+                                    <li>
+                                        <strong>constructor</strong>
+                                    </li>
+                                    <li>
+                                        <strong>extends</strong> Tuning
+                                    </li>
+                                    <li>
+                                        <strong>param</strong> <em>Number</em> pitchesPerOctave The number of notes in each octave.
+                                    </li>
+                                    
+                                </ul>
+                                
+                            </div>
+                        </div>
+                        <div class="right">
+                            <div>
+                                <div class="highlight"><pre><span class="kd">var</span> <span class="nx">EqualTemperamentTuning</span> <span class="o">=</span> <span class="kd">function</span><span class="p">(</span><span class="nx">pitchesPerOctave</span><span class="p">)</span> <span class="p">{</span>
+    <span class="kd">var</span> <span class="nx">semitones</span> <span class="o">=</span> <span class="p">[];</span>
+    <span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;</span> <span class="nx">pitchesPerOctave</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
+        <span class="nx">semitones</span><span class="p">.</span><span class="nx">push</span><span class="p">(</span><span class="nx">i</span><span class="p">);</span>
+    <span class="p">}</span>
+    <span class="nx">Tuning</span><span class="p">.</span><span class="nx">call</span><span class="p">(</span><span class="k">this</span><span class="p">,</span> <span class="nx">semitones</span><span class="p">,</span> <span class="mi">2</span><span class="p">);</span>
+<span class="p">};</span>
+<span class="nx">extend</span><span class="p">(</span><span class="nx">EqualTemperamentTuning</span><span class="p">,</span> <span class="nx">Tuning</span><span class="p">);</span>
+</pre></div>
+
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                    </div>
+                    
+                </div>
+                
+            </div>
             
         </div>
     </body>

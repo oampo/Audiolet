@@ -65,4 +65,13 @@ oxo -t 'Audiolet API Documentation' \
        ../trunk/src/operators/Reciprocal.js \
        ../trunk/src/operators/MulAdd.js \
        ../trunk/src/operators/Tanh.js \
+    -s 'Scales' \
+    -a 'Musical scales' \
+    -i ../trunk/src/scale/Scale.js \
+       ../trunk/src/scale/MajorScale.js \
+       ../trunk/src/scale/MinorScale.js \
+    -s 'Tunings' \
+    -a 'Musical tunings' \
+    -i ../trunk/src/tuning/Tuning.js \
+       ../trunk/src/tuning/EqualTemeperamentTuning.js \
     -o api.html
