@@ -28,8 +28,10 @@ var Pan = function(audiolet, pan) {
     AudioletNode.call(this, audiolet, 2, 1);
     // Hardcode two output channels
     this.setNumberOfOutputChannels(0, 2);
-    this.pan = new AudioletParameter(this, 1, pan || 0.5);
-};
+    if (pan == null) {
+    	var pan = 0.5;
+    }
+    this.pan = new AudioletParameter(this, 1, pan);};
 extend(Pan, AudioletNode);
 
 /**
