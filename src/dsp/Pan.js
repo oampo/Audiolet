@@ -31,7 +31,8 @@ var Pan = function(audiolet, pan) {
     if (pan == null) {
     	var pan = 0.5;
     }
-    this.pan = new AudioletParameter(this, 1, pan);};
+    this.pan = new AudioletParameter(this, 1, pan);
+};
 extend(Pan, AudioletNode);
 
 /**
