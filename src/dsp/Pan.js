@@ -29,7 +29,7 @@ var Pan = function(audiolet, pan) {
     // Hardcode two output channels
     this.setNumberOfOutputChannels(0, 2);
     if (pan == null) {
-    	var pan = 0.5;
+        var pan = 0.5;
     }
     this.pan = new AudioletParameter(this, 1, pan);
 };
