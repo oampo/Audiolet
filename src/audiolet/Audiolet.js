@@ -2275,7 +2275,7 @@ Envelope.prototype.generate = function(inputBuffers, outputBuffers) {
         }
 
         if (stageChanged) {
-            level = this.levels[stage];
+//            level = this.levels[stage];
             if (stage != this.times.length) {
                 // Actually update the variables
                 delta = this.calculateDelta(stage, level);
