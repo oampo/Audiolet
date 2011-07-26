@@ -1823,6 +1823,35 @@ Scheduler.prototype.play = function(patterns, durationPattern, callback) {
 };
 
 /**
+ * Schedule patterns to play starting at an absolute beat position, 
+ * and provide the values generated to a callback.
+ * The durationPattern argument can be either a number, giving a constant time
+ * between each event, or a pattern, allowing varying time difference.
+ *
+ * @param {Number} beat The beat at which the event should take place.
+ * @param {Pattern[]} patterns An array of patterns to play.
+ * @param {Pattern|Number} durationPattern The number of beats between events.
+ * @param {Function} callback Function called with the generated pattern values.
+ * @return {Object} The event object.
+ */
+Scheduler.prototype.playAbsolute = function(beat, patterns, durationPattern,
+                                            callback) {
+    if (beat < this.beat ||
+        beat == this.beat && this.time > this.lastBeatTime) {
+        // Nah
+        return null;
+    }
+    var event = {};
+    event.patterns = patterns;
+    event.durationPattern = durationPattern;
+    event.callback = callback;
+    event.time = this.lastBeatTime + (beat - this.beat) * this.beatLength;
+    this.queue.push(event);
+    return event;
+};
+
+
+/**
  * Remove a scheduled event from the scheduler
  *
  * @param {Object} event The event to remove.
