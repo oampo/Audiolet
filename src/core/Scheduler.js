@@ -123,7 +123,8 @@ Scheduler.prototype.play = function(patterns, durationPattern, callback) {
  * @param {Function} callback Function called with the generated pattern values.
  * @return {Object} The event object.
  */
-Scheduler.prototype.playAtAbsolute = function(beat, patterns, durationPattern, callback) {
+Scheduler.prototype.playAbsolute = function(beat, patterns, durationPattern,
+                                            callback) {
     if (beat < this.beat ||
         beat == this.beat && this.time > this.lastBeatTime) {
         // Nah
