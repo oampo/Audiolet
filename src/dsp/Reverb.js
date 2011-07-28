@@ -35,7 +35,7 @@
  * @param {Number} [damping=0.5] The initial damping amount.
  */
 var Reverb = function(audiolet, mix, roomSize, damping) {
-    AudioletGroup.call(this, audiolet, 4, 1);
+    AudioletNode.call(this, audiolet, 4, 1);
 
     // Constants
     this.initialMix = 0.33;
@@ -51,88 +51,166 @@ var Reverb = function(audiolet, mix, roomSize, damping) {
     this.allPassTuning = [556, 441, 341, 225];
 
     // Controls
+    // Mix control
+    var mix = mix || this.initialMix;
+    this.mix = new AudioletParameter(this, 1, mix);
+
     // Room size control
     var roomSize = roomSize || this.initialRoomSize;
-    this.roomSizeNode = new ParameterNode(audiolet, roomSize);
-    this.roomSizeMulAdd = new MulAdd(audiolet, this.scaleRoom,
-                                     this.offsetRoom);
+    this.roomSize = new AudioletParameter(this, 2, roomSize);
 
     // Damping control
     var damping = damping || this.initialDamping;
-    this.dampingNode = new ParameterNode(audiolet, damping);
-    this.dampingMulAdd = new MulAdd(audiolet, this.scaleDamping);
+    this.damping = new AudioletParameter(this, 3, damping);
 
-    // Access the controls as if this is an AudioletNode, and they are it's
-    // parameters.
-    this.roomSize = this.roomSizeNode.parameter;
-    this.damping = this.dampingNode.parameter;
+    // Damped comb filters
+    this.combBuffers = [];
+    this.combIndices = [];
+    this.filterStores = [];
 
-    // Initial gain control
-    this.gain = new Gain(audiolet, this.fixedGain);
-
-    // Eight comb filters and feedback gain converters
-    this.combFilters = [];
-    this.fgConverters = [];
-    for (var i = 0; i < this.combTuning.length; i++) {
-        var delayTime = this.combTuning[i] /
-                        this.audiolet.device.sampleRate;
-        this.combFilters[i] = new DampedCombFilter(audiolet, delayTime,
-                                                   delayTime);
-
-        this.fgConverters[i] = new FeedbackGainToDecayTime(audiolet,
-                                                           delayTime);
+    var numberOfCombs = this.combTuning.length;
+    for (var i = 0; i < numberOfCombs; i++) {
+        this.combBuffers.push(new Float32Array(this.combTuning[i]));
+        this.combIndices.push(0);
+        this.filterStores.push(0);
     }
 
-    // Four allpass filters
-    this.allPassFilters = [];
-    for (var i = 0; i < this.allPassTuning.length; i++) {
-        this.allPassFilters[i] = new AllPassFilter(audiolet,
-                                                   this.allPassTuning[i]);
+    // All-pass filters
+    this.allPassBuffers = [];
+    this.allPassIndices = [];
+
+    var numberOfFilters = this.allPassTuning.length;
+    for (var i = 0; i < numberOfFilters; i++) {
+        this.allPassBuffers.push(new Float32Array(this.allPassTuning[i]));
+        this.allPassIndices.push(0);
     }
-
-    // Mixer
-    var mix = mix || this.initialMix;
-    this.mixer = new LinearCrossFade(audiolet, mix);
-
-    this.mix = this.mixer.position;
-
-    // Connect up the controls
-    this.inputs[1].connect(this.mixer, 0, 2);
-
-    this.inputs[2].connect(this.roomSizeNode);
-    this.roomSizeNode.connect(this.roomSizeMulAdd);
-
-    this.inputs[3].connect(this.dampingNode);
-    this.dampingNode.connect(this.dampingMulAdd);
-
-    // Connect up the gain
-    this.inputs[0].connect(this.gain);
-
-    // Connect up the comb filters
-    for (var i = 0; i < this.combFilters.length; i++) {
-        this.gain.connect(this.combFilters[i]);
-        this.combFilters[i].connect(this.allPassFilters[0]);
-
-        // Controls
-        this.roomSizeMulAdd.connect(this.fgConverters[i]);
-        this.fgConverters[i].connect(this.combFilters[i], 0, 2);
-
-        this.dampingMulAdd.connect(this.combFilters[i], 0, 3);
-    }
-
-    // Connect up the all pass filters
-    var numberOfAllPassFilters = this.allPassFilters.length;
-    for (var i = 0; i < numberOfAllPassFilters - 1; i++) {
-        this.allPassFilters[i].connect(this.allPassFilters[i + 1]);
-    }
-
-    this.inputs[0].connect(this.mixer);
-    var lastAllPassIndex = numberOfAllPassFilters - 1;
-    this.allPassFilters[lastAllPassIndex].connect(this.mixer, 0, 1);
-
-    this.mixer.connect(this.outputs[0]);
 };
-extend(Reverb, AudioletGroup);
+extend(Reverb, AudioletNode);
+
+/**
+ * Process a block of samples
+ *
+ * @param {AudioletBuffer[]} inputBuffers Samples received from the inputs.
+ * @param {AudioletBuffer[]} outputBuffers Samples to be sent to the outputs.
+ */
+Reverb.prototype.generate = function(inputBuffers, outputBuffers) {
+    var inputBuffer = inputBuffers[0];
+    var inputChannel = inputBuffer.channels[0];
+    var outputBuffer = outputBuffers[0];
+    var outputChannel = outputBuffer.channels[0];
+
+    var mixParameter = this.mix;
+    var mix, mixChannel;
+    if (mixParameter.isStatic()) {
+        mix = mixParameter.getValue();
+    }
+    else {
+        mixChannel = mixParameter.getChannel();
+    }
+
+    var roomSizeParameter = this.roomSize;
+    var roomSize, roomSizeChannel;
+    if (roomSizeParameter.isStatic()) {
+        roomSize = roomSizeParameter.getValue();
+    }
+    else {
+        roomSizeChannel = roomSizeParameter.getChannel();
+    }
+
+    var dampingParameter = this.damping;
+    var damping, dampingChannel;
+    if (dampingParameter.isStatic()) {
+        damping = dampingParameter.getValue();
+    }
+    else {
+        dampingChannel = dampingParameter.getChannel();
+    }
+
+    var numberOfCombs = this.combTuning.length;
+    var numberOfFilters = this.allPassTuning.length;
+
+    var gain = this.fixedGain;
+
+    var combBuffers = this.combBuffers;
+    var combIndices = this.combIndices;
+    var filterStores = this.filterStores;
+
+    var allPassBuffers = this.allPassBuffers;
+    var allPassIndices = this.allPassIndices;
+
+    var scaleDamping = this.scaleDamping;
+
+    var scaleRoom = this.scaleRoom;
+    var offsetRoom = this.offsetRoom;
+
+    var bufferLength = inputBuffer.length;
+    for (var i = 0; i < bufferLength; i++) {
+        if (mixChannel) {
+            mix = mixChannel[i];
+        }
+        if (roomSizeChannel) {
+            roomSize = roomSizeChannel[i];
+        }
+        if (dampingChannel) {
+            damping = dampingChannel[i];
+        }
+
+        var value;
+        if (!inputBuffer.isEmpty) {
+            value = inputChannel[i];
+        }
+        else {
+            value = 0;
+        }
+        var dryValue = value;
+
+        value *= gain;
+        var gainedValue = value;
+
+        var damping = damping * scaleDamping;
+        var feedback = roomSize * scaleRoom + offsetRoom;
+        for (var j = 0; j < numberOfCombs; j++) {
+            var combIndex = combIndices[j];
+            var combBuffer = combBuffers[j];
+            var filterStore = filterStores[j];
+
+            var output = combBuffer[combIndex];
+            filterStore = (output * (1 - damping)) +
+                          (filterStore * damping);
+            value += output;
+            combBuffer[combIndex] = gainedValue + feedback * filterStore;
+
+            combIndex += 1;
+            if (combIndex >= combBuffer.length) {
+                combIndex = 0;
+            }
+
+
+            combIndices[j] = combIndex;
+            filterStores[j] = filterStore;
+        }
+
+        for (var j = 0; j < numberOfFilters; j++) {
+            var allPassBuffer = allPassBuffers[j];
+            var allPassIndex = allPassIndices[j];
+
+            var input = value;
+            var bufferValue = allPassBuffer[allPassIndex];
+            value = -value + bufferValue;
+            allPassBuffer[allPassIndex] = input + (bufferValue * 0.5);
+
+            allPassIndex += 1;
+            if (allPassIndex >= allPassBuffer.length) {
+                allPassIndex = 0;
+            }
+
+            allPassIndices[j] = allPassIndex;
+        }
+
+        outputChannel[i] = mix * value + (1 - mix) * dryValue;
+    }
+};
+
 
 /**
  * toString
@@ -143,57 +221,3 @@ Reverb.prototype.toString = function() {
     return 'Reverb';
 };
 
-/**
- * Helper node to convert a feedback gain multiplier to a 60db decay time.
- *
- * **Inputs**
- *
- * - Feedback gain
- *
- * **Outputs**
- *
- * - Decay time
- *
- * @constructor
- * @extends AudioletNode
- * @param {Audiolet} audiolet The audiolet object.
- * @param {Number} delayTime The delay time in seconds
- */
-var FeedbackGainToDecayTime = function(audiolet, delayTime) {
-    AudioletNode.call(this, audiolet, 1, 1);
-    this.delayTime = delayTime;
-    this.lastFeedbackGain = null;
-    this.decayTime = null;
-};
-extend(FeedbackGainToDecayTime, AudioletNode);
-
-/**
- * Process a block of samples
- *
- * @param {AudioletBuffer[]} inputBuffers Samples received from the inputs.
- * @param {AudioletBuffer[]} outputBuffers Samples to be sent to the outputs.
- */
-FeedbackGainToDecayTime.prototype.generate = function(inputBuffers,
-                                                      outputBuffers) {
-    var inputBuffer = inputBuffers[0];
-    var outputBuffer = outputBuffers[0];
-    var inputChannel = inputBuffer.channels[0];
-    var outputChannel = outputBuffer.channels[0];
-
-    var delayTime = this.lastDelayTime;
-    var decayTime = this.decayTime;
-    var lastFeedbackGain = this.lastFeedbackGain;
-
-    var bufferLength = outputBuffer.length;
-    for (var i = 0; i < bufferLength; i++) {
-        var feedbackGain = inputChannel[i];
-        if (feedbackGain != lastFeedbackGain) {
-            decayTime = - 3 * delayTime / Math.log(feedbackGain);
-            lastFeedbackGain = feedbackGain;
-        }
-        outputChannel[i] = feedbackGain;
-    }
-
-    this.decayTime = decayTime;
-    this.lastFeedbackGain = lastFeedbackGain;
-};
