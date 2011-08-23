@@ -28,23 +28,20 @@ extend(PassThroughNode, AudioletNode);
  * @return {AudioletNode[]} The output buffers.
  */
 PassThroughNode.prototype.createOutputBuffers = function(length) {
-    var outputBuffers = [];
-    var numberOfOutputs = this.numberOfOutputs;
-    var numberOfInputs = this.numberOfInputs;
+    var numberOfOutputs = this.outputs.length;
+    var numberOfInputs = this.inputs.length;
     // Copy the inputs buffers straight to the output buffers
     for (var i = 0; i < numberOfOutputs; i++) {
         var output = this.outputs[i];
         if (i < numberOfInputs) {
             // Copy the input buffer straight to the output buffers
             var input = this.inputs[i];
-            output.buffer = input.buffer;
+            output.sample = input.sample;
         }
         else {
-            output.buffer.resize(output.getNumberOfChannels(), length);
+            output.sample = 0;
         }
-        outputBuffers.push(output.buffer);
     }
-    return (outputBuffers);
 };
 
 /**

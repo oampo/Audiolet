@@ -15,17 +15,13 @@
 var AudioletNode = function(audiolet, numberOfInputs, numberOfOutputs,
                             generate) {
     this.audiolet = audiolet;
-    this.numberOfInputs = numberOfInputs;
-    this.numberOfOutputs = numberOfOutputs;
 
     this.inputs = [];
-    var numberOfInputs = this.numberOfInputs;
     for (var i = 0; i < numberOfInputs; i++) {
         this.inputs.push(new AudioletInput(this, i));
     }
 
     this.outputs = [];
-    var numberOfOutputs = this.numberOfOutputs;
     for (var i = 0; i < numberOfOutputs; i++) {
         this.outputs.push(new AudioletOutput(this, i));
     }
@@ -106,18 +102,17 @@ AudioletNode.prototype.linkNumberOfOutputChannels = function(output, input) {
  * @param {Number} length The number of samples to process.
  * @param {Number} timestamp A timestamp for the block of samples.
  */
-AudioletNode.prototype.tick = function(length, timestamp) {
+AudioletNode.prototype.tick = function(timestamp) {
     if (timestamp != this.timestamp) {
         // Need to set the timestamp before we tick the parents so we
         // can't get into infinite loops where there is feedback in the
         // graph
         this.timestamp = timestamp;
-        this.tickParents(length, timestamp);
+        this.tickParents(timestamp);
 
-        var inputBuffers = this.createInputBuffers(length);
-        var outputBuffers = this.createOutputBuffers(length);
+        var inputSamples = this.createInputSamples();
 
-        this.generate(inputBuffers, outputBuffers);
+        this.generate();
     }
 };
 
@@ -128,8 +123,8 @@ AudioletNode.prototype.tick = function(length, timestamp) {
  * @param {Number} length The number of samples to process.
  * @param {Number} timestamp A timestamp for the block of samples.
  */
-AudioletNode.prototype.tickParents = function(length, timestamp) {
-    var numberOfInputs = this.numberOfInputs;
+AudioletNode.prototype.tickParents = function(timestamp) {
+    var numberOfInputs = this.inputs.length;
     for (var i = 0; i < numberOfInputs; i++) {
         var input = this.inputs[i];
         var numberOfStreams = input.connectedFrom.length;
@@ -137,7 +132,7 @@ AudioletNode.prototype.tickParents = function(length, timestamp) {
         // loop
         for (var j = 0; j < numberOfStreams; j++) {
             var index = numberOfStreams - j - 1;
-            input.connectedFrom[index].node.tick(length, timestamp);
+            input.connectedFrom[index].node.tick(timestamp);
         }
     }
 };
@@ -149,15 +144,7 @@ AudioletNode.prototype.tickParents = function(length, timestamp) {
  * @param {AudioletBuffer[]} inputBuffers Samples received from the inputs.
  * @param {AudioletBuffer[]} outputBuffers Samples to be sent to the outputs.
  */
-AudioletNode.prototype.generate = function(inputBuffers, outputBuffers) {
-    // Sane default - pass along any empty flags
-    var numberOfInputs = inputBuffers.length;
-    var numberOfOutputs = outputBuffers.length;
-    for (var i = 0; i < numberOfInputs; i++) {
-        if (i < numberOfOutputs && inputBuffers[i].isEmpty) {
-            outputBuffers[i].isEmpty = true;
-        }
-    }
+AudioletNode.prototype.generate = function() {
 };
 
 /**
@@ -168,78 +155,23 @@ AudioletNode.prototype.generate = function(inputBuffers, outputBuffers) {
  * @param {Number} length The number of samples for the resulting buffers.
  * @return {AudioletBuffer[]} The input buffers.
  */
-AudioletNode.prototype.createInputBuffers = function(length) {
-    var inputBuffers = [];
+AudioletNode.prototype.createInputSamples = function() {
     var numberOfInputs = this.numberOfInputs;
     for (var i = 0; i < numberOfInputs; i++) {
         var input = this.inputs[i];
 
-        // Find the non-empty output with the most channels
-        var numberOfChannels = 0;
-        var largestOutput = null;
+        var inputSample = 0;
+
         var connectedFrom = input.connectedFrom;
         var numberOfConnections = connectedFrom.length;
+        // Sum the rest of the outputs
         for (var j = 0; j < numberOfConnections; j++) {
             var output = connectedFrom[j];
-            var outputBuffer = output.buffer;
-            if (outputBuffer.numberOfChannels > numberOfChannels &&
-                !outputBuffer.isEmpty) {
-                numberOfChannels = outputBuffer.numberOfChannels;
-                largestOutput = output;
-            }
+            inputSample += output.sample;
         }
-
-        if (largestOutput) {
-            // TODO: Optimizations
-            // We have non-empty connections
-
-            // Resize the input buffer accordingly
-            var inputBuffer = input.buffer;
-            inputBuffer.resize(numberOfChannels, length, true);
-            inputBuffer.isEmpty = false;
-
-            // Set the buffer using the largest output
-            inputBuffer.set(largestOutput.getBuffer(length));
-
-            // Sum the rest of the outputs
-            for (var j = 0; j < numberOfConnections; j++) {
-                var output = connectedFrom[j];
-                if (output != largestOutput && !output.buffer.isEmpty) {
-                    inputBuffer.add(output.getBuffer(length));
-                }
-            }
-
-            inputBuffers.push(inputBuffer);
-        }
-        else {
-            // If we don't have any non-empty connections give a single
-            // channel empty buffer of the correct length
-            var inputBuffer = input.buffer;
-            inputBuffer.resize(1, length, true);
-            inputBuffer.isEmpty = true;
-            inputBuffers.push(inputBuffer);
-        }
+        
+        input.sample = inputSample
     }
-    return inputBuffers;
-};
-
-/**
- * Create output buffers of the correct length.
- *
- * @param {Number} length The number of samples for the resulting buffers.
- * @return {AudioletNode[]} The output buffers.
- */
-AudioletNode.prototype.createOutputBuffers = function(length) {
-    // Create the output buffers
-    var outputBuffers = [];
-    var numberOfOutputs = this.numberOfOutputs;
-    for (var i = 0; i < numberOfOutputs; i++) {
-        var output = this.outputs[i];
-        output.buffer.resize(output.getNumberOfChannels(), length, true);
-        output.buffer.isEmpty = false;
-        outputBuffers.push(output.buffer);
-    }
-    return (outputBuffers);
 };
 
 /**

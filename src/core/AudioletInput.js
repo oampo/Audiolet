@@ -10,9 +10,7 @@ var AudioletInput = function(node, index) {
     this.index = index;
     this.connectedFrom = [];
     // Minimum sized buffer, which we can resize from accordingly
-    this.buffer = new AudioletBuffer(1, 0);
-    // Overflow buffer, for feedback loops
-    this.overflow = new AudioletBuffer(1, 0);
+    this.sample = 0;
 };
 
 /**
@@ -37,15 +35,6 @@ AudioletInput.prototype.disconnect = function(output) {
             break;
         }
     }
-};
-
-/**
- * Check whether the input is connected
- *
- * @return {Boolean} True if the output is connected.
- */
-AudioletInput.prototype.isConnected = function() {
-    return (this.connectedFrom.length > 0);
 };
 
 /**

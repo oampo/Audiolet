@@ -40,8 +40,6 @@ var Scheduler = function(audiolet, bpm) {
 
     this.lastBeatTime = 0;
     this.beatLength = 60 / this.bpm * this.audiolet.device.sampleRate;
-
-    this.emptyBuffer = new AudioletBuffer(1, 1);
 };
 extend(Scheduler, AudioletNode);
 
@@ -174,71 +172,13 @@ Scheduler.prototype.stop = function(event) {
  * @param {Number} length The number of samples to process.
  * @param {Number} timestamp A timestamp for the block of samples.
  */
-Scheduler.prototype.tick = function(length, timestamp) {
-    // The time at the beginning of the block
-    var startTime = this.audiolet.device.getWriteTime();
+Scheduler.prototype.tick = function(timestamp) {
+    AudioletNode.prototype.tick(timestamp);
 
-    // Update the clock so it is correct for the first samples
-    this.updateClock(startTime);
-
-    // Don't create the output buffer yet - it needs to be created after
-    // the first input buffer so we can work out how many channels it needs
-    var outputBuffers = null;
-
-    // Generate the block of samples and carry out events, generating a
-    // new sub-block each time an event is carried out
-    var lastEventTime = startTime;
     while (!this.queue.isEmpty() &&
-           this.queue.peek().time <= startTime + length) {
+           this.queue.peek().time <= this.time) {
         var event = this.queue.pop();
-        // Event can't take place before the previous event
-        var eventTime = Math.floor(Math.max(event.time, lastEventTime));
-
-        // Generate samples to take us to the event
-        var timeToEvent = eventTime - lastEventTime;
-        if (timeToEvent > 0) {
-            var offset = lastEventTime - startTime;
-            this.tickParents(timeToEvent,
-                             timestamp + offset);
-
-            // Get the summed input
-            var inputBuffers = this.createInputBuffers(timeToEvent);
-
-            // Create the output buffer
-            if (!outputBuffers) {
-                var outputBuffers = this.createOutputBuffers(length);
-            }
-
-            // Copy it to the right part of the output
-            // Use the generate function so it looks and quacks like an
-            // AudioletNode
-            this.generate(inputBuffers, outputBuffers, offset);
-        }
-
-        // Update the clock so it is correct for the current event
-        this.updateClock(eventTime);
-
-
-        // Set this before processEvent, as that can change the event time
-        lastEventTime = eventTime;
-        // Carry out the event
         this.processEvent(event);
-    }
-
-    // Generate enough samples to complete the block
-    var remainingTime = startTime + length - lastEventTime;
-    if (remainingTime) {
-        this.tickParents(remainingTime,
-                         timestamp + lastEventTime - startTime);
-        var inputBuffers = this.createInputBuffers(remainingTime);
-
-        // Make sure we have an output buffer
-        if (!outputBuffers) {
-            var outputBuffers = this.createOutputBuffers(length);
-        }
-
-        var offset = lastEventTime - startTime;
-        this.generate(inputBuffers, outputBuffers, offset);
     }
 };
 
@@ -247,8 +187,8 @@ Scheduler.prototype.tick = function(length, timestamp) {
  *
  * @param {Number} time The current write position in samples.
  */
-Scheduler.prototype.updateClock = function(time) {
-    this.time = time;
+Scheduler.prototype.tickClock = function() {
+    this.time += 1;
     this.seconds = this.time * this.audiolet.device.sampleRate;
     if (this.time >= this.lastBeatTime + this.beatLength) {
         this.beat += 1;
@@ -305,37 +245,6 @@ Scheduler.prototype.processEvent = function(event) {
     else {
         // Regular event
         event.callback();
-    }
-};
-
-/**
- * Overridden function reading from the input buffers, and putting new values
- * into sections of the output buffers.  Also handles buffers which are flagged
- * as being empty, converting them into actual zeroed buffers.
- *
- * @param {AudioletBuffer[]} inputBuffers Samples received from the inputs.
- * @param {AudioletBuffer[]} outputBuffers Samples to be sent to the outputs.
- * @param {Number} offset Sample offset for writing to the output buffers.
- */
-Scheduler.prototype.generate = function(inputBuffers, outputBuffers, offset) {
-    var inputBuffer = inputBuffers[0];
-    var outputBuffer = outputBuffers[0];
-    for (var i = 0; i < inputBuffer.numberOfChannels; i++) {
-        var inputChannel;
-        if (inputBuffer.isEmpty) {
-            // Substitute the supposedly empty buffer with an actually
-            // empty buffer.  This means that we don't have to  zero
-            // buffers in other nodes
-            var emptyBuffer = this.emptyBuffer;
-            emptyBuffer.resize(inputBuffer.numberOfChannels,
-                               inputBuffer.length);
-            inputChannel = emptyBuffer.getChannelData(0);
-        }
-        else {
-            inputChannel = inputBuffer.getChannelData(i);
-        }
-        var outputChannel = outputBuffer.getChannelData(i);
-        outputChannel.set(inputChannel, offset);
     }
 };
 
