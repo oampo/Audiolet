@@ -12,10 +12,6 @@ oxo -t 'Audiolet API Documentation' \
        ../trunk/src/core/AudioletOutput.js \
        ../trunk/src/core/AudioletDestination.js \
        ../trunk/src/core/AudioletDevice.js \
-       ../trunk/src/core/AbstractAudioletDevice.js \
-       ../trunk/src/core/AudioDataAPIDevice.js \
-       ../trunk/src/core/WebAudioAPIDevice.js \
-       ../trunk/src/core/DummyDevice.js \
        ../trunk/src/core/Scheduler.js \
        ../trunk/src/core/PassThroughNode.js \
        ../trunk/src/core/ParameterNode.js \
@@ -39,6 +35,7 @@ oxo -t 'Audiolet API Documentation' \
        ../trunk/src/dsp/Gain.js \
        ../trunk/src/dsp/Pan.js \
        ../trunk/src/dsp/UpMixer.js \
+       ../trunk/src/dsp/CrossFade.js \
        ../trunk/src/dsp/LinearCrossFade.js \
        ../trunk/src/dsp/Limiter.js \
        ../trunk/src/dsp/BiquadFilter.js \
@@ -46,11 +43,15 @@ oxo -t 'Audiolet API Documentation' \
        ../trunk/src/dsp/HighPassFilter.js \
        ../trunk/src/dsp/BandPassFilter.js \
        ../trunk/src/dsp/BandRejectFilter.js \
+       ../trunk/src/dsp/AllPassFilter.js \
+       ../trunk/src/dsp/DCFilter.js \
        ../trunk/src/dsp/Lag.js \
        ../trunk/src/dsp/Delay.js \
+       ../trunk/src/dsp/FeedbackDelay.js \
        ../trunk/src/dsp/CombFilter.js \
        ../trunk/src/dsp/DampedCombFilter.js \
        ../trunk/src/dsp/Reverb.js \
+       ../trunk/src/dsp/ReverbB.js \
        ../trunk/src/dsp/SoftClip.js \
        ../trunk/src/dsp/BitCrusher.js \
        ../trunk/src/dsp/Amplitude.js \
