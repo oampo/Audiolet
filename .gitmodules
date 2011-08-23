@@ -1,0 +1,3 @@
+[submodule "src/sink.js"]
+	path = src/sink.js
+	url = git://github.com/jussi-kalliokoski/sink.js.git
