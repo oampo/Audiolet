@@ -3197,11 +3197,34 @@ for (var i = 0; i < 8192; i++) {
 }
 
 
-/**
+/*!
  * @depends ../core/AudioletNode.js
  * @depends Sine.js
  */
 
+/**
+ * Equal-power cross-fade between two signals
+ *
+ * **Inputs**
+ *
+ * - Audio 1
+ * - Audio 2
+ * - Fade Position
+ *
+ * **Outputs**
+ *
+ * - Mixed audio
+ *
+ * **Parameters**
+ *
+ * - position The fade position.  Values between 0 (Audio 1 only) and 1 (Audio
+ * 2 only).  Linked to input 2.
+ *
+ * @constructor
+ * @extends AudioletNode
+ * @param {Audiolet} audiolet The audiolet object.
+ * @param {Number} [position=0.5] The initial fade position.
+ */
 var CrossFade = function(audiolet, position) {
     AudioletNode.call(this, audiolet, 3, 1);
     this.linkNumberOfOutputChannels(0, 0);
@@ -3209,6 +3232,12 @@ var CrossFade = function(audiolet, position) {
 };
 extend(CrossFade, AudioletNode);
 
+/**
+ * Process a block of samples
+ *
+ * @param {AudioletBuffer[]} inputBuffers Samples received from the inputs.
+ * @param {AudioletBuffer[]} outputBuffers Samples to be sent to the outputs.
+ */
 CrossFade.prototype.generate = function(inputBuffers, outputBuffers) {
     var inputBufferA = inputBuffers[0];
     var inputBufferB = inputBuffers[1];
@@ -3271,6 +3300,11 @@ CrossFade.prototype.generate = function(inputBuffers, outputBuffers) {
     }
 };
 
+/**
+ * toString
+ *
+ * @return {String} String representation.
+ */
 CrossFade.prototype.toString = function() {
     return 'Cross Fader';
 };
@@ -7273,8 +7307,8 @@ Sink.Recording		= Recording;
 Sink.doInterval		= function(callback, timeout){
 	var	BlobBuilder	= window.MozBlobBuilder || window.WebKitBlobBuilder || window.MSBlobBuilder || window.OBlobBuilder || window.BlobBuilder,
 		timer, id, prev;
-	if (Sink.doInterval.backgroundWork || Sink.devices.moz.backgroundWork){
-		if (BlobBuilder){
+	if ((Sink.doInterval.backgroundWork || Sink.devices.moz.backgroundWork) && BlobBuilder){
+		try{
 			prev	= new BlobBuilder();
 			prev.append('setInterval(function(){ postMessage("tic"); }, ' + timeout + ');');
 			id	= window.URL.createObjectURL(prev.getBlob());
@@ -7286,27 +7320,15 @@ Sink.doInterval		= function(callback, timeout){
 				timer.terminate();
 				window.URL.revokeObjectURL(id);
 			};
-		}
-		id = prev = +new Date + '';
-		function messageListener(e){
-			if (e.source === window && e.data === id && prev < +new Date){
-				prev = +new Date + timeout;
-				callback();
-			}
-			window.postMessage(id, '*');
-		}
-		window.addEventListener('message', messageListener, true);
-		window.postMessage(id, '*');
-		return function(){
-			window.removeEventListener('message', messageListener);
-		};
-	} else {
-		timer = setInterval(callback, timeout);
-		return function(){
-			clearInterval(timer);
-		};
+		} catch(e){};
 	}
+	timer = setInterval(callback, timeout);
+	return function(){
+		clearInterval(timer);
+	};
 };
+
+Sink.doInterval.backgroundWork = true;
 
 (function(){
 
