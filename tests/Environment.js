@@ -1,3 +1,8 @@
+window = {};
+Sink.sinks['moz'].enabled = false;
+Sink.sinks['webkit'].enabled = false;
+Sink.sinks['dummy'].enabled = true;
+
 function Audio() {}
 
 function setInterval() {}
