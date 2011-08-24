@@ -20,33 +20,27 @@
  */
 var UpMixer = function(audiolet, outputChannels) {
     AudioletNode.call(this, audiolet, 1, 1);
-    this.outputChannels = outputChannels;
     this.outputs[0].numberOfChannels = outputChannels;
 };
 extend(UpMixer, AudioletNode);
 
 /**
  * Process a block of samples
- *
- * @param {AudioletBuffer[]} inputBuffers Samples received from the inputs.
- * @param {AudioletBuffer[]} outputBuffers Samples to be sent to the outputs.
  */
-UpMixer.prototype.generate = function(inputBuffers, outputBuffers) {
-    var inputBuffer = inputBuffers[0];
-    var outputBuffer = outputBuffers[0];
+UpMixer.prototype.generate = function() {
+    var input = this.inputs[0];
+    var output = this.outputs[0];
 
-    if (inputBuffer.isEmpty) {
-        outputBuffer.isEmpty = true;
-        return;
+    var numberOfInputChannels = input.samples.length;
+    var numberOfOutputChannels = output.samples.length;
+    
+    if (numberOfInputChannels == numberOfOutputChannels) {
+        output.samples = input.samples;
     }
-
-    var outputChannels = this.outputChannels;
-
-    var numberOfChannels = inputBuffer.numberOfChannels;
-    for (var i = 0; i < outputChannels; i++) {
-        var inputChannel = inputBuffer.getChannelData(i % numberOfChannels);
-        var outputChannel = outputBuffer.getChannelData(i);
-        outputChannel.set(inputChannel);
+    else {
+        for (var i = 0; i < numberOfOutputChannels; i++) {
+            output.samples[i] = input.samples[i % numberOfInputChannels];
+        }
     }
 };
 

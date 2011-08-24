@@ -10,7 +10,7 @@ var AudioletInput = function(node, index) {
     this.index = index;
     this.connectedFrom = [];
     // Minimum sized buffer, which we can resize from accordingly
-    this.sample = 0;
+    this.samples = [];
 };
 
 /**

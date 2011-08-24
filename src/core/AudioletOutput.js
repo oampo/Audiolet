@@ -9,7 +9,7 @@ var AudioletOutput = function(node, index) {
     this.node = node;
     this.index = index;
     this.connectedTo = [];
-    this.sample = 0;
+    this.samples = [];
 
     this.linkedInput = null;
     this.numberOfChannels = 1;
@@ -64,7 +64,7 @@ AudioletOutput.prototype.unlinkNumberOfChannels = function() {
  */
 AudioletOutput.prototype.getNumberOfChannels = function() {
     if (this.linkedInput && this.linkedInput.connectedFrom.length) {
-        return (this.linkedInput.buffer.numberOfChannels);
+        return (this.linkedInput.samples.length);
     }
     return (this.numberOfChannels);
 };

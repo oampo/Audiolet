@@ -28,10 +28,7 @@ var AudioletParameter = function(node, inputIndex, value) {
  * @return {Boolean} True if the static value should be used.
  */
 AudioletParameter.prototype.isStatic = function() {
-    var input = this.input;
-    return (input == null ||
-            input.connectedFrom.length == 0 ||
-            input.buffer.isEmpty);
+    return (this.input.samples.length == 0);
 };
 
 /**
@@ -40,10 +37,7 @@ AudioletParameter.prototype.isStatic = function() {
  * @return {Boolean} True if the dynamic values should be used.
  */
 AudioletParameter.prototype.isDynamic = function() {
-    var input = this.input;
-    return (input != null &&
-            input.connectedFrom.length > 0 &&
-            !input.buffer.isEmpty);
+    return (this.input.samples.length > 0);
 };
 
 /**
@@ -61,14 +55,10 @@ AudioletParameter.prototype.setValue = function(value) {
  * @return {Number} The stored static value.
  */
 AudioletParameter.prototype.getValue = function() {
-    return this.value;
-};
-
-/**
- * Get the channel containing the dynamic values taken from the linked input
- *
- * @return {Float32Array} The channel containing the dynamic values.
- */
-AudioletParameter.prototype.getChannel = function() {
-    return this.input.buffer.channels[0];
+    if (this.input.samples.length > 0) {
+        return this.input.samples[0];
+    }
+    else {
+        return this.value;
+    }
 };

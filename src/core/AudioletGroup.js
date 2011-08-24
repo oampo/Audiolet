@@ -14,8 +14,6 @@
  */
 var AudioletGroup = function(audiolet, numberOfInputs, numberOfOutputs) {
     this.audiolet = audiolet;
-    this.numberOfInputs = numberOfInputs;
-    this.numberOfOutputs = numberOfOutputs;
 
     this.inputs = [];
     for (var i = 0; i < numberOfInputs; i++) {

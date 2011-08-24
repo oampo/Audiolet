@@ -32,43 +32,18 @@ extend(TableLookupOscillator, AudioletNode);
 
 /**
  * Process a block of samples
- *
- * @param {AudioletBuffer[]} inputBuffers Samples received from the inputs.
- * @param {AudioletBuffer[]} outputBuffers Samples to be sent to the outputs.
  */
-TableLookupOscillator.prototype.generate = function(inputBuffers,
-                                                    outputBuffers) {
-    var buffer = outputBuffers[0];
-    var channel = buffer.getChannelData(0);
+TableLookupOscillator.prototype.generate = function() {
+    this.outputs[0].samples[0] = this.table[Math.floor(this.phase)];
 
-    // Make processing variables local
     var sampleRate = this.audiolet.device.sampleRate;
-    var table = this.table;
-    var tableSize = table.length;
-    var phase = this.phase;
-    var frequencyParameter = this.frequency;
-    var frequency, frequencyChannel;
-    if (frequencyParameter.isStatic()) {
-        frequency = frequencyParameter.getValue();
-    }
-    else {
-        frequencyChannel = frequencyParameter.getChannel();
-    }
+    var frequency = this.frequency.getValue();
+    var tableSize = this.table.length;
 
-    // Processing loop
-    var bufferLength = buffer.length;
-    for (var i = 0; i < bufferLength; i++) {
-        if (frequencyChannel) {
-            frequency = frequencyChannel[i];
-        }
-        var step = frequency * tableSize / sampleRate;
-        phase += step;
-        if (phase >= tableSize) {
-            phase %= tableSize;
-        }
-        channel[i] = table[Math.floor(phase)];
+    this.phase += frequency * tableSize / sampleRate;
+    if (this.phase > tableSize) {
+        this.phase %= tableSize;
     }
-    this.phase = phase;
 };
 
 /**

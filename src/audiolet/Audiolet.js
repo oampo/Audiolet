@@ -344,8 +344,6 @@ AudioletBuffer.prototype.load = function(path, async, callback) {
  */
 var AudioletGroup = function(audiolet, numberOfInputs, numberOfOutputs) {
     this.audiolet = audiolet;
-    this.numberOfInputs = numberOfInputs;
-    this.numberOfOutputs = numberOfOutputs;
 
     this.inputs = [];
     for (var i = 0; i < numberOfInputs; i++) {
@@ -404,7 +402,7 @@ AudioletGroup.prototype.remove = function() {
  * Group containing all of the components for the Audiolet output chain.  The
  * chain consists of:
  *
- *     Input => Block Size Limiter => Scheduler => UpMixer => Output
+ *     Input => Scheduler => UpMixer => Output
  *
  * **Inputs**
  *
@@ -427,14 +425,9 @@ var AudioletDestination = function(audiolet, sampleRate, numberOfChannels,
     this.scheduler = new Scheduler(audiolet);
     audiolet.scheduler = this.scheduler; // Shortcut
 
-    this.blockSizeLimiter = new BlockSizeLimiter(audiolet,
-            Math.pow(2, 15));
-    audiolet.blockSizeLimiter = this.blockSizeLimiter; // Shortcut
-
     this.upMixer = new UpMixer(audiolet, this.device.numberOfChannels);
 
-    this.inputs[0].connect(this.blockSizeLimiter);
-    this.blockSizeLimiter.connect(this.scheduler);
+    this.inputs[0].connect(this.scheduler);
     this.scheduler.connect(this.upMixer);
     this.upMixer.connect(this.device);
 };
@@ -466,17 +459,13 @@ AudioletDestination.prototype.toString = function() {
 var AudioletNode = function(audiolet, numberOfInputs, numberOfOutputs,
                             generate) {
     this.audiolet = audiolet;
-    this.numberOfInputs = numberOfInputs;
-    this.numberOfOutputs = numberOfOutputs;
 
     this.inputs = [];
-    var numberOfInputs = this.numberOfInputs;
     for (var i = 0; i < numberOfInputs; i++) {
         this.inputs.push(new AudioletInput(this, i));
     }
 
     this.outputs = [];
-    var numberOfOutputs = this.numberOfOutputs;
     for (var i = 0; i < numberOfOutputs; i++) {
         this.outputs.push(new AudioletOutput(this, i));
     }
@@ -554,21 +543,20 @@ AudioletNode.prototype.linkNumberOfOutputChannels = function(output, input) {
  * manually by users, who should instead rely on automatic ticking from
  * connections to the AudioletDevice.
  *
- * @param {Number} length The number of samples to process.
  * @param {Number} timestamp A timestamp for the block of samples.
  */
-AudioletNode.prototype.tick = function(length, timestamp) {
+AudioletNode.prototype.tick = function(timestamp) {
     if (timestamp != this.timestamp) {
         // Need to set the timestamp before we tick the parents so we
         // can't get into infinite loops where there is feedback in the
         // graph
         this.timestamp = timestamp;
-        this.tickParents(length, timestamp);
+        this.tickParents(timestamp);
 
-        var inputBuffers = this.createInputBuffers(length);
-        var outputBuffers = this.createOutputBuffers(length);
+        this.createInputSamples();
+        this.createOutputSamples();
 
-        this.generate(inputBuffers, outputBuffers);
+        this.generate();
     }
 };
 
@@ -576,11 +564,10 @@ AudioletNode.prototype.tick = function(length, timestamp) {
  * Call the tick function on nodes which are connected to the inputs.  This
  * function should not be called manually by users.
  *
- * @param {Number} length The number of samples to process.
  * @param {Number} timestamp A timestamp for the block of samples.
  */
-AudioletNode.prototype.tickParents = function(length, timestamp) {
-    var numberOfInputs = this.numberOfInputs;
+AudioletNode.prototype.tickParents = function(timestamp) {
+    var numberOfInputs = this.inputs.length;
     for (var i = 0; i < numberOfInputs; i++) {
         var input = this.inputs[i];
         var numberOfStreams = input.connectedFrom.length;
@@ -588,7 +575,7 @@ AudioletNode.prototype.tickParents = function(length, timestamp) {
         // loop
         for (var j = 0; j < numberOfStreams; j++) {
             var index = numberOfStreams - j - 1;
-            input.connectedFrom[index].node.tick(length, timestamp);
+            input.connectedFrom[index].node.tick(timestamp);
         }
     }
 };
@@ -596,101 +583,53 @@ AudioletNode.prototype.tickParents = function(length, timestamp) {
 /**
  * Process a block of samples, reading from the input buffers and putting
  * new values into the output buffers.  Override me!
- *
- * @param {AudioletBuffer[]} inputBuffers Samples received from the inputs.
- * @param {AudioletBuffer[]} outputBuffers Samples to be sent to the outputs.
  */
-AudioletNode.prototype.generate = function(inputBuffers, outputBuffers) {
-    // Sane default - pass along any empty flags
-    var numberOfInputs = inputBuffers.length;
-    var numberOfOutputs = outputBuffers.length;
-    for (var i = 0; i < numberOfInputs; i++) {
-        if (i < numberOfOutputs && inputBuffers[i].isEmpty) {
-            outputBuffers[i].isEmpty = true;
-        }
-    }
+AudioletNode.prototype.generate = function() {
 };
 
 /**
  * Create the input buffers by grabbing data from the outputs of connected
  * nodes and summing it.  If no nodes are connected to an input, then
  * give a one channel empty buffer.
- *
- * @param {Number} length The number of samples for the resulting buffers.
- * @return {AudioletBuffer[]} The input buffers.
  */
-AudioletNode.prototype.createInputBuffers = function(length) {
-    var inputBuffers = [];
-    var numberOfInputs = this.numberOfInputs;
+AudioletNode.prototype.createInputSamples = function() {
+    var numberOfInputs = this.inputs.length;
     for (var i = 0; i < numberOfInputs; i++) {
         var input = this.inputs[i];
+        var inputSamples = [];
+        var numberOfInputChannels = 0;
 
-        // Find the non-empty output with the most channels
-        var numberOfChannels = 0;
-        var largestOutput = null;
         var connectedFrom = input.connectedFrom;
         var numberOfConnections = connectedFrom.length;
         for (var j = 0; j < numberOfConnections; j++) {
             var output = connectedFrom[j];
-            var outputBuffer = output.buffer;
-            if (outputBuffer.numberOfChannels > numberOfChannels &&
-                !outputBuffer.isEmpty) {
-                numberOfChannels = outputBuffer.numberOfChannels;
-                largestOutput = output;
-            }
-        }
+            var outputSamples = output.samples;
+            var numberOfOutputChannels = output.samples.length;
 
-        if (largestOutput) {
-            // TODO: Optimizations
-            // We have non-empty connections
-
-            // Resize the input buffer accordingly
-            var inputBuffer = input.buffer;
-            inputBuffer.resize(numberOfChannels, length, true);
-            inputBuffer.isEmpty = false;
-
-            // Set the buffer using the largest output
-            inputBuffer.set(largestOutput.getBuffer(length));
-
-            // Sum the rest of the outputs
-            for (var j = 0; j < numberOfConnections; j++) {
-                var output = connectedFrom[j];
-                if (output != largestOutput && !output.buffer.isEmpty) {
-                    inputBuffer.add(output.getBuffer(length));
+            for (var k = 0; k < numberOfOutputChannels; k++) {
+                if (k >= numberOfInputChannels) {
+                    inputSamples.push(outputSamples[k]);
+                    numberOfInputChannels += 1;
+                }
+                else {
+                    inputSamples[k] += outputSamples[k];
                 }
             }
-
-            inputBuffers.push(inputBuffer);
         }
-        else {
-            // If we don't have any non-empty connections give a single
-            // channel empty buffer of the correct length
-            var inputBuffer = input.buffer;
-            inputBuffer.resize(1, length, true);
-            inputBuffer.isEmpty = true;
-            inputBuffers.push(inputBuffer);
-        }
+        input.samples = inputSamples;
     }
-    return inputBuffers;
 };
 
+
 /**
- * Create output buffers of the correct length.
- *
- * @param {Number} length The number of samples for the resulting buffers.
- * @return {AudioletNode[]} The output buffers.
- */
-AudioletNode.prototype.createOutputBuffers = function(length) {
-    // Create the output buffers
-    var outputBuffers = [];
-    var numberOfOutputs = this.numberOfOutputs;
+* Create output buffers of the correct length.
+*/
+AudioletNode.prototype.createOutputSamples = function() {
+    var numberOfOutputs = this.outputs.length;
     for (var i = 0; i < numberOfOutputs; i++) {
         var output = this.outputs[i];
-        output.buffer.resize(output.getNumberOfChannels(), length, true);
-        output.buffer.isEmpty = false;
-        outputBuffers.push(output.buffer);
+        output.samples = new Array(output.getNumberOfChannels());
     }
-    return (outputBuffers);
 };
 
 /**
@@ -739,7 +678,7 @@ AudioletNode.prototype.remove = function() {
  */
 function AudioletDevice(audiolet, sampleRate, numberOfChannels, bufferSize) {
     AudioletNode.call(this, audiolet, 1, 0);
-
+    bufferSize = 8192;
     this.sink = Sink(this.tick.bind(this), numberOfChannels, bufferSize,
                      sampleRate);
 
@@ -750,7 +689,7 @@ function AudioletDevice(audiolet, sampleRate, numberOfChannels, bufferSize) {
     this.bufferSize = this.sink.preBufferSize;
 
     this.writePosition = 0;
-    this.buffer = null;
+    this.samples = null;
 }
 extend(AudioletDevice, AudioletNode);
 
@@ -762,24 +701,18 @@ extend(AudioletDevice, AudioletNode);
 * @param {Number} numberOfChannels Number of channels in the buffer.
 */
 AudioletDevice.prototype.tick = function(buffer, numberOfChannels) {
-    var samplesNeeded = buffer.length / numberOfChannels;
-    AudioletNode.prototype.tick.call(this, samplesNeeded, this.writePosition);
-    var interleaved = this.buffer.interleaved();
-    var numberOfSamples = interleaved.length;
-    for (var i = 0; i < numberOfSamples; i++) {
-        buffer[i] = interleaved[i];
-    }
-    this.writePosition += samplesNeeded;
-};
+    var input = this.inputs[0];
 
-/**
-* Make the input buffer available as a member.
-*
-* @param {AudioletBuffer[]} inputBuffers An array containing the input buffer.
-* @param {AudioletBuffer[]} outputBuffers An empty array.
-*/
-AudioletDevice.prototype.generate = function(inputBuffers, outputBuffers) {
-    this.buffer = inputBuffers[0];
+    var samplesNeeded = buffer.length / numberOfChannels;
+    for (var i = 0; i < samplesNeeded; i++) {
+        AudioletNode.prototype.tick.call(this, this.writePosition);
+
+        for (var j = 0; j < numberOfChannels; j++) {
+            buffer[i * numberOfChannels + j] = input.samples[j];
+        }
+
+        this.writePosition += 1;
+    }
 };
 
 /**
@@ -821,9 +754,7 @@ var AudioletInput = function(node, index) {
     this.index = index;
     this.connectedFrom = [];
     // Minimum sized buffer, which we can resize from accordingly
-    this.buffer = new AudioletBuffer(1, 0);
-    // Overflow buffer, for feedback loops
-    this.overflow = new AudioletBuffer(1, 0);
+    this.samples = [];
 };
 
 /**
@@ -848,15 +779,6 @@ AudioletInput.prototype.disconnect = function(output) {
             break;
         }
     }
-};
-
-/**
- * Check whether the input is connected
- *
- * @return {Boolean} True if the output is connected.
- */
-AudioletInput.prototype.isConnected = function() {
-    return (this.connectedFrom.length > 0);
 };
 
 /**
@@ -895,18 +817,10 @@ var AudioletOutput = function(node, index) {
     this.node = node;
     this.index = index;
     this.connectedTo = [];
-    // External buffer where data pulled from the graph is stored
-    this.buffer = new AudioletBuffer(1, 0);
-    // Internal buffer for if we are in a feedback loop
-    this.feedbackBuffer = new AudioletBuffer(1, 0);
-    // Buffer to shift data into if we are in a feedback loop
-    this.outputBuffer = new AudioletBuffer(1, 0);
+    this.samples = [];
 
     this.linkedInput = null;
     this.numberOfChannels = 1;
-
-    this.suppliesFeedbackLoop = false;
-    this.timestamp = null;
 };
 
 /**
@@ -934,15 +848,6 @@ AudioletOutput.prototype.disconnect = function(input) {
 };
 
 /**
- * Check whether the input is connected
- *
- * @return {Boolean} True if the output is connected.
- */
-AudioletOutput.prototype.isConnected = function() {
-    return (this.connectedTo.length > 0);
-};
-
-/**
  * Link the output to an input, forcing the output to always contain the
  * same number of channels as the input.
  *
@@ -966,69 +871,10 @@ AudioletOutput.prototype.unlinkNumberOfChannels = function() {
  * @return {Number} The number of output channels.
  */
 AudioletOutput.prototype.getNumberOfChannels = function() {
-    if (this.linkedInput && this.linkedInput.isConnected()) {
-        return (this.linkedInput.buffer.numberOfChannels);
+    if (this.linkedInput && this.linkedInput.connectedFrom.length) {
+        return (this.linkedInput.samples.length);
     }
     return (this.numberOfChannels);
-};
-
-/**
- * Get the output buffer.  This is more complicated than it seems, as in
- * feedback loops we try to get data from the previous tick, which was often
- * a different length to the current tick.  In order to get round this we keepi
- * a fixed length FIFO buffer of the output and limit the size of blocks we
- * request to the size of the buffer.  This means that we never overflow the
- * buffer, so output data is always available.  The price we pay for this is
- * introducing extra latency equal to the length of the FIFO.
- *
- * @param {Number} length The number of samples requested.
- * @return {AudioletBuffer} The output buffer.
- */
-AudioletOutput.prototype.getBuffer = function(length) {
-    var buffer = this.buffer;
-    if (buffer.length == length && !this.suppliesFeedbackLoop) {
-        // Buffer not part of a feedback loop, so just return it
-        return buffer;
-    }
-    else {
-        // Buffer is part of a feedback loop, so we need to take care
-        // of overflows.
-        // Because feedback loops have to be connected to more than one
-        // node, getBuffer will be called more than once.  To make sure
-        // we only generate the output buffer once, store a timestamp.
-        if (this.node.timestamp == this.timestamp) {
-            // Buffer already generated by a previous getBuffer call
-            return this.outputBuffer;
-        }
-        else {
-            this.timestamp = this.node.timestamp;
-
-            var feedbackBuffer = this.feedbackBuffer;
-            var outputBuffer = this.outputBuffer;
-
-            if (!this.suppliesFeedbackLoop) {
-                this.suppliesFeedbackLoop = true;
-                var limiter = this.node.audiolet.blockSizeLimiter;
-                feedbackBuffer.resize(this.getNumberOfChannels(),
-                                      limiter.maximumBlockSize, true);
-            }
-
-            // Resize feedback buffer to the correct number of channels
-            feedbackBuffer.resize(this.getNumberOfChannels(),
-                                  feedbackBuffer.length);
-
-            // Resize output buffer to the correct size
-            outputBuffer.resize(this.getNumberOfChannels(), length, true);
-
-            // Buffer the output, so nodes on a later timestamp (i.e. nodes
-            // in a feedback loop connected to this output) can pull
-            // any amount up to maximumBlockSize without fear of overflow
-            feedbackBuffer.push(buffer);
-            feedbackBuffer.shift(outputBuffer);
-
-            return outputBuffer;
-        }
-    }
 };
 
 /**
@@ -1071,10 +917,7 @@ var AudioletParameter = function(node, inputIndex, value) {
  * @return {Boolean} True if the static value should be used.
  */
 AudioletParameter.prototype.isStatic = function() {
-    var input = this.input;
-    return (input == null ||
-            input.connectedFrom.length == 0 ||
-            input.buffer.isEmpty);
+    return (this.input.samples.length == 0);
 };
 
 /**
@@ -1083,10 +926,7 @@ AudioletParameter.prototype.isStatic = function() {
  * @return {Boolean} True if the dynamic values should be used.
  */
 AudioletParameter.prototype.isDynamic = function() {
-    var input = this.input;
-    return (input != null &&
-            input.connectedFrom.length > 0 &&
-            !input.buffer.isEmpty);
+    return (this.input.samples.length > 0);
 };
 
 /**
@@ -1104,121 +944,12 @@ AudioletParameter.prototype.setValue = function(value) {
  * @return {Number} The stored static value.
  */
 AudioletParameter.prototype.getValue = function() {
-    return this.value;
-};
-
-/**
- * Get the channel containing the dynamic values taken from the linked input
- *
- * @return {Float32Array} The channel containing the dynamic values.
- */
-AudioletParameter.prototype.getChannel = function() {
-    return this.input.buffer.channels[0];
-};
-
-/*!
- * @depends AudioletNode.js
- */
-
-/**
- * Node to limit the size of sample blocks which are processed.  Any larger
- * blocks requested are split into smaller blocks and recombined at the end
- * of a tick call.
- *
- * **Inputs**
- *
- * - Audio
- *
- * **Outputs**
- *
- * - Audio
- *
- * @constructor
- * @extends AudioletNode
- * @param {Audiolet} audiolet The audiolet object.
- * @param {Number} maximumBlockSize The largest allowed block size.
- */
-var BlockSizeLimiter = function(audiolet, maximumBlockSize) {
-    AudioletNode.call(this, audiolet, 1, 1);
-    this.maximumBlockSize = maximumBlockSize;
-    this.linkNumberOfOutputChannels(0, 0);
-};
-extend(BlockSizeLimiter, AudioletNode);
-
-/**
- * Overridden tick method.  Splits any calls with length larger than the
- * maximum block size into chunks smaller than the maximum, combining the
- * chunks in the output buffers.
- *
- * @param {Number} length The number of samples to process.
- * @param {Number} timestamp A timestamp for the block of samples.
- */
-BlockSizeLimiter.prototype.tick = function(length, timestamp) {
-    var maximumBlockSize = this.maximumBlockSize;
-    if (length < maximumBlockSize) {
-        // Enough samples from the last tick and buffered, so just tick
-        // and recalculate any overflow
-        AudioletNode.prototype.tick.call(this, length, timestamp);
+    if (this.input.samples.length > 0) {
+        return this.input.samples[0];
     }
     else {
-        // Not enough samples available, so we will have to do it in blocks
-        // of size maximumBlockSize
-        var samplesGenerated = 0;
-        var outputBuffers = null;
-        while (samplesGenerated < length) {
-            var samplesNeeded;
-            // If length does not split exactly into the block size,
-            // then do the small block size first, so at the end we still
-            // have a lastTickSize equal to maximumBlockSize
-            var smallBlockSize = length % maximumBlockSize;
-            if (samplesGenerated == 0 && smallBlockSize) {
-                samplesNeeded = smallBlockSize;
-            }
-            else {
-                samplesNeeded = maximumBlockSize;
-            }
-
-            this.tickParents(samplesNeeded, timestamp + samplesGenerated);
-
-            var inputBuffers = this.createInputBuffers(samplesNeeded);
-            if (!outputBuffers) {
-                outputBuffers = this.createOutputBuffers(length);
-            }
-            this.generate(inputBuffers, outputBuffers, samplesGenerated);
-
-            samplesGenerated += samplesNeeded;
-        }
+        return this.value;
     }
-};
-
-/**
- * Overridden function reading from the input buffers, and putting new values
- * into sections of the output buffers.
- *
- * @param {AudioletBuffer[]} inputBuffers Samples received from the inputs.
- * @param {AudioletBuffer[]} outputBuffers Samples to be sent to the outputs.
- * @param {Number} offset Sample offset for writing to the output buffers.
- */
-BlockSizeLimiter.prototype.generate = function(inputBuffers, outputBuffers,
-                                               offset) {
-    offset = offset || 0;
-    var inputBuffer = inputBuffers[0];
-    var outputBuffer = outputBuffers[0];
-    if (inputBuffer.isEmpty) {
-        outputBuffer.isEmpty = true;
-        return;
-    }
-    outputBuffer.setSection(inputBuffer, inputBuffer.length,
-                            0, offset);
-};
-
-/**
- * toString
- *
- * @return {String} String representation.
- */
-BlockSizeLimiter.prototype.toString = function() {
-    return 'Block Size Limiter';
 };
 
 /*
@@ -1272,32 +1003,9 @@ extend(ParameterNode, AudioletNode);
 
 /**
  * Process a block of samples
- *
- * @param {AudioletBuffer[]} inputBuffers Samples received from the inputs.
- * @param {AudioletBuffer[]} outputBuffers Samples to be sent to the outputs.
  */
-ParameterNode.prototype.generate = function(inputBuffers, outputBuffers) {
-    var outputBuffer = outputBuffers[0];
-    var outputChannel = outputBuffer.channels[0];
-
-    // Local processing variables
-    var parameterParameter = this.parameter;
-    var parameter, parameterChannel;
-    if (parameterParameter.isStatic()) {
-        parameter = parameterParameter.getValue();
-    }
-    else {
-        parameterChannel = parameterParameter.getChannel();
-    }
-
-
-    var bufferLength = outputBuffer.length;
-    for (var i = 0; i < bufferLength; i++) {
-        if (parameterChannel) {
-            parameter = parameterChannel[i];
-        }
-        outputChannel[i] = parameter;
-    }
+ParameterNode.prototype.generate = function() {
+    output.samples[0] = this.parameter.getValue();
 };
 
 /**
@@ -1336,26 +1044,22 @@ extend(PassThroughNode, AudioletNode);
  * the corresponding outputs.
  *
  * @param {Number} length The number of samples for the resulting buffers.
- * @return {AudioletNode[]} The output buffers.
  */
-PassThroughNode.prototype.createOutputBuffers = function(length) {
-    var outputBuffers = [];
-    var numberOfOutputs = this.numberOfOutputs;
-    var numberOfInputs = this.numberOfInputs;
+PassThroughNode.prototype.createOutputSamples = function(length) {
+    var numberOfOutputs = this.outputs.length;
+    var numberOfInputs = this.inputs.length;
     // Copy the inputs buffers straight to the output buffers
     for (var i = 0; i < numberOfOutputs; i++) {
         var output = this.outputs[i];
         if (i < numberOfInputs) {
             // Copy the input buffer straight to the output buffers
             var input = this.inputs[i];
-            output.buffer = input.buffer;
+            output.samples = input.samples;
         }
         else {
-            output.buffer.resize(output.getNumberOfChannels(), length);
+            output.samples = new Array(output.getNumberOfChannels());
         }
-        outputBuffers.push(output.buffer);
     }
-    return (outputBuffers);
 };
 
 /**
@@ -1497,7 +1201,7 @@ PriorityQueue.prototype.compare = function(a, b) {
 };
 
 /*!
- * @depends AudioletNode.js
+ * @depends PassThroughNode.js
  */
 
 /**
@@ -1517,12 +1221,12 @@ PriorityQueue.prototype.compare = function(a, b) {
  * - Audio
  *
  * @constructor
- * @extends AudioletNode
+ * @extends PassThroughNode
  * @param {Audiolet} audiolet The audiolet object.
  * @param {Number} [bpm=120] Initial tempo.
  */
 var Scheduler = function(audiolet, bpm) {
-    AudioletNode.call(this, audiolet, 1, 1);
+    PassThroughNode.call(this, audiolet, 1, 1);
     this.linkNumberOfOutputChannels(0, 0);
     this.bpm = bpm || 120;
     this.queue = new PriorityQueue(null, function(a, b) {
@@ -1538,10 +1242,8 @@ var Scheduler = function(audiolet, bpm) {
 
     this.lastBeatTime = 0;
     this.beatLength = 60 / this.bpm * this.audiolet.device.sampleRate;
-
-    this.emptyBuffer = new AudioletBuffer(1, 1);
 };
-extend(Scheduler, AudioletNode);
+extend(Scheduler, PassThroughNode);
 
 /**
  * Set the tempo of the scheduler.
@@ -1610,7 +1312,7 @@ Scheduler.prototype.play = function(patterns, durationPattern, callback) {
 };
 
 /**
- * Schedule patterns to play starting at an absolute beat position, 
+ * Schedule patterns to play starting at an absolute beat position,
  * and provide the values generated to a callback.
  * The durationPattern argument can be either a number, giving a constant time
  * between each event, or a pattern, allowing varying time difference.
@@ -1669,84 +1371,23 @@ Scheduler.prototype.stop = function(event) {
  * blocks allows sample-accurate changes to happen, and also where we process
  * the events themselves.
  *
- * @param {Number} length The number of samples to process.
  * @param {Number} timestamp A timestamp for the block of samples.
  */
-Scheduler.prototype.tick = function(length, timestamp) {
-    // The time at the beginning of the block
-    var startTime = this.audiolet.device.getWriteTime();
+Scheduler.prototype.tick = function(timestamp) {
+    PassThroughNode.prototype.tick.call(this, timestamp);
 
-    // Update the clock so it is correct for the first samples
-    this.updateClock(startTime);
-
-    // Don't create the output buffer yet - it needs to be created after
-    // the first input buffer so we can work out how many channels it needs
-    var outputBuffers = null;
-
-    // Generate the block of samples and carry out events, generating a
-    // new sub-block each time an event is carried out
-    var lastEventTime = startTime;
     while (!this.queue.isEmpty() &&
-           this.queue.peek().time <= startTime + length) {
+           this.queue.peek().time <= this.time) {
         var event = this.queue.pop();
-        // Event can't take place before the previous event
-        var eventTime = Math.floor(Math.max(event.time, lastEventTime));
-
-        // Generate samples to take us to the event
-        var timeToEvent = eventTime - lastEventTime;
-        if (timeToEvent > 0) {
-            var offset = lastEventTime - startTime;
-            this.tickParents(timeToEvent,
-                             timestamp + offset);
-
-            // Get the summed input
-            var inputBuffers = this.createInputBuffers(timeToEvent);
-
-            // Create the output buffer
-            if (!outputBuffers) {
-                var outputBuffers = this.createOutputBuffers(length);
-            }
-
-            // Copy it to the right part of the output
-            // Use the generate function so it looks and quacks like an
-            // AudioletNode
-            this.generate(inputBuffers, outputBuffers, offset);
-        }
-
-        // Update the clock so it is correct for the current event
-        this.updateClock(eventTime);
-
-
-        // Set this before processEvent, as that can change the event time
-        lastEventTime = eventTime;
-        // Carry out the event
         this.processEvent(event);
-    }
-
-    // Generate enough samples to complete the block
-    var remainingTime = startTime + length - lastEventTime;
-    if (remainingTime) {
-        this.tickParents(remainingTime,
-                         timestamp + lastEventTime - startTime);
-        var inputBuffers = this.createInputBuffers(remainingTime);
-
-        // Make sure we have an output buffer
-        if (!outputBuffers) {
-            var outputBuffers = this.createOutputBuffers(length);
-        }
-
-        var offset = lastEventTime - startTime;
-        this.generate(inputBuffers, outputBuffers, offset);
     }
 };
 
 /**
  * Update the various representations of time within the scheduler.
- *
- * @param {Number} time The current write position in samples.
  */
-Scheduler.prototype.updateClock = function(time) {
-    this.time = time;
+Scheduler.prototype.tickClock = function() {
+    this.time += 1;
     this.seconds = this.time * this.audiolet.device.sampleRate;
     if (this.time >= this.lastBeatTime + this.beatLength) {
         this.beat += 1;
@@ -1803,37 +1444,6 @@ Scheduler.prototype.processEvent = function(event) {
     else {
         // Regular event
         event.callback();
-    }
-};
-
-/**
- * Overridden function reading from the input buffers, and putting new values
- * into sections of the output buffers.  Also handles buffers which are flagged
- * as being empty, converting them into actual zeroed buffers.
- *
- * @param {AudioletBuffer[]} inputBuffers Samples received from the inputs.
- * @param {AudioletBuffer[]} outputBuffers Samples to be sent to the outputs.
- * @param {Number} offset Sample offset for writing to the output buffers.
- */
-Scheduler.prototype.generate = function(inputBuffers, outputBuffers, offset) {
-    var inputBuffer = inputBuffers[0];
-    var outputBuffer = outputBuffers[0];
-    for (var i = 0; i < inputBuffer.numberOfChannels; i++) {
-        var inputChannel;
-        if (inputBuffer.isEmpty) {
-            // Substitute the supposedly empty buffer with an actually
-            // empty buffer.  This means that we don't have to  zero
-            // buffers in other nodes
-            var emptyBuffer = this.emptyBuffer;
-            emptyBuffer.resize(inputBuffer.numberOfChannels,
-                               inputBuffer.length);
-            inputChannel = emptyBuffer.getChannelData(0);
-        }
-        else {
-            inputChannel = inputBuffer.getChannelData(i);
-        }
-        var outputChannel = outputBuffer.getChannelData(i);
-        outputChannel.set(inputChannel, offset);
     }
 };
 
@@ -3101,43 +2711,18 @@ extend(TableLookupOscillator, AudioletNode);
 
 /**
  * Process a block of samples
- *
- * @param {AudioletBuffer[]} inputBuffers Samples received from the inputs.
- * @param {AudioletBuffer[]} outputBuffers Samples to be sent to the outputs.
  */
-TableLookupOscillator.prototype.generate = function(inputBuffers,
-                                                    outputBuffers) {
-    var buffer = outputBuffers[0];
-    var channel = buffer.getChannelData(0);
+TableLookupOscillator.prototype.generate = function() {
+    this.outputs[0].samples[0] = this.table[Math.floor(this.phase)];
 
-    // Make processing variables local
     var sampleRate = this.audiolet.device.sampleRate;
-    var table = this.table;
-    var tableSize = table.length;
-    var phase = this.phase;
-    var frequencyParameter = this.frequency;
-    var frequency, frequencyChannel;
-    if (frequencyParameter.isStatic()) {
-        frequency = frequencyParameter.getValue();
-    }
-    else {
-        frequencyChannel = frequencyParameter.getChannel();
-    }
+    var frequency = this.frequency.getValue();
+    var tableSize = this.table.length;
 
-    // Processing loop
-    var bufferLength = buffer.length;
-    for (var i = 0; i < bufferLength; i++) {
-        if (frequencyChannel) {
-            frequency = frequencyChannel[i];
-        }
-        var step = frequency * tableSize / sampleRate;
-        phase += step;
-        if (phase >= tableSize) {
-            phase %= tableSize;
-        }
-        channel[i] = table[Math.floor(phase)];
+    this.phase += frequency * tableSize / sampleRate;
+    if (this.phase > tableSize) {
+        this.phase %= tableSize;
     }
-    this.phase = phase;
 };
 
 /**
@@ -3197,11 +2782,34 @@ for (var i = 0; i < 8192; i++) {
 }
 
 
-/**
+/*!
  * @depends ../core/AudioletNode.js
  * @depends Sine.js
  */
 
+/**
+ * Equal-power cross-fade between two signals
+ *
+ * **Inputs**
+ *
+ * - Audio 1
+ * - Audio 2
+ * - Fade Position
+ *
+ * **Outputs**
+ *
+ * - Mixed audio
+ *
+ * **Parameters**
+ *
+ * - position The fade position.  Values between 0 (Audio 1 only) and 1 (Audio
+ * 2 only).  Linked to input 2.
+ *
+ * @constructor
+ * @extends AudioletNode
+ * @param {Audiolet} audiolet The audiolet object.
+ * @param {Number} [position=0.5] The initial fade position.
+ */
 var CrossFade = function(audiolet, position) {
     AudioletNode.call(this, audiolet, 3, 1);
     this.linkNumberOfOutputChannels(0, 0);
@@ -3209,6 +2817,12 @@ var CrossFade = function(audiolet, position) {
 };
 extend(CrossFade, AudioletNode);
 
+/**
+ * Process a block of samples
+ *
+ * @param {AudioletBuffer[]} inputBuffers Samples received from the inputs.
+ * @param {AudioletBuffer[]} outputBuffers Samples to be sent to the outputs.
+ */
 CrossFade.prototype.generate = function(inputBuffers, outputBuffers) {
     var inputBufferA = inputBuffers[0];
     var inputBufferB = inputBuffers[1];
@@ -3271,6 +2885,11 @@ CrossFade.prototype.generate = function(inputBuffers, outputBuffers) {
     }
 };
 
+/**
+ * toString
+ *
+ * @return {String} String representation.
+ */
 CrossFade.prototype.toString = function() {
     return 'Cross Fader';
 };
@@ -5412,33 +5031,27 @@ TriggerControl.prototype.toString = function() {
  */
 var UpMixer = function(audiolet, outputChannels) {
     AudioletNode.call(this, audiolet, 1, 1);
-    this.outputChannels = outputChannels;
     this.outputs[0].numberOfChannels = outputChannels;
 };
 extend(UpMixer, AudioletNode);
 
 /**
  * Process a block of samples
- *
- * @param {AudioletBuffer[]} inputBuffers Samples received from the inputs.
- * @param {AudioletBuffer[]} outputBuffers Samples to be sent to the outputs.
  */
-UpMixer.prototype.generate = function(inputBuffers, outputBuffers) {
-    var inputBuffer = inputBuffers[0];
-    var outputBuffer = outputBuffers[0];
+UpMixer.prototype.generate = function() {
+    var input = this.inputs[0];
+    var output = this.outputs[0];
 
-    if (inputBuffer.isEmpty) {
-        outputBuffer.isEmpty = true;
-        return;
+    var numberOfInputChannels = input.samples.length;
+    var numberOfOutputChannels = output.samples.length;
+    
+    if (numberOfInputChannels == numberOfOutputChannels) {
+        output.samples = input.samples;
     }
-
-    var outputChannels = this.outputChannels;
-
-    var numberOfChannels = inputBuffer.numberOfChannels;
-    for (var i = 0; i < outputChannels; i++) {
-        var inputChannel = inputBuffer.getChannelData(i % numberOfChannels);
-        var outputChannel = outputBuffer.getChannelData(i);
-        outputChannel.set(inputChannel);
+    else {
+        for (var i = 0; i < numberOfOutputChannels; i++) {
+            output.samples[i] = input.samples[i % numberOfInputChannels];
+        }
     }
 };
 

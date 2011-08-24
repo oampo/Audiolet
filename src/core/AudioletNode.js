@@ -99,7 +99,6 @@ AudioletNode.prototype.linkNumberOfOutputChannels = function(output, input) {
  * manually by users, who should instead rely on automatic ticking from
  * connections to the AudioletDevice.
  *
- * @param {Number} length The number of samples to process.
  * @param {Number} timestamp A timestamp for the block of samples.
  */
 AudioletNode.prototype.tick = function(timestamp) {
@@ -110,7 +109,8 @@ AudioletNode.prototype.tick = function(timestamp) {
         this.timestamp = timestamp;
         this.tickParents(timestamp);
 
-        var inputSamples = this.createInputSamples();
+        this.createInputSamples();
+        this.createOutputSamples();
 
         this.generate();
     }
@@ -120,7 +120,6 @@ AudioletNode.prototype.tick = function(timestamp) {
  * Call the tick function on nodes which are connected to the inputs.  This
  * function should not be called manually by users.
  *
- * @param {Number} length The number of samples to process.
  * @param {Number} timestamp A timestamp for the block of samples.
  */
 AudioletNode.prototype.tickParents = function(timestamp) {
@@ -140,9 +139,6 @@ AudioletNode.prototype.tickParents = function(timestamp) {
 /**
  * Process a block of samples, reading from the input buffers and putting
  * new values into the output buffers.  Override me!
- *
- * @param {AudioletBuffer[]} inputBuffers Samples received from the inputs.
- * @param {AudioletBuffer[]} outputBuffers Samples to be sent to the outputs.
  */
 AudioletNode.prototype.generate = function() {
 };
@@ -151,26 +147,44 @@ AudioletNode.prototype.generate = function() {
  * Create the input buffers by grabbing data from the outputs of connected
  * nodes and summing it.  If no nodes are connected to an input, then
  * give a one channel empty buffer.
- *
- * @param {Number} length The number of samples for the resulting buffers.
- * @return {AudioletBuffer[]} The input buffers.
  */
 AudioletNode.prototype.createInputSamples = function() {
-    var numberOfInputs = this.numberOfInputs;
+    var numberOfInputs = this.inputs.length;
     for (var i = 0; i < numberOfInputs; i++) {
         var input = this.inputs[i];
-
-        var inputSample = 0;
+        var inputSamples = [];
+        var numberOfInputChannels = 0;
 
         var connectedFrom = input.connectedFrom;
         var numberOfConnections = connectedFrom.length;
-        // Sum the rest of the outputs
         for (var j = 0; j < numberOfConnections; j++) {
             var output = connectedFrom[j];
-            inputSample += output.sample;
+            var outputSamples = output.samples;
+            var numberOfOutputChannels = output.samples.length;
+
+            for (var k = 0; k < numberOfOutputChannels; k++) {
+                if (k >= numberOfInputChannels) {
+                    inputSamples.push(outputSamples[k]);
+                    numberOfInputChannels += 1;
+                }
+                else {
+                    inputSamples[k] += outputSamples[k];
+                }
+            }
         }
-        
-        input.sample = inputSample
+        input.samples = inputSamples;
+    }
+};
+
+
+/**
+* Create output buffers of the correct length.
+*/
+AudioletNode.prototype.createOutputSamples = function() {
+    var numberOfOutputs = this.outputs.length;
+    for (var i = 0; i < numberOfOutputs; i++) {
+        var output = this.outputs[i];
+        output.samples = new Array(output.getNumberOfChannels());
     }
 };
 

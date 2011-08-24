@@ -1,5 +1,5 @@
 /*!
- * @depends AudioletNode.js
+ * @depends PassThroughNode.js
  */
 
 /**
@@ -19,12 +19,12 @@
  * - Audio
  *
  * @constructor
- * @extends AudioletNode
+ * @extends PassThroughNode
  * @param {Audiolet} audiolet The audiolet object.
  * @param {Number} [bpm=120] Initial tempo.
  */
 var Scheduler = function(audiolet, bpm) {
-    AudioletNode.call(this, audiolet, 1, 1);
+    PassThroughNode.call(this, audiolet, 1, 1);
     this.linkNumberOfOutputChannels(0, 0);
     this.bpm = bpm || 120;
     this.queue = new PriorityQueue(null, function(a, b) {
@@ -41,7 +41,7 @@ var Scheduler = function(audiolet, bpm) {
     this.lastBeatTime = 0;
     this.beatLength = 60 / this.bpm * this.audiolet.device.sampleRate;
 };
-extend(Scheduler, AudioletNode);
+extend(Scheduler, PassThroughNode);
 
 /**
  * Set the tempo of the scheduler.
@@ -110,7 +110,7 @@ Scheduler.prototype.play = function(patterns, durationPattern, callback) {
 };
 
 /**
- * Schedule patterns to play starting at an absolute beat position, 
+ * Schedule patterns to play starting at an absolute beat position,
  * and provide the values generated to a callback.
  * The durationPattern argument can be either a number, giving a constant time
  * between each event, or a pattern, allowing varying time difference.
@@ -169,11 +169,10 @@ Scheduler.prototype.stop = function(event) {
  * blocks allows sample-accurate changes to happen, and also where we process
  * the events themselves.
  *
- * @param {Number} length The number of samples to process.
  * @param {Number} timestamp A timestamp for the block of samples.
  */
 Scheduler.prototype.tick = function(timestamp) {
-    AudioletNode.prototype.tick(timestamp);
+    PassThroughNode.prototype.tick.call(this, timestamp);
 
     while (!this.queue.isEmpty() &&
            this.queue.peek().time <= this.time) {
@@ -184,8 +183,6 @@ Scheduler.prototype.tick = function(timestamp) {
 
 /**
  * Update the various representations of time within the scheduler.
- *
- * @param {Number} time The current write position in samples.
  */
 Scheduler.prototype.tickClock = function() {
     this.time += 1;

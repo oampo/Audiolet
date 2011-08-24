@@ -13,7 +13,7 @@
  */
 function AudioletDevice(audiolet, sampleRate, numberOfChannels, bufferSize) {
     AudioletNode.call(this, audiolet, 1, 0);
-
+    bufferSize = 8192;
     this.sink = Sink(this.tick.bind(this), numberOfChannels, bufferSize,
                      sampleRate);
 
@@ -24,7 +24,7 @@ function AudioletDevice(audiolet, sampleRate, numberOfChannels, bufferSize) {
     this.bufferSize = this.sink.preBufferSize;
 
     this.writePosition = 0;
-    this.buffer = null;
+    this.samples = null;
 }
 extend(AudioletDevice, AudioletNode);
 
@@ -36,24 +36,18 @@ extend(AudioletDevice, AudioletNode);
 * @param {Number} numberOfChannels Number of channels in the buffer.
 */
 AudioletDevice.prototype.tick = function(buffer, numberOfChannels) {
-    var samplesNeeded = buffer.length / numberOfChannels;
-    AudioletNode.prototype.tick.call(this, samplesNeeded, this.writePosition);
-    var interleaved = this.buffer.interleaved();
-    var numberOfSamples = interleaved.length;
-    for (var i = 0; i < numberOfSamples; i++) {
-        buffer[i] = interleaved[i];
-    }
-    this.writePosition += samplesNeeded;
-};
+    var input = this.inputs[0];
 
-/**
-* Make the input buffer available as a member.
-*
-* @param {AudioletBuffer[]} inputBuffers An array containing the input buffer.
-* @param {AudioletBuffer[]} outputBuffers An empty array.
-*/
-AudioletDevice.prototype.generate = function(inputBuffers, outputBuffers) {
-    this.buffer = inputBuffers[0];
+    var samplesNeeded = buffer.length / numberOfChannels;
+    for (var i = 0; i < samplesNeeded; i++) {
+        AudioletNode.prototype.tick.call(this, this.writePosition);
+
+        for (var j = 0; j < numberOfChannels; j++) {
+            buffer[i * numberOfChannels + j] = input.samples[j];
+        }
+
+        this.writePosition += 1;
+    }
 };
 
 /**
