@@ -55,7 +55,7 @@ AudioletParameter.prototype.setValue = function(value) {
  * @return {Number} The stored static value.
  */
 AudioletParameter.prototype.getValue = function() {
-    if (this.input.samples.length > 0) {
+    if (this.input != null && this.input.samples.length > 0) {
         return this.input.samples[0];
     }
     else {

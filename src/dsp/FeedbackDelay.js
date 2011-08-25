@@ -51,89 +51,37 @@ extend(FeedbackDelay, AudioletNode);
  * @param {AudioletBuffer[]} outputBuffers Samples to be sent to the outputs.
  */
 FeedbackDelay.prototype.generate = function(inputBuffers, outputBuffers) {
-    var inputBuffer = inputBuffers[0];
-    var outputBuffer = outputBuffers[0];
+    var input = this.inputs[0];
+    var output = this.outputs[0];
 
-    // Local processing variables
-    var maximumDelayTime = this.maximumDelayTime;
-    var sampleRate = this.audiolet.device.sampleRate;
+    var delayTime = this.delayTime.getValue();
+    var feedback = this.feedback.getValue();
+    var mix = this.mix.getValue();
 
-    var delayTimeParameter = this.delayTime;
-    var delayTime, delayTimeChannel;
-    if (delayTimeParameter.isStatic()) {
-        delayTime = Math.floor(delayTimeParameter.getValue() * sampleRate);
-    }
-    else {
-        delayTimeChannel = delayTimeParameter.getChannel();
-    }
+    var sampleRate = this.audiolet.output.device.sampleRate;
 
-    var feedbackParameter = this.feedback;
-    var feedback, feedbackChannel;
-    if (feedbackParameter.isStatic()) {
-        feedback = feedbackParameter.getValue();
-    }
-    else {
-        feedbackChannel = feedbackParameter.getChannel();
-    }
-
-    var mixParameter = this.mix;
-    var mix, mixChannel;
-    if (mixParameter.isStatic()) {
-        mix = mixParameter.getValue();
-    }
-    else {
-        mixChannel = mixParameter.getChannel();
-    }
-
-
-    var buffers = this.buffers;
-    var readWriteIndex = this.readWriteIndex;
-
-    var inputChannels = inputBuffer.channels;
-    var outputChannels = outputBuffer.channels;
-    var numberOfChannels = inputBuffer.numberOfChannels;
-    var numberOfBuffers = buffers.length;
-    for (var i = numberOfBuffers; i < numberOfChannels; i++) {
-        // Create buffer for channel if it doesn't already exist
-        var bufferSize = maximumDelayTime * sampleRate;
-        buffers.push(new Float32Array(bufferSize));
-    }
-
-
-    var bufferLength = inputBuffer.length;
-    for (var i = 0; i < bufferLength; i++) {
-        if (delayTimeChannel) {
-            delayTime = Math.floor(delayTimeChannel[i] * sampleRate);
-        }
-        if (feedbackChannel) {
-            feedback = feedbackChannel[i];
-        }
-        if (mixChannel) {
-            mix = mixChannel[i];
+    var numberOfChannels = input.samples.length;
+    var numberOfBuffers = this.buffers.length;
+    for (var i = 0; i < numberOfChannels; i++) {
+        if (i >= numberOfBuffers) {
+            // Create buffer for channel if it doesn't already exist
+            var bufferSize = this.maximumDelayTime * sampleRate;
+            this.buffers.push(new Float32Array(bufferSize));
         }
 
-        for (var j = 0; j < numberOfChannels; j++) {
-            var inputChannel = inputChannels[j];
-            var outputChannel = outputChannels[j];
-            var buffer = buffers[j];
-            var input;
-            if (!inputBuffer.isEmpty) {
-                input = inputChannel[i];
-            }
-            else {
-                input = 0;
-            }
-            var output = buffer[readWriteIndex];
-            outputChannel[i] = mix * output + (1 - mix) * input;
-            buffer[readWriteIndex] = input + feedback * output;
-        }
+        var buffer = this.buffers[i];
 
-        readWriteIndex += 1;
-        if (readWriteIndex >= delayTime) {
-            readWriteIndex = 0;
-        }
+        var inputSample = input.samples[i];
+        var bufferSample = buffer[this.readWriteIndex];
+
+        output.samples[i] = mix * bufferSample + (1 - mix) * inputSample;
+        buffer[this.readWriteIndex] = inputSample + feedback * bufferSample;
     }
-    this.readWriteIndex = readWriteIndex;
+
+    this.readWriteIndex += 1;
+    if (this.readWriteIndex >= delayTime) {
+        this.readWriteIndex = 0;
+    }
 };
 
 /**

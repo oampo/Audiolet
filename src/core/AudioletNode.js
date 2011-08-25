@@ -184,7 +184,11 @@ AudioletNode.prototype.createOutputSamples = function() {
     var numberOfOutputs = this.outputs.length;
     for (var i = 0; i < numberOfOutputs; i++) {
         var output = this.outputs[i];
-        output.samples = new Array(output.getNumberOfChannels());
+        var numberOfChannels = output.getNumberOfChannels();
+        output.samples = new Array(numberOfChannels);
+        for (var j = 0; j < numberOfChannels; j++) {
+            output.samples[j] = 0;
+        }
     }
 };
 

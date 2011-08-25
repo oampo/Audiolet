@@ -32,22 +32,12 @@ extend(TriggerControl, AudioletNode);
  * @param {AudioletBuffer[]} outputBuffers Samples to be sent to the outputs.
  */
 TriggerControl.prototype.generate = function(inputBuffers, outputBuffers) {
-    var buffer = outputBuffers[0];
-    var channel = buffer.getChannelData(0);
-
-    var triggerParameter = this.trigger;
-    var trigger = triggerParameter.getValue();
-
-    var bufferLength = buffer.length;
-    for (var i = 0; i < bufferLength; i++) {
-        if (trigger) {
-            channel[i] = 1;
-            triggerParameter.setValue(0);
-            trigger = 0;
-        }
-        else {
-            channel[i] = 0;
-        }
+    if (this.trigger.getValue() > 0) {
+        this.outputs[0].samples[0] = 1;
+        this.trigger.setValue(0);
+    }
+    else {
+        this.outputs[0].samples[0] = 0;
     }
 };
 

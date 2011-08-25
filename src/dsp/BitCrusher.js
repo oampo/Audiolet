@@ -37,37 +37,14 @@ extend(BitCrusher, AudioletNode);
  * @param {AudioletBuffer[]} outputBuffers Samples to be sent to the outputs.
  */
 BitCrusher.prototype.generate = function(inputBuffers, outputBuffers) {
-    var inputBuffer = inputBuffers[0];
-    var outputBuffer = outputBuffers[0];
+    var input = this.inputs[0];
 
-    if (inputBuffer.isEmpty) {
-        outputBuffer.isEmpty = true;
-        return;
-    }
+    var maxValue = Math.pow(2, this.bits.getValue()) - 1;
 
-    // Local processing variables
-    var bitsParameter = this.bits;
-    var bits, bitsChannel;
-    if (bitsParameter.isStatic()) {
-        bits = bitsParameter.getValue();
-    }
-    else {
-        bitsChannel = bitsParameter.getChannel();
-    }
-
-    var numberOfChannels = inputBuffer.numberOfChannels;
+    var numberOfChannels = input.samples.length;
     for (var i = 0; i < numberOfChannels; i++) {
-        var inputChannel = inputBuffer.getChannelData(i);
-        var outputChannel = outputBuffer.getChannelData(i);
-        var bufferLength = inputBuffer.length;
-        for (var j = 0; j < bufferLength; j++) {
-            if (bitsChannel) {
-                bits = bitsChannel[j];
-            }
-            var maxValue = Math.pow(2, bits) - 1;
-            outputChannel[j] = Math.floor(inputChannel[j] * maxValue) /
-                               maxValue;
-        }
+        this.outputs[0].samples[i] = Math.floor(input.samples[i] * maxValue) /
+                                     maxValue;
     }
 };
 

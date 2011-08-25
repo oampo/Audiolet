@@ -37,35 +37,11 @@ extend(Gain, AudioletNode);
  * @param {AudioletBuffer[]} outputBuffers Samples to be sent to the outputs.
  */
 Gain.prototype.generate = function(inputBuffers, outputBuffers) {
-    var inputBuffer = inputBuffers[0];
-    var outputBuffer = outputBuffers[0];
-
-    if (inputBuffer.isEmpty) {
-        outputBuffer.isEmpty = true;
-        return;
-    }
-
-    // Local processing variables
-    var gainParameter = this.gain;
-    var gain, gainChannel;
-    if (gainParameter.isStatic()) {
-        gain = gainParameter.getValue();
-    }
-    else {
-        gainChannel = gainParameter.getChannel();
-    }
-
-    var numberOfChannels = inputBuffer.numberOfChannels;
+    var gain = this.gain.getValue();
+    var input = this.inputs[0];
+    var numberOfChannels = input.samples.length;
     for (var i = 0; i < numberOfChannels; i++) {
-        var inputChannel = inputBuffer.getChannelData(i);
-        var outputChannel = outputBuffer.getChannelData(i);
-        var bufferLength = inputBuffer.length;
-        for (var j = 0; j < bufferLength; j++) {
-            if (gainChannel) {
-                gain = gainChannel[j];
-            }
-            outputChannel[j] = inputChannel[j] * gain;
-        }
+        this.outputs[0].samples[i] = input.samples[i] * gain;
     }
 };
 

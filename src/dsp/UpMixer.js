@@ -33,7 +33,7 @@ UpMixer.prototype.generate = function() {
 
     var numberOfInputChannels = input.samples.length;
     var numberOfOutputChannels = output.samples.length;
-    
+
     if (numberOfInputChannels == numberOfOutputChannels) {
         output.samples = input.samples;
     }

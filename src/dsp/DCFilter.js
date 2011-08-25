@@ -45,58 +45,24 @@ extend(DCFilter, AudioletNode);
  * @param {AudioletBuffer[]} outputBuffers Samples to be sent to the outputs.
  */
 DCFilter.prototype.generate = function(inputBuffers, outputBuffers) {
-    var inputBuffer = inputBuffers[0];
-    var outputBuffer = outputBuffers[0];
-
-    if (inputBuffer.isEmpty) {
-        outputBuffer.isEmpty = true;
-        return;
-    }
-
-    var xValues = this.xValues;
-    var yValues = this.yValues;
-
-    // Local processing variables
-    var coefficientParameter = this.coefficient;
-    var coefficient, coefficientChannel;
-    if (coefficientParameter.isStatic()) {
-        coefficient = coefficientParameter.getValue();
-    }
-    else {
-        coefficientChannel = coefficientParameter.getChannel();
-    }
-
-    var numberOfChannels = inputBuffer.channels.length;
-    var bufferLength = outputBuffer.length;
+    var coefficient = this.coefficient.getValue();
+    var input = this.inputs[0];
+    var numberOfChannels = input.samples.length;
     for (var i = 0; i < numberOfChannels; i++) {
-        var inputChannel = inputBuffer.channels[i];
-        var outputChannel = outputBuffer.channels[i];
-
-        if (i >= xValues.length) {
-            xValues.push(0);
+        if (i >= this.xValues.length) {
+            this.xValues.push(0);
         }
-        if (i >= yValues.length) {
-            yValues.push(0);
+        if (i >= this.yValues.length) {
+            this.yValues.push(0);
         }
 
-        var lastX = xValues[i];
-        var lastY = yValues[i];
+        var x0 = input.samples[i];
+        var y0 = x0 - this.xValues[i] + coefficient * this.yValues[i];
 
-        for (var j = 0; j < bufferLength; j++) {
-            if (coefficientChannel) {
-                var coefficient = coefficientChannel[j];
-            }
+        this.outputs[0].samples[i] = y0;
 
-            var x0 = inputChannel[j];
-            var y0 = x0 - lastX + coefficient * lastY;
-
-            outputChannel[j] = y0;
-
-            lastX = x0;
-            lastY = y0;
-        }
-        xValues[i] = lastX;
-        yValues[i] = lastY;
+        this.xValues[i] = x0;
+        this.yValues[i] = y0;
     }
 };
 

@@ -40,48 +40,14 @@ extend(Pulse, AudioletNode);
  * @param {AudioletBuffer[]} outputBuffers Samples to be sent to the outputs.
  */
 Pulse.prototype.generate = function(inputBuffers, outputBuffers) {
-    var buffer = outputBuffers[0];
-    var channel = buffer.getChannelData(0);
+    this.outputs[0].samples[0] = (this.phase < this.pulseWidth) ? 1 : -1;
 
-    // Make processing variables local
+    var frequency = this.frequency.getValue();
     var sampleRate = this.audiolet.device.sampleRate;
-    var phase = this.phase;
-
-    var frequencyParameter = this.frequency;
-    var frequency, frequencyChannel;
-    if (frequencyParameter.isStatic()) {
-        frequency = frequencyParameter.getValue();
+    this.phase += frequency / sampleRate;
+    if (this.phase > 1) {
+        this.phase %= 1;
     }
-    else {
-        frequencyChannel = frequencyParameter.getChannel();
-    }
-
-    var pulseWidthParameter = this.pulseWidth;
-    var pulseWidth, pulseWidthChannel;
-    if (pulseWidthParameter.isStatic()) {
-        pulseWidth = pulseWidthParameter.getValue();
-    }
-    else {
-        pulseWidthChannel = pulseWidthParameter.getChannel();
-    }
-
-    // Processing loop
-    var bufferLength = buffer.length;
-    for (var i = 0; i < bufferLength; i++) {
-        if (frequencyChannel) {
-            frequency = frequencyChannel[i];
-        }
-        if (pulseWidthChannel) {
-            pulseWidth = pulseWidthChannel[i];
-        }
-
-        phase += frequency / sampleRate;
-        if (phase > 1) {
-            phase %= 1;
-        }
-        channel[i] = (phase < pulseWidth) ? 1 : -1;
-    }
-    this.phase = phase;
 };
 
 /**

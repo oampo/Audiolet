@@ -14,6 +14,7 @@
 function AudioletDevice(audiolet, sampleRate, numberOfChannels, bufferSize) {
     AudioletNode.call(this, audiolet, 1, 0);
     bufferSize = 8192;
+    Sink.doInterval.backgroundWork = false;
     this.sink = Sink(this.tick.bind(this), numberOfChannels, bufferSize,
                      sampleRate);
 

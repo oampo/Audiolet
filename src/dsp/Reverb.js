@@ -94,121 +94,60 @@ extend(Reverb, AudioletNode);
  * @param {AudioletBuffer[]} outputBuffers Samples to be sent to the outputs.
  */
 Reverb.prototype.generate = function(inputBuffers, outputBuffers) {
-    var inputBuffer = inputBuffers[0];
-    var inputChannel = inputBuffer.channels[0];
-    var outputBuffer = outputBuffers[0];
-    var outputChannel = outputBuffer.channels[0];
-
-    var mixParameter = this.mix;
-    var mix, mixChannel;
-    if (mixParameter.isStatic()) {
-        mix = mixParameter.getValue();
-    }
-    else {
-        mixChannel = mixParameter.getChannel();
-    }
-
-    var roomSizeParameter = this.roomSize;
-    var roomSize, roomSizeChannel;
-    if (roomSizeParameter.isStatic()) {
-        roomSize = roomSizeParameter.getValue();
-    }
-    else {
-        roomSizeChannel = roomSizeParameter.getChannel();
-    }
-
-    var dampingParameter = this.damping;
-    var damping, dampingChannel;
-    if (dampingParameter.isStatic()) {
-        damping = dampingParameter.getValue();
-    }
-    else {
-        dampingChannel = dampingParameter.getChannel();
-    }
+    var mix = this.mix.getValue();
+    var roomSize = this.roomSize.getValue();
+    var damping = this.damping.getValue();
 
     var numberOfCombs = this.combTuning.length;
     var numberOfFilters = this.allPassTuning.length;
 
-    var gain = this.fixedGain;
+    var value = this.inputs[0].samples[0];
+    var dryValue = value;
 
-    var combBuffers = this.combBuffers;
-    var combIndices = this.combIndices;
-    var filterStores = this.filterStores;
+    value *= this.fixedGain;
+    var gainedValue = value;
 
-    var allPassBuffers = this.allPassBuffers;
-    var allPassIndices = this.allPassIndices;
+    var damping = damping * this.scaleDamping;
+    var feedback = roomSize * this.scaleRoom + this.offsetRoom;
 
-    var scaleDamping = this.scaleDamping;
+    for (var i = 0; i < numberOfCombs; i++) {
+        var combIndex = this.combIndices[i];
+        var combBuffer = this.combBuffers[i];
+        var filterStore = this.filterStores[i];
 
-    var scaleRoom = this.scaleRoom;
-    var offsetRoom = this.offsetRoom;
+        var output = combBuffer[combIndex];
+        filterStore = (output * (1 - damping)) +
+                      (filterStore * damping);
+        value += output;
+        combBuffer[combIndex] = gainedValue + feedback * filterStore;
 
-    var bufferLength = inputBuffer.length;
-    for (var i = 0; i < bufferLength; i++) {
-        if (mixChannel) {
-            mix = mixChannel[i];
-        }
-        if (roomSizeChannel) {
-            roomSize = roomSizeChannel[i];
-        }
-        if (dampingChannel) {
-            damping = dampingChannel[i];
-        }
-
-        var value;
-        if (!inputBuffer.isEmpty) {
-            value = inputChannel[i];
-        }
-        else {
-            value = 0;
-        }
-        var dryValue = value;
-
-        value *= gain;
-        var gainedValue = value;
-
-        var damping = damping * scaleDamping;
-        var feedback = roomSize * scaleRoom + offsetRoom;
-        for (var j = 0; j < numberOfCombs; j++) {
-            var combIndex = combIndices[j];
-            var combBuffer = combBuffers[j];
-            var filterStore = filterStores[j];
-
-            var output = combBuffer[combIndex];
-            filterStore = (output * (1 - damping)) +
-                          (filterStore * damping);
-            value += output;
-            combBuffer[combIndex] = gainedValue + feedback * filterStore;
-
-            combIndex += 1;
-            if (combIndex >= combBuffer.length) {
-                combIndex = 0;
-            }
-
-
-            combIndices[j] = combIndex;
-            filterStores[j] = filterStore;
+        combIndex += 1;
+        if (combIndex >= combBuffer.length) {
+            combIndex = 0;
         }
 
-        for (var j = 0; j < numberOfFilters; j++) {
-            var allPassBuffer = allPassBuffers[j];
-            var allPassIndex = allPassIndices[j];
-
-            var input = value;
-            var bufferValue = allPassBuffer[allPassIndex];
-            value = -value + bufferValue;
-            allPassBuffer[allPassIndex] = input + (bufferValue * 0.5);
-
-            allPassIndex += 1;
-            if (allPassIndex >= allPassBuffer.length) {
-                allPassIndex = 0;
-            }
-
-            allPassIndices[j] = allPassIndex;
-        }
-
-        outputChannel[i] = mix * value + (1 - mix) * dryValue;
+        this.combIndices[i] = combIndex;
+        this.filterStores[i] = filterStore;
     }
+
+    for (var i = 0; i < numberOfFilters; i++) {
+        var allPassBuffer = this.allPassBuffers[i];
+        var allPassIndex = this.allPassIndices[i];
+
+        var input = value;
+        var bufferValue = allPassBuffer[allPassIndex];
+        value = -value + bufferValue;
+        allPassBuffer[allPassIndex] = input + (bufferValue * 0.5);
+
+        allPassIndex += 1;
+        if (allPassIndex >= allPassBuffer.length) {
+            allPassIndex = 0;
+        }
+
+        this.allPassIndices[i] = allPassIndex;
+    }
+
+    this.outputs[0].samples[0] = mix * value + (1 - mix) * dryValue;
 };
 
 

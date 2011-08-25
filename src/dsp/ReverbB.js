@@ -158,7 +158,7 @@ ReverbB.prototype.toString = function() {
  * @constructor
  * @extends AudioletNode
  * @param {Audiolet} audiolet The audiolet object.
- * @param {Number} delayTime The delay time in seconds
+ * @param {Number} delayTime The delay time in seconds.
  */
 var FeedbackGainToDecayTime = function(audiolet, delayTime) {
     AudioletNode.call(this, audiolet, 1, 1);
