@@ -1,8 +1,31 @@
-/**
+/*!
  * @depends ../core/AudioletNode.js
  * @depends Sine.js
  */
 
+/**
+ * Equal-power cross-fade between two signals
+ *
+ * **Inputs**
+ *
+ * - Audio 1
+ * - Audio 2
+ * - Fade Position
+ *
+ * **Outputs**
+ *
+ * - Mixed audio
+ *
+ * **Parameters**
+ *
+ * - position The fade position.  Values between 0 (Audio 1 only) and 1 (Audio
+ * 2 only).  Linked to input 2.
+ *
+ * @constructor
+ * @extends AudioletNode
+ * @param {Audiolet} audiolet The audiolet object.
+ * @param {Number} [position=0.5] The initial fade position.
+ */
 var CrossFade = function(audiolet, position) {
     AudioletNode.call(this, audiolet, 3, 1);
     this.linkNumberOfOutputChannels(0, 0);
@@ -10,6 +33,12 @@ var CrossFade = function(audiolet, position) {
 };
 extend(CrossFade, AudioletNode);
 
+/**
+ * Process a block of samples
+ *
+ * @param {AudioletBuffer[]} inputBuffers Samples received from the inputs.
+ * @param {AudioletBuffer[]} outputBuffers Samples to be sent to the outputs.
+ */
 CrossFade.prototype.generate = function(inputBuffers, outputBuffers) {
     var inputBufferA = inputBuffers[0];
     var inputBufferB = inputBuffers[1];
@@ -72,6 +101,11 @@ CrossFade.prototype.generate = function(inputBuffers, outputBuffers) {
     }
 };
 
+/**
+ * toString
+ *
+ * @return {String} String representation.
+ */
 CrossFade.prototype.toString = function() {
     return 'Cross Fader';
 };
