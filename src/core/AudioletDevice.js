@@ -62,7 +62,7 @@ AudioletDevice.prototype.generate = function(inputBuffers, outputBuffers) {
  * @return {Number} Output position in samples.
  */
 AudioletDevice.prototype.getPlaybackTime = function() {
-    return this.sink.getPlayBackTime();
+    return this.sink.getPlaybackTime();
 };
 
 /**
