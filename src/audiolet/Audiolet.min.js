@@ -751,6 +751,7 @@ function AudioletDevice(audiolet, sampleRate, numberOfChannels, bufferSize) {
 
     this.writePosition = 0;
     this.buffer = null;
+    this.paused = false;
 }
 extend(AudioletDevice, AudioletNode);
 
@@ -762,14 +763,17 @@ extend(AudioletDevice, AudioletNode);
 * @param {Number} numberOfChannels Number of channels in the buffer.
 */
 AudioletDevice.prototype.tick = function(buffer, numberOfChannels) {
-    var samplesNeeded = buffer.length / numberOfChannels;
-    AudioletNode.prototype.tick.call(this, samplesNeeded, this.writePosition);
-    var interleaved = this.buffer.interleaved();
-    var numberOfSamples = interleaved.length;
-    for (var i = 0; i < numberOfSamples; i++) {
-        buffer[i] = interleaved[i];
+    if (!this.paused) {
+        var samplesNeeded = buffer.length / numberOfChannels;
+        AudioletNode.prototype.tick.call(this, samplesNeeded,
+                                         this.writePosition);
+        var interleaved = this.buffer.interleaved();
+        var numberOfSamples = interleaved.length;
+        for (var i = 0; i < numberOfSamples; i++) {
+            buffer[i] = interleaved[i];
+        }
+        this.writePosition += samplesNeeded;
     }
-    this.writePosition += samplesNeeded;
 };
 
 /**
@@ -798,6 +802,21 @@ AudioletDevice.prototype.getPlaybackTime = function() {
  */
 AudioletDevice.prototype.getWriteTime = function() {
     return this.writePosition;
+};
+
+/**
+ * Pause the output stream, and stop everything from ticking.  The playback
+ * time will continue to increase, but the write time will be paused.
+ */
+AudioletDevice.prototype.pause = function() {
+    this.paused = true;
+};
+
+/**
+ * Restart the output stream.
+ */
+AudioletDevice.prototype.play = function() {
+   this.paused = false; 
 };
 
 /**
