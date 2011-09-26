@@ -1,0 +1,16 @@
+body {
+  background-color:#AAAAAA;
+}
+#drum-machine-wrapper {
+  width: 640px;
+  height: 80px;
+  margin-left: auto;
+  margin-right: auto;
+}
+#ruler-wrapper {
+  height: 20px;
+}
+#sequence-wrapper {
+  width: 640px;
+  height: 60px;
+}

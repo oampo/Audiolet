@@ -90,14 +90,14 @@ Amplitude.prototype.generate = function(inputBuffers, outputBuffers) {
         var outputChannel = outputBuffer.getChannelData(i);
         var bufferLength = inputBuffer.length;
         for (var j = 0; j < bufferLength; j++) {
-            var value = inputChannel[j];
+            var value = Math.abs(inputChannel[j]);
             if (attackChannel) {
                 attack = attackChannel[j];
             }
             if (releaseChannel) {
                 release = releaseChannel[j];
             }
-            if (i > follower) {
+            if (value > follower) {
                 follower = attack * (follower - value) + value;
             }
             else {

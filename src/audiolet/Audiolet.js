@@ -682,8 +682,7 @@ AudioletNode.prototype.remove = function() {
  */
 function AudioletDevice(audiolet, sampleRate, numberOfChannels, bufferSize) {
     AudioletNode.call(this, audiolet, 1, 0);
-    bufferSize = 8192;
-    Sink.doInterval.backgroundWork = false;
+
     this.sink = Sink(this.tick.bind(this), numberOfChannels, bufferSize,
                      sampleRate);
 
@@ -694,7 +693,8 @@ function AudioletDevice(audiolet, sampleRate, numberOfChannels, bufferSize) {
     this.bufferSize = this.sink.preBufferSize;
 
     this.writePosition = 0;
-    this.samples = null;
+    this.buffer = null;
+    this.paused = false;
 }
 extend(AudioletDevice, AudioletNode);
 
@@ -706,17 +706,19 @@ extend(AudioletDevice, AudioletNode);
 * @param {Number} numberOfChannels Number of channels in the buffer.
 */
 AudioletDevice.prototype.tick = function(buffer, numberOfChannels) {
-    var input = this.inputs[0];
+    if (!this.paused) {
+        var input = this.inputs[0];
 
-    var samplesNeeded = buffer.length / numberOfChannels;
-    for (var i = 0; i < samplesNeeded; i++) {
-        AudioletNode.prototype.tick.call(this, this.writePosition);
+        var samplesNeeded = buffer.length / numberOfChannels;
+        for (var i = 0; i < samplesNeeded; i++) {
+            AudioletNode.prototype.tick.call(this, this.writePosition);
 
-        for (var j = 0; j < numberOfChannels; j++) {
-            buffer[i * numberOfChannels + j] = input.samples[j];
+            for (var j = 0; j < numberOfChannels; j++) {
+                buffer[i * numberOfChannels + j] = input.samples[j];
+            }
+
+            this.writePosition += 1;
         }
-
-        this.writePosition += 1;
     }
 };
 
@@ -726,7 +728,7 @@ AudioletDevice.prototype.tick = function(buffer, numberOfChannels) {
  * @return {Number} Output position in samples.
  */
 AudioletDevice.prototype.getPlaybackTime = function() {
-    return this.sink.getPlayBackTime();
+    return this.sink.getPlaybackTime();
 };
 
 /**
@@ -736,6 +738,21 @@ AudioletDevice.prototype.getPlaybackTime = function() {
  */
 AudioletDevice.prototype.getWriteTime = function() {
     return this.writePosition;
+};
+
+/**
+ * Pause the output stream, and stop everything from ticking.  The playback
+ * time will continue to increase, but the write time will be paused.
+ */
+AudioletDevice.prototype.pause = function() {
+    this.paused = true;
+};
+
+/**
+ * Restart the output stream.
+ */
+AudioletDevice.prototype.play = function() {
+   this.paused = false; 
 };
 
 /**
@@ -2011,14 +2028,14 @@ Amplitude.prototype.generate = function(inputBuffers, outputBuffers) {
         var outputChannel = outputBuffer.getChannelData(i);
         var bufferLength = inputBuffer.length;
         for (var j = 0; j < bufferLength; j++) {
-            var value = inputChannel[j];
+            var value = Math.abs(inputChannel[j]);
             if (attackChannel) {
                 attack = attackChannel[j];
             }
             if (releaseChannel) {
                 release = releaseChannel[j];
             }
-            if (i > follower) {
+            if (value > follower) {
                 follower = attack * (follower - value) + value;
             }
             else {
@@ -6405,7 +6422,7 @@ SinkClass.prototype = {
  * @return {Number} The position of the write head, in samples, per channel.
 */
 	getPlaybackTime: function(){
-		return this.writePosition - preBufferSize;
+		return this.writePosition - this.preBufferSize;
 	},
 /**
  * A private method that applies the ring buffer contents to the specified buffer, while in interleaved mode.
@@ -6516,8 +6533,8 @@ sinks('moz', function(){
 	self._bufferFill	= bufferFill;
 	self._audio		= audioDevice;
 }, {
-	getPlayBackTime: function(){
-		return this._audio.mozCurrentSampleOffset() / this.numberOfChannels
+	getPlaybackTime: function(){
+		return this._audio.mozCurrentSampleOffset() / this.channelCount;
 	}
 });
 
@@ -6598,14 +6615,14 @@ Sink.doInterval		= function(callback, timeout){
 		try{
 			prev	= new BlobBuilder();
 			prev.append('setInterval(function(){ postMessage("tic"); }, ' + timeout + ');');
-			id	= window.URL.createObjectURL(prev.getBlob());
+			id	= (window.MozURL || window.webkitURL || window.MSURL || window.OURL || window.URL).createObjectURL(prev.getBlob());
 			timer	= new Worker(id);
 			timer.onmessage = function(){
 				callback();
 			};
 			return function(){
 				timer.terminate();
-				window.URL.revokeObjectURL(id);
+				(window.MozURL || window.webkitURL || window.MSURL || window.OURL || window.URL).revokeObjectURL(id);
 			};
 		} catch(e){};
 	}
