@@ -41,14 +41,15 @@ extend(AudioletDevice, AudioletNode);
 */
 AudioletDevice.prototype.tick = function(buffer, numberOfChannels) {
     if (!this.paused) {
-        if (this.needTraverse) {
-            this.nodes = this.traverse([]);
-            this.needTraverse = false;
-        }
         var input = this.inputs[0];
 
         var samplesNeeded = buffer.length / numberOfChannels;
         for (var i = 0; i < samplesNeeded; i++) {
+            if (this.needTraverse) {
+                this.nodes = this.traverse([]);
+                this.needTraverse = false;
+            }
+
             // Tick up to, but not including this node
             for (var j = 0; j < this.nodes.length - 1; j++) {
                 this.nodes[j].tick();
