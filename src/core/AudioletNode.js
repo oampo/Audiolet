@@ -172,8 +172,7 @@ AudioletNode.prototype.createInputSamples = function() {
             }
         }
         if (input.samples.length > numberOfInputChannels) {
-            input.samples.splice(numberOfInputChannels,
-                                 input.samples.length - numberOfInputChannels);
+            input.samples = input.samples.slice(0, numberOfInputChannels);
         }
     }
 };
