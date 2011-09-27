@@ -50,6 +50,8 @@ AudioletNode.prototype.connect = function(node, output, input) {
     var inputPin = node.inputs[input || 0];
     outputPin.connect(inputPin);
     inputPin.connect(outputPin);
+
+    this.audiolet.device.needTraverse = true;
 };
 
 /**
@@ -69,6 +71,8 @@ AudioletNode.prototype.disconnect = function(node, output, input) {
     var inputPin = node.inputs[input || 0];
     inputPin.disconnect(outputPin);
     outputPin.disconnect(inputPin);
+
+    this.audiolet.device.needTraverse = true;
 };
 
 /**
@@ -98,22 +102,20 @@ AudioletNode.prototype.linkNumberOfOutputChannels = function(output, input) {
  * higher up the processing graph.  This function should not be called
  * manually by users, who should instead rely on automatic ticking from
  * connections to the AudioletDevice.
- *
- * @param {Number} timestamp A timestamp for the block of samples.
  */
-AudioletNode.prototype.tick = function(timestamp) {
-    if (timestamp != this.timestamp) {
-        // Need to set the timestamp before we tick the parents so we
-        // can't get into infinite loops where there is feedback in the
-        // graph
-        this.timestamp = timestamp;
-        this.tickParents(timestamp);
+AudioletNode.prototype.tick = function() {
+    this.createInputSamples();
+    this.createOutputSamples();
 
-        this.createInputSamples();
-        this.createOutputSamples();
+    this.generate();
+};
 
-        this.generate();
+AudioletNode.prototype.traverse = function(nodes) {
+    nodes = this.traverseParents(nodes);
+    if (nodes.indexOf(this) == -1) {
+        nodes.push(this);
     }
+    return nodes;
 };
 
 /**
@@ -122,18 +124,16 @@ AudioletNode.prototype.tick = function(timestamp) {
  *
  * @param {Number} timestamp A timestamp for the block of samples.
  */
-AudioletNode.prototype.tickParents = function(timestamp) {
+AudioletNode.prototype.traverseParents = function(nodes) {
     var numberOfInputs = this.inputs.length;
     for (var i = 0; i < numberOfInputs; i++) {
         var input = this.inputs[i];
         var numberOfStreams = input.connectedFrom.length;
-        // Tick backwards, as the input may disconnect itself during the
-        // loop
         for (var j = 0; j < numberOfStreams; j++) {
-            var index = numberOfStreams - j - 1;
-            input.connectedFrom[index].node.tick(timestamp);
+            nodes = input.connectedFrom[j].node.traverse(nodes);
         }
     }
+    return nodes;
 };
 
 /**
@@ -152,27 +152,28 @@ AudioletNode.prototype.createInputSamples = function() {
     var numberOfInputs = this.inputs.length;
     for (var i = 0; i < numberOfInputs; i++) {
         var input = this.inputs[i];
-        var inputSamples = [];
         var numberOfInputChannels = 0;
 
         var connectedFrom = input.connectedFrom;
         var numberOfConnections = connectedFrom.length;
         for (var j = 0; j < numberOfConnections; j++) {
             var output = connectedFrom[j];
-            var outputSamples = output.samples;
             var numberOfOutputChannels = output.samples.length;
 
+            for (var k = numberOfInputChannels; k < numberOfOutputChannels;
+                 k++) {
+                input.samples[k] = 0;
+                numberOfInputChannels += 1;
+            }
+
             for (var k = 0; k < numberOfOutputChannels; k++) {
-                if (k >= numberOfInputChannels) {
-                    inputSamples.push(outputSamples[k]);
-                    numberOfInputChannels += 1;
-                }
-                else {
-                    inputSamples[k] += outputSamples[k];
-                }
+                input.samples[k] += output.samples[k];
             }
         }
-        input.samples = inputSamples;
+        if (input.samples.length > numberOfInputChannels) {
+            input.samples.splice(numberOfInputChannels,
+                                 input.samples.length - numberOfInputChannels);
+        }
     }
 };
 
@@ -185,9 +186,12 @@ AudioletNode.prototype.createOutputSamples = function() {
     for (var i = 0; i < numberOfOutputs; i++) {
         var output = this.outputs[i];
         var numberOfChannels = output.getNumberOfChannels();
-        output.samples = new Array(numberOfChannels);
         for (var j = 0; j < numberOfChannels; j++) {
             output.samples[j] = 0;
+        }
+        if (output.samples.length > numberOfChannels) {
+            output.samples.splice(numberOfChannels,
+                                  output.samples.length - numberOfChannels);
         }
     }
 };

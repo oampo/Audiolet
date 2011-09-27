@@ -171,8 +171,9 @@ Scheduler.prototype.stop = function(event) {
  *
  * @param {Number} timestamp A timestamp for the block of samples.
  */
-Scheduler.prototype.tick = function(timestamp) {
-    PassThroughNode.prototype.tick.call(this, timestamp);
+Scheduler.prototype.tick = function() {
+    PassThroughNode.prototype.tick.call(this);
+    this.tickClock();
 
     while (!this.queue.isEmpty() &&
            this.queue.peek().time <= this.time) {

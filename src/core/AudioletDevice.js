@@ -26,6 +26,9 @@ function AudioletDevice(audiolet, sampleRate, numberOfChannels, bufferSize) {
     this.writePosition = 0;
     this.buffer = null;
     this.paused = false;
+
+    this.needTraverse = true;
+    this.nodes = [];
 }
 extend(AudioletDevice, AudioletNode);
 
@@ -38,11 +41,19 @@ extend(AudioletDevice, AudioletNode);
 */
 AudioletDevice.prototype.tick = function(buffer, numberOfChannels) {
     if (!this.paused) {
+        if (this.needTraverse) {
+            this.nodes = this.traverse([]);
+            this.needTraverse = false;
+        }
         var input = this.inputs[0];
 
         var samplesNeeded = buffer.length / numberOfChannels;
         for (var i = 0; i < samplesNeeded; i++) {
-            AudioletNode.prototype.tick.call(this, this.writePosition);
+            // Tick up to, but not including this node
+            for (var j = 0; j < this.nodes.length - 1; j++) {
+                this.nodes[j].tick();
+            }
+            AudioletNode.prototype.tick.call(this);
 
             for (var j = 0; j < numberOfChannels; j++) {
                 buffer[i * numberOfChannels + j] = input.samples[j];

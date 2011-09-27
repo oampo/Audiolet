@@ -40,7 +40,8 @@ extend(Pulse, AudioletNode);
  * @param {AudioletBuffer[]} outputBuffers Samples to be sent to the outputs.
  */
 Pulse.prototype.generate = function(inputBuffers, outputBuffers) {
-    this.outputs[0].samples[0] = (this.phase < this.pulseWidth) ? 1 : -1;
+    var pulseWidth = this.pulseWidth.getValue();
+    this.outputs[0].samples[0] = (this.phase < pulseWidth) ? 1 : -1;
 
     var frequency = this.frequency.getValue();
     var sampleRate = this.audiolet.device.sampleRate;
