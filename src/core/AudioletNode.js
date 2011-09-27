@@ -186,10 +186,16 @@ AudioletNode.prototype.createOutputSamples = function() {
     for (var i = 0; i < numberOfOutputs; i++) {
         var output = this.outputs[i];
         var numberOfChannels = output.getNumberOfChannels();
-        if (output.samples.length != numberOfChannels) {
-            for (var j = 0; j < numberOfChannels; j++) {
-                output.samples[j] = 0;
-            }
+        if (output.samples.length == numberOfChannels) {
+            continue;
+        }
+        else if (output.samples.length > numberOfChannels) {
+            output.samples = output.samples.slice(0, numberOfChannels);
+            continue;
+        }
+
+        for (var j = output.samples.length; j < numberOfChannels; j++) {
+            output.samples[j] = 0;
         }
     }
 };
