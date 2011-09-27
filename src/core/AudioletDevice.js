@@ -54,7 +54,8 @@ AudioletDevice.prototype.tick = function(buffer, numberOfChannels) {
             for (var j = 0; j < this.nodes.length - 1; j++) {
                 this.nodes[j].tick();
             }
-            AudioletNode.prototype.tick.call(this);
+            // Cut down tick to just sum the input samples 
+            this.createInputSamples();
 
             for (var j = 0; j < numberOfChannels; j++) {
                 buffer[i * numberOfChannels + j] = input.samples[j];

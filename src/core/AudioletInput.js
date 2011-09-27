@@ -35,6 +35,9 @@ AudioletInput.prototype.disconnect = function(output) {
             break;
         }
     }
+    if (this.connectedFrom.length == 0) {
+        this.samples = [];
+    }
 };
 
 /**

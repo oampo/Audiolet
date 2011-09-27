@@ -596,15 +596,15 @@ AudioletNode.prototype.createInputSamples = function() {
     var numberOfInputs = this.inputs.length;
     for (var i = 0; i < numberOfInputs; i++) {
         var input = this.inputs[i];
+        if (!input.connectedFrom.length) {
+            continue;
+        }
+
         var numberOfInputChannels = 0;
 
-        var connectedFrom = input.connectedFrom;
-        var numberOfConnections = connectedFrom.length;
-        for (var j = 0; j < numberOfConnections; j++) {
-            var output = connectedFrom[j];
-            var numberOfOutputChannels = output.samples.length;
-
-            for (var k = 0; k < numberOfOutputChannels; k++) {
+        for (var j = 0; j < input.connectedFrom.length; j++) {
+            var output = input.connectedFrom[j];
+            for (var k = 0; k < output.samples.length; k++) {
                 var sample = output.samples[k];
                 if (k < numberOfInputChannels) {
                     input.samples[k] += sample;
@@ -631,12 +631,10 @@ AudioletNode.prototype.createOutputSamples = function() {
     for (var i = 0; i < numberOfOutputs; i++) {
         var output = this.outputs[i];
         var numberOfChannels = output.getNumberOfChannels();
-        for (var j = 0; j < numberOfChannels; j++) {
-            output.samples[j] = 0;
-        }
-        if (output.samples.length > numberOfChannels) {
-            output.samples.splice(numberOfChannels,
-                                  output.samples.length - numberOfChannels);
+        if (output.samples.length != numberOfChannels) {
+            for (var j = 0; j < numberOfChannels; j++) {
+                output.samples[j] = 0;
+            }
         }
     }
 };
@@ -728,7 +726,8 @@ AudioletDevice.prototype.tick = function(buffer, numberOfChannels) {
             for (var j = 0; j < this.nodes.length - 1; j++) {
                 this.nodes[j].tick();
             }
-            AudioletNode.prototype.tick.call(this);
+            // Cut down tick to just sum the input samples 
+            this.createInputSamples();
 
             for (var j = 0; j < numberOfChannels; j++) {
                 buffer[i * numberOfChannels + j] = input.samples[j];
@@ -817,6 +816,9 @@ AudioletInput.prototype.disconnect = function(output) {
             this.connectedFrom.splice(i, 1);
             break;
         }
+    }
+    if (this.connectedFrom.length == 0) {
+        this.samples = [];
     }
 };
 
