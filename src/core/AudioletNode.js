@@ -161,11 +161,12 @@ AudioletNode.prototype.createInputSamples = function() {
             var numberOfOutputChannels = output.samples.length;
 
             for (var k = 0; k < numberOfOutputChannels; k++) {
+                var sample = output.samples[k];
                 if (k < numberOfInputChannels) {
-                    input.samples[k] += output.samples[k];
+                    input.samples[k] += sample;
                 }
                 else {
-                    input.samples[k] = output.samples[k];
+                    input.samples[k] = sample;
                     numberOfInputChannels += 1;
                 }
             }
