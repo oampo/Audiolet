@@ -604,14 +604,14 @@ AudioletNode.prototype.createInputSamples = function() {
             var output = connectedFrom[j];
             var numberOfOutputChannels = output.samples.length;
 
-            for (var k = 0; k < numberOfInputChannels; k++) {
-                input.samples[k] += output.samples[k];
-            }
-
-            for (var k = numberOfInputChannels; k < numberOfOutputChannels;
-                 k++) {
-                input.samples[k] = output.samples[k];
-                numberOfInputChannels += 1;
+            for (var k = 0; k < numberOfOutputChannels; k++) {
+                if (k < numberOfInputChannels) {
+                    input.samples[k] += output.samples[k];
+                }
+                else {
+                    input.samples[k] = output.samples[k];
+                    numberOfInputChannels += 1;
+                }
             }
         }
         if (input.samples.length > numberOfInputChannels) {
@@ -714,14 +714,15 @@ extend(AudioletDevice, AudioletNode);
 */
 AudioletDevice.prototype.tick = function(buffer, numberOfChannels) {
     if (!this.paused) {
-        if (this.needTraverse) {
-            this.nodes = this.traverse([]);
-            this.needTraverse = false;
-        }
         var input = this.inputs[0];
 
         var samplesNeeded = buffer.length / numberOfChannels;
         for (var i = 0; i < samplesNeeded; i++) {
+            if (this.needTraverse) {
+                this.nodes = this.traverse([]);
+                this.needTraverse = false;
+            }
+
             // Tick up to, but not including this node
             for (var j = 0; j < this.nodes.length - 1; j++) {
                 this.nodes[j].tick();
