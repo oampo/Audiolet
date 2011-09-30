@@ -249,7 +249,7 @@ Scheduler.prototype.tick = function(length, timestamp) {
  */
 Scheduler.prototype.updateClock = function(time) {
     this.time = time;
-    this.seconds = this.time * this.audiolet.device.sampleRate;
+    this.seconds = this.time / this.audiolet.device.sampleRate;
     if (this.time >= this.lastBeatTime + this.beatLength) {
         this.beat += 1;
         this.beatInBar += 1;

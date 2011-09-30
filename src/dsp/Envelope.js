@@ -42,7 +42,7 @@ var Envelope = function(audiolet, gate, levels, times, releaseStage,
     this.time = null;
     this.changeTime = null;
 
-    this.level = 0;
+    this.level = levels[0];
     this.delta = 0;
     this.gateOn = false;
 };
@@ -123,7 +123,6 @@ Envelope.prototype.generate = function(inputBuffers, outputBuffers) {
         }
 
         if (stageChanged) {
-//            level = this.levels[stage];
             if (stage != this.times.length) {
                 // Actually update the variables
                 delta = this.calculateDelta(stage, level);
