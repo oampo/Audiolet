@@ -89,13 +89,15 @@ Envelope.prototype.generate = function(inputBuffers, outputBuffers) {
             gateOn = true;
             stage = 0;
             time = 0;
-            stageChanged = true;
+            if (stage != releaseStage) {
+                stageChanged = true;
+            }
         }
 
         if (gateOn && !gate) {
             // Key released
             gateOn = false;
-            if (releaseStage) {
+            if (releaseStage != null) {
                 // Jump to the release stage
                 stage = releaseStage;
                 stageChanged = true;
