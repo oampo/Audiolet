@@ -1766,7 +1766,7 @@ Scheduler.prototype.tick = function(length, timestamp) {
  */
 Scheduler.prototype.updateClock = function(time) {
     this.time = time;
-    this.seconds = this.time * this.audiolet.device.sampleRate;
+    this.seconds = this.time / this.audiolet.device.sampleRate;
     if (this.time >= this.lastBeatTime + this.beatLength) {
         this.beat += 1;
         this.beatInBar += 1;
@@ -1936,7 +1936,7 @@ var Envelope = function(audiolet, gate, levels, times, releaseStage,
     this.time = null;
     this.changeTime = null;
 
-    this.level = 0;
+    this.level = levels[0];
     this.delta = 0;
     this.gateOn = false;
 };
@@ -1983,13 +1983,15 @@ Envelope.prototype.generate = function(inputBuffers, outputBuffers) {
             gateOn = true;
             stage = 0;
             time = 0;
-            stageChanged = true;
+            if (stage != releaseStage) {
+                stageChanged = true;
+            }
         }
 
         if (gateOn && !gate) {
             // Key released
             gateOn = false;
-            if (releaseStage) {
+            if (releaseStage != null) {
                 // Jump to the release stage
                 stage = releaseStage;
                 stageChanged = true;
@@ -2017,7 +2019,6 @@ Envelope.prototype.generate = function(inputBuffers, outputBuffers) {
         }
 
         if (stageChanged) {
-//            level = this.levels[stage];
             if (stage != this.times.length) {
                 // Actually update the variables
                 delta = this.calculateDelta(stage, level);
@@ -2801,9 +2802,10 @@ BitCrusher.prototype.toString = function() {
  * @param {Number} [playbackRate=1] The initial playback rate.
  * @param {Number} [startPosition=0] The initial start position.
  * @param {Number} [loop=0] Initial value for whether to loop.
+ * @param {Function} [onComplete] Called when the buffer has finished playing.
  */
 var BufferPlayer = function(audiolet, buffer, playbackRate, startPosition,
-                            loop) {
+                            loop, onComplete) {
     AudioletNode.call(this, audiolet, 3, 1);
     this.buffer = buffer;
     this.setNumberOfOutputChannels(0, this.buffer.numberOfChannels);
@@ -2812,6 +2814,7 @@ var BufferPlayer = function(audiolet, buffer, playbackRate, startPosition,
     this.restartTrigger = new AudioletParameter(this, 1, 0);
     this.startPosition = new AudioletParameter(this, 2, startPosition || 0);
     this.loop = new AudioletParameter(this, 3, loop || 0);
+    this.onComplete = onComplete;
 
     this.restartTriggerOn = false;
     this.playing = true;
@@ -2919,6 +2922,9 @@ BufferPlayer.prototype.generate = function(inputBuffers, outputBuffers) {
                 else {
                     // Finish playing until a new restart trigger
                     playing = false;
+                    if (this.onComplete) {
+                        this.onComplete();
+                    }
                 }
             }
         }
@@ -7257,6 +7263,8 @@ sinks('moz', function(){
  * A sink class for the Web Audio API
 */
 
+var fixChrome82795 = [];
+
 sinks('webkit', function(readFn, channelCount, preBufferSize, sampleRate){
 	var	self		= this,
 		// For now, we have to accept that the AudioContext is at 48000Hz, or whatever it decides.
@@ -7289,10 +7297,12 @@ sinks('webkit', function(readFn, channelCount, preBufferSize, sampleRate){
 	node.connect(context.destination);
 
 	self.sampleRate		= context.sampleRate;
-	/* Keep references in order to avoid garbage collection removing the listeners, working around http://code.google.com/p/chromium/issues/detail?id=82795 */
 	self._context		= context;
 	self._node		= node;
 	self._callback		= bufferFill;
+	/* Keep references in order to avoid garbage collection removing the listeners, working around http://code.google.com/p/chromium/issues/detail?id=82795 */
+	// Thanks to @baffo32
+	fixChrome82795.push(node);
 }, {
 	//TODO: Do something here.
 	kill: function(){
@@ -7301,6 +7311,8 @@ sinks('webkit', function(readFn, channelCount, preBufferSize, sampleRate){
 		return this._context.currentTime * this.sampleRate;
 	},
 });
+
+sinks.webkit.fix82795 = fixChrome82795;
 
 /**
  * A dummy Sink. (No output)
@@ -7324,7 +7336,7 @@ Sink.sinks		= Sink.devices = sinks;
 Sink.Recording		= Recording;
 
 Sink.doInterval		= function(callback, timeout){
-	var	BlobBuilder	= window.MozBlobBuilder || window.WebKitBlobBuilder || window.MSBlobBuilder || window.OBlobBuilder || window.BlobBuilder,
+	var	BlobBuilder	= typeof window === 'undefined' ? undefined : window.MozBlobBuilder || window.WebKitBlobBuilder || window.MSBlobBuilder || window.OBlobBuilder || window.BlobBuilder,
 		timer, id, prev;
 	if ((Sink.doInterval.backgroundWork || Sink.devices.moz.backgroundWork) && BlobBuilder){
 		try{
