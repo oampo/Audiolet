@@ -89,6 +89,8 @@ Envelope.prototype.generate = function(inputBuffers, outputBuffers) {
             gateOn = true;
             stage = 0;
             time = 0;
+            delta = 0;
+            level = this.levels[0];
             if (stage != releaseStage) {
                 stageChanged = true;
             }
