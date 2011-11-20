@@ -31,8 +31,7 @@ PRandom.prototype.next = function() {
         var low = this.valueOf(this.low);
         var high = this.valueOf(this.high);
         if (low != null && high != null) {
-            this.value *= step;
-            returnValue = this.value;
+            returnValue = low + Math.random() * (high - low);
             this.position += 1;
         }
         else {
