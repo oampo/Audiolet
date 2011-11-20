@@ -1,4 +1,4 @@
-window.onload = new function() {
+function playExample() {
     var audiolet = new Audiolet();
 
     var Synth = function(audiolet) {

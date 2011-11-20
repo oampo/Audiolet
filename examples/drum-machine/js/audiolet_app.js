@@ -7,7 +7,7 @@ var sampleRate = 44100;
 var latency = 1000 * bufferSize / sampleRate;
 var audioletReady = false;
 
-window.onload = function() {
+function playExample() {
   var AudioletApp = function() {
     this.audiolet = new Audiolet(sampleRate, 2, bufferSize);
     this.audiolet.scheduler.setTempo(100);

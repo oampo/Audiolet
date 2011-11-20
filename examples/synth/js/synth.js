@@ -1,4 +1,4 @@
-window.onload = function() {
+function playExample() {
     var Synth = function(audiolet) {
         AudioletGroup.apply(this, [audiolet, 0, 1]);
         // Basic wave
@@ -61,4 +61,3 @@ window.onload = function() {
 
     synth.connect(audiolet.output);
 };
-

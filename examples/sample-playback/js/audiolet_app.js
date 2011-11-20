@@ -1,5 +1,6 @@
 // Example needs to be run from a server for XHR file loading to work
-window.onload = function() {
+window.onload = playExample;
+function playExample() {
     var AudioletApp = function() {
         this.audiolet = new Audiolet();
         // Amen break is 138 BPM
@@ -46,5 +47,3 @@ window.onload = function() {
 
     this.audioletApp = new AudioletApp();
 };
-
-
