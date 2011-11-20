@@ -1,4 +1,4 @@
-window.onload = function() {
+function playExample() {
     var Synth = function(audiolet, frequency) {
         AudioletGroup.call(this, audiolet, 0, 1);
         // Basic wave
@@ -66,4 +66,3 @@ window.onload = function() {
     var app = new SchedulerApp();
 
 }
-

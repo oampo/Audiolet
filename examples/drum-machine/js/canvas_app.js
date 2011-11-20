@@ -14,9 +14,9 @@ var context = null;
 var noteWidth = 10;
 var noteHeight = 10;
 
-var noteSoftColor = '#FFFF00';
-var noteMedColor = '#FF0000';
-var noteLoudColor = '#000000';
+var noteSoftColor = '#222222';
+var noteMedColor = '#359aff';
+var noteLoudColor = '#48ffff';
 
 $(document).ready(function() {
   canvas = $('#sequence');
@@ -62,7 +62,14 @@ function draw() {
       else if (rows[j][i] == 2)
         context.fillStyle = noteLoudColor;
       
-      context.fillRect(i * noteWidth, j * noteHeight, noteWidth, noteHeight);
+      context.fillRect(i * noteWidth, j * noteHeight, noteWidth-1, noteHeight-1);
+/*
+        context.beginPath()
+          var x = i * noteWidth + (noteWidth/2);
+          var y = j * noteHeight + (noteHeight/2);
+          context.arc(x, y, noteWidth/2, 0, Math.PI*2)
+        context.fill()*/
+
     }
   }
 }
@@ -90,7 +97,7 @@ function drawRuler() {
   //rulerContext.fillStyle = noteSoftColor;
   //rulerContext.fillRect(0, 0, ruler.width(), ruler.height());
   for (i = 0; i <= patternLength; i++) {
-    rulerContext.strokeStyle = "#000";
+    rulerContext.strokeStyle = "#fff";
     rulerContext.stroke();
     // draw half notes:
     if (i % 8 == 0) {
@@ -110,5 +117,5 @@ function drawRuler() {
       rulerContext.lineTo(i * noteWidth, ruler.height() * 0.15);
     }
   }
-  rulerContext.strokeRect(0, 0, ruler.width(), ruler.height());
+  // rulerContext.strokeRect(0, 0, ruler.width(), ruler.height());
 }
