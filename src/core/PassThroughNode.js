@@ -38,7 +38,19 @@ PassThroughNode.prototype.createOutputSamples = function(length) {
             output.samples = input.samples;
         }
         else {
-            output.samples = new Array(output.getNumberOfChannels());
+            // Create the correct number of output samples
+            var numberOfChannels = output.getNumberOfChannels();
+            if (output.samples.length == numberOfChannels) {
+                continue;
+            }
+            else if (output.samples.length > numberOfChannels) {
+                output.samples = output.samples.slice(0, numberOfChannels);
+                continue;
+            }
+
+            for (var j = output.samples.length; j < numberOfChannels; j++) {
+                output.samples[j] = 0;
+            }
         }
     }
 };
