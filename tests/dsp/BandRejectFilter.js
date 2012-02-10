@@ -12,15 +12,16 @@ function testBRF() {
     sine.connect(brf);
     brf.connect(recorder);
 
-    for (var i=0; i<10; i++) {
-        recorder.tick(8192, i);
+    for (var i=0; i<81920; i++) {
+        sine.tick();
+        brf.tick();
+        recorder.tick();
     }
 
-    var buffer = recorder.buffers[0];
-    var data = buffer.getChannelData(0);
-    Assert.assertContinuous(data);
-    Assert.assertAudibleValues(data);
-    Assert.assertValuesInRange(data);
+    var buffer = recorder.buffers[0][0];
+    Assert.assertContinuous(buffer);
+    Assert.assertAudibleValues(buffer);
+    Assert.assertValuesInRange(buffer);
 }
 
 test("Band Reject Filter", testBRF);
@@ -36,14 +37,15 @@ function testPassingLows() {
     sine.connect(brf);
     brf.connect(recorder);
 
-    for (var i=0; i<10; i++) {
-        recorder.tick(8192, i);
+    for (var i=0; i<81920; i++) {
+        sine.tick();
+        brf.tick();
+        recorder.tick();
     }
 
-    var buffer = recorder.buffers[0];
-    var data = buffer.getChannelData(0);
-    Assert.assertAudibleValues(data);
-    Assert.assertValuesReach(data); // Check for high amplitude
+    var buffer = recorder.buffers[0][0];
+    Assert.assertAudibleValues(buffer);
+    Assert.assertValuesReach(buffer); // Check for high amplitude
 }
 
 test("Is Passing Lows", testPassingLows);
@@ -58,15 +60,16 @@ function testFilteringCenter() {
     sine.connect(brf);
     brf.connect(recorder);
 
-    for (var i=0; i<10; i++) {
-        recorder.tick(8192, i);
+    for (var i=0; i<81920; i++) {
+        sine.tick();
+        brf.tick();
+        recorder.tick();
     }
 
-    var buffer = recorder.buffers[0];
-    var data = buffer.getChannelData(0);
-    Assert.assertContinuous(data);
-    Assert.assertAudibleValues(data);
-    Assert.assertValuesInRange(data, -0.5, 0.5); // Check for low amplitude
+    var buffer = recorder.buffers[0][0];
+    Assert.assertContinuous(buffer);
+    Assert.assertAudibleValues(buffer);
+    Assert.assertValuesInRange(buffer, -0.5, 0.5); // Check for low amplitude
 }
 
 test("Is Filtering Center", testFilteringCenter);
@@ -81,27 +84,16 @@ function testPassingHighs() {
     sine.connect(brf);
     brf.connect(recorder);
 
-    for (var i=0; i<10; i++) {
-        recorder.tick(8192, i);
+    for (var i=0; i<81920; i++) {
+        sine.tick();
+        brf.tick();
+        recorder.tick();
     }
 
-    var buffer = recorder.buffers[0];
-    var data = buffer.getChannelData(0);
-    Assert.assertAudibleValues(data);
-    Assert.assertValuesReach(data); // Check for high amplitude
+    var buffer = recorder.buffers[0][0];
+    Assert.assertAudibleValues(buffer);
+    Assert.assertValuesReach(buffer); // Check for high amplitude
 }
 
 test("Is Passing Highs", testPassingHighs);
 
-function testEmpty() {
-    var audiolet = new Audiolet();
-    var brf = new BandRejectFilter(audiolet);
-    var node = new Introspector(audiolet, 1, 0);
-    brf.connect(node);
-
-    node.tick(8192, 0);
-
-    Assert.assertEquals(node.inputBuffers[0].isEmpty, true, "Buffer empty");
-}
-
-test("Empty input", testEmpty);

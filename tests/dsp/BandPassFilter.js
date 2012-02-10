@@ -12,15 +12,16 @@ function testBPF() {
     sine.connect(bpf);
     bpf.connect(recorder);
 
-    for (var i=0; i<10; i++) {
-        recorder.tick(8192, i);
+    for (var i=0; i<81920; i++) {
+        sine.tick();
+        bpf.tick();
+        recorder.tick();
     }
 
-    var buffer = recorder.buffers[0];
-    var data = buffer.getChannelData(0);
-    Assert.assertContinuous(data);
-    Assert.assertAudibleValues(data);
-    Assert.assertValuesInRange(data);
+    var buffer = recorder.buffers[0][0];
+    Assert.assertContinuous(buffer);
+    Assert.assertAudibleValues(buffer);
+    Assert.assertValuesInRange(buffer);
 }
 
 test("Band Pass Filter", testBPF);
@@ -35,15 +36,16 @@ function testFilteringLows() {
     sine.connect(bpf);
     bpf.connect(recorder);
 
-    for (var i=0; i<10; i++) {
-        recorder.tick(8192, i);
+    for (var i=0; i<81920; i++) {
+        sine.tick();
+        bpf.tick();
+        recorder.tick();
     }
 
-    var buffer = recorder.buffers[0];
-    var data = buffer.getChannelData(0);
-    Assert.assertContinuous(data);
-    Assert.assertAudibleValues(data);
-    Assert.assertValuesInRange(data, -0.1, 0.1); // Check for low amplitude
+    var buffer = recorder.buffers[0][0];
+    Assert.assertContinuous(buffer);
+    Assert.assertAudibleValues(buffer);
+    Assert.assertValuesInRange(buffer, -0.1, 0.1); // Check for low amplitude
 }
 
 test("Is Filtering Lows", testFilteringLows);
@@ -58,14 +60,16 @@ function testPassingCenter() {
     sine.connect(bpf);
     bpf.connect(recorder);
 
-    for (var i=0; i<10; i++) {
-        recorder.tick(8192, i);
+    for (var i=0; i<81920; i++) {
+        sine.tick();
+        bpf.tick();
+        recorder.tick();
+
     }
 
-    var buffer = recorder.buffers[0];
-    var data = buffer.getChannelData(0);
-    Assert.assertAudibleValues(data);
-    Assert.assertValuesReach(data); // Check for high amplitude
+    var buffer = recorder.buffers[0][0];
+    Assert.assertAudibleValues(buffer);
+    Assert.assertValuesReach(buffer); // Check for high amplitude
 }
 
 test("Is Passing Center", testPassingCenter);
@@ -80,28 +84,16 @@ function testFilteringHighs() {
     sine.connect(bpf);
     bpf.connect(recorder);
 
-    for (var i=0; i<10; i++) {
-        recorder.tick(8192, i);
+    for (var i=0; i<81920; i++) {
+        sine.tick();
+        bpf.tick();
+        recorder.tick();
     }
 
-    var buffer = recorder.buffers[0];
-    var data = buffer.getChannelData(0);
-    Assert.assertContinuous(data);
-    Assert.assertAudibleValues(data);
-    Assert.assertValuesInRange(data, -0.1, 0.1); // Check for low amplitude
+    var buffer = recorder.buffers[0][0];
+    Assert.assertContinuous(buffer);
+    Assert.assertAudibleValues(buffer);
+    Assert.assertValuesInRange(buffer, -0.1, 0.1); // Check for low amplitude
 }
 
 test("Is Filtering Highs", testFilteringHighs);
-
-function testEmpty() {
-    var audiolet = new Audiolet();
-    var bpf = new BandPassFilter(audiolet);
-    var node = new Introspector(audiolet, 1, 0);
-    bpf.connect(node);
-
-    node.tick(8192, 0);
-
-    Assert.assertEquals(node.inputBuffers[0].isEmpty, true, "Buffer empty");
-}
-
-test("Empty input", testEmpty);

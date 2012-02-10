@@ -10,14 +10,14 @@ function testSquare() {
 
     square.connect(recorder);
 
-    for (var i=0; i<10; i++) {
-        recorder.tick(8192, i);
+    for (var i=0; i<81920; i++) {
+        square.tick();
+        recorder.tick();
     }
 
-    var buffer = recorder.buffers[0];
-    var data = buffer.getChannelData(0);
-    Assert.assertAudibleValues(data);
-    Assert.assertValuesInRange(data);
+    var buffer = recorder.buffers[0][0];
+    Assert.assertAudibleValues(buffer);
+    Assert.assertValuesInRange(buffer);
 }
 
 test("Square", testSquare);
