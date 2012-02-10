@@ -48,14 +48,20 @@ InputRecorder.prototype.generate = function() {
 
     for (var i=0; i<this.inputs.length; i++) {
         var input = this.inputs[i];
-        var numberOfChannels = input.length;
+        var numberOfChannels = input.samples.length;
         var recordBuffer = buffers[i];
-        for (var j=0; j<this.inputs[i]; j++) {
+        for (var j=0; j<numberOfChannels; j++) {
             if (j >= recordBuffer.length) {
                 recordBuffer.push([]);
             }
             recordBuffer[j].push(input.samples[j]);
         }
+    }
+};
+
+InputRecorder.prototype.reset = function() {
+    for (var i=0; i<this.inputs.length; i++) {
+        this.buffers[i] = [];
     }
 };
 
