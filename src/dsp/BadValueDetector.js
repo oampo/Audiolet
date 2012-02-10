@@ -36,38 +36,25 @@ extend(BadValueDetector, PassThroughNode);
  * @param {Number} channel The index of the channel the value was found in.
  * @param {Number} index The sample index the value was found at.
  */
-BadValueDetector.prototype.callback = function(value, channel, index) {
-    console.error(value + ' detected at channel ' + channel + ' index ' +
-                  index);
+BadValueDetector.prototype.callback = function(value, channel) {
+    console.error(value + ' detected at channel ' + channel);
 };
 
 /**
  * Process a block of samples
- *
- * @param {AudioletBuffer[]} inputBuffers Samples received from the inputs.
- * @param {AudioletBuffer[]} outputBuffers Samples to be sent to the outputs.
  */
-BadValueDetector.prototype.generate = function(inputBuffers, outputBuffers) {
-    var inputBuffer = inputBuffers[0];
+BadValueDetector.prototype.generate = function() {
+    var input = this.inputs[0];
 
-    if (inputBuffer.isEmpty) {
-        return;
-    }
-
-    var numberOfChannels = inputBuffer.numberOfChannels;
+    var numberOfChannels = input.samples.length;
     for (var i = 0; i < numberOfChannels; i++) {
-        var channel = inputBuffer.getChannelData(i);
-
-        var bufferLength = inputBuffer.length;
-        for (var j = 0; j < bufferLength; j++) {
-            var value = channel[j];
-            if (typeof value == 'undefined' ||
-                value == null ||
-                isNaN(value) ||
-                value == Infinity ||
-                value == -Infinity) {
-                this.callback(value, i, j);
-            }
+        var value = input.samples[i];
+        if (typeof value == 'undefined' ||
+            value == null ||
+            isNaN(value) ||
+            value == Infinity ||
+            value == -Infinity) {
+            this.callback(value, i);
         }
     }
 };

@@ -57,123 +57,62 @@ extend(BufferPlayer, AudioletNode);
 
 /**
  * Process a block of samples
- *
- * @param {AudioletBuffer[]} inputBuffers Samples received from the inputs.
- * @param {AudioletBuffer[]} outputBuffers Samples to be sent to the outputs.
  */
-BufferPlayer.prototype.generate = function(inputBuffers, outputBuffers) {
-    var outputBuffer = outputBuffers[0];
+BufferPlayer.prototype.generate = function() {
+    var output = this.outputs[0];
 
     // Cache local variables
-    var buffer = this.buffer;
-    var position = this.position;
-    var playing = this.playing;
-    var restartTriggerOn = this.restartTriggerOn;
+    var numberOfChannels = output.samples.length;
 
-    // Crap load of parameters
-    var playbackRateParameter = this.playbackRate;
-    var playbackRate, playbackRateChannel;
-    if (playbackRateParameter.isStatic()) {
-        playbackRate = playbackRateParameter.getValue();
-    }
-    else {
-        playbackRateChannel = playbackRateParameter.getChannel();
-    }
-
-    var restartTriggerParameter = this.restartTrigger;
-    var restartTrigger, restartTriggerChannel;
-    if (restartTriggerParameter.isStatic()) {
-        restartTrigger = restartTriggerParameter.getValue();
-    }
-    else {
-        restartTriggerChannel = restartTriggerParameter.getChannel();
-    }
-
-    var startPositionParameter = this.startPosition;
-    var startPosition, startPositionChannel;
-    if (startPositionParameter.isStatic()) {
-        startPosition = startPositionParameter.getValue();
-    }
-    else {
-        startPositionChannel = startPositionParameter.getChannel();
-    }
-
-    var loopParameter = this.loop;
-    var loop, loopChannel;
-    if (loopParameter.isStatic()) {
-        loop = loopParameter.getValue();
-    }
-    else {
-        loopChannel = loopParameter.getChannel();
-    }
-
-
-    if (buffer.length == 0 || (!restartTriggerChannel && !playing)) {
-        // No buffer data, or chance of starting playing in this block, so
-        // we can just send an empty buffer and return
-        outputBuffer.isEmpty = true;
+    if (this.buffer.length == 0 || !this.playing) {
+        // No buffer data, or not playing, so output zeros and return
+        for (var i=0; i<numberOfChannels; i++) {
+            output.samples[i] = 0;
+        }
         return;
     }
 
-    var numberOfChannels = buffer.numberOfChannels;
-    var bufferLength = outputBuffer.length;
-    for (var i = 0; i < bufferLength; i++) {
-        if (playbackRateChannel) {
-            playbackRate = playbackRateChannel[i];
-        }
-        if (restartTriggerChannel) {
-            restartTrigger = restartTriggerChannel[i];
-        }
-        if (loopChannel) {
-            loop = loopChannel[i];
-        }
+    // Crap load of parameters
+    var playbackRate = this.playbackRate.getValue();
+    var restartTrigger = this.restartTrigger.getValue();
+    var startPosition = this.startPosition.getValue();
+    var loop = this.loop.getValue();
 
-        if (restartTrigger > 0 && !restartTriggerOn) {
-            // Trigger moved from <=0 to >0, so we restart playback from
-            // startPosition
-            position = startPosition;
-            restartTriggerOn = true;
-            playing = true;
-        }
+    if (restartTrigger > 0 && !this.restartTriggerOn) {
+        // Trigger moved from <=0 to >0, so we restart playback from
+        // startPosition
+        this.position = startPosition;
+        this.restartTriggerOn = true;
+        this.playing = true;
+    }
 
-        if (restartTrigger <= 0 && restartTriggerOn) {
-            // Trigger moved back to <= 0
-            restartTriggerOn = false;
-        }
+    if (restartTrigger <= 0 && this.restartTriggerOn) {
+        // Trigger moved back to <= 0
+        this.restartTriggerOn = false;
+    }
 
-        if (playing) {
-            for (var j = 0; j < numberOfChannels; j++) {
-                var inputChannel = buffer.channels[j];
-                var outputChannel = outputBuffer.channels[j];
-                outputChannel[i] = inputChannel[Math.floor(position)];
-            }
-            position += playbackRate;
-            if (position >= buffer.length) {
-                if (loop) {
-                    // Back to the start
-                    position %= buffer.length;
-                }
-                else {
-                    // Finish playing until a new restart trigger
-                    playing = false;
-                    if (this.onComplete) {
-                        this.onComplete();
-                    }
-                }
-            }
+    var numberOfChannels = this.buffer.channels.length;
+
+    for (var i = 0; i < numberOfChannels; i++) {
+        var inputChannel = this.buffer.getChannelData(i);
+        output.samples[i] = inputChannel[Math.floor(this.position)];
+    }
+    
+    this.position += playbackRate;
+
+    if (this.position >= this.buffer.length) {
+        if (loop) {
+            // Back to the start
+            this.position %= this.buffer.length;
         }
         else {
-            // Give zeros until we restart
-            for (var j = 0; j < numberOfChannels; j++) {
-                var outputChannel = outputBuffer.channels[j];
-                outputChannel[i] = 0;
+            // Finish playing until a new restart trigger
+            this.playing = false;
+            if (this.onComplete) {
+               this.onComplete();
             }
         }
     }
-
-    this.playing = playing;
-    this.position = position;
-    this.restartTriggerOn = restartTriggerOn;
 };
 
 /**
