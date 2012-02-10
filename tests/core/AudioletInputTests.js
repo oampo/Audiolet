@@ -41,16 +41,3 @@ function testDisconnect() {
 
 test("Disconnect", testDisconnect);
 
-function testIsConnected() {
-    var input = new AudioletInput(null, 0);
-    var output = new AudioletOutput(null, 1);
-
-    input.connect(output);
-    Assert.assertEquals(input.isConnected(), true, "Connected");
-
-    input.disconnect(output);
-    Assert.assertEquals(input.isConnected(), false, "Not connected");
-}
-
-test("Is Connected", testIsConnected);
-

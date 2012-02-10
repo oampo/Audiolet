@@ -6,9 +6,7 @@ load('../Environment.js');
 function testInit() {
     var audiolet = new Audiolet();
     var node = new AudioletGroup(audiolet, 3, 4);
-    Assert.assertEquals(node.numberOfInputs, 3, "Number of inputs");
     Assert.assertEquals(node.inputs.length, 3, "Actual number of inputs");
-    Assert.assertEquals(node.numberOfOutputs, 4, "Number of outputs");
     Assert.assertEquals(node.outputs.length, 4, "Actual number of outputs");
 }
 
