@@ -29,8 +29,6 @@ var AudioletNode = function(audiolet, numberOfInputs, numberOfOutputs,
     if (generate) {
         this.generate = generate;
     }
-
-    this.timestamp = null;
 };
 
 /**
@@ -121,8 +119,6 @@ AudioletNode.prototype.traverse = function(nodes) {
 /**
  * Call the tick function on nodes which are connected to the inputs.  This
  * function should not be called manually by users.
- *
- * @param {Number} timestamp A timestamp for the block of samples.
  */
 AudioletNode.prototype.traverseParents = function(nodes) {
     var numberOfInputs = this.inputs.length;

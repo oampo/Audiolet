@@ -473,8 +473,6 @@ var AudioletNode = function(audiolet, numberOfInputs, numberOfOutputs,
     if (generate) {
         this.generate = generate;
     }
-
-    this.timestamp = null;
 };
 
 /**
@@ -565,8 +563,6 @@ AudioletNode.prototype.traverse = function(nodes) {
 /**
  * Call the tick function on nodes which are connected to the inputs.  This
  * function should not be called manually by users.
- *
- * @param {Number} timestamp A timestamp for the block of samples.
  */
 AudioletNode.prototype.traverseParents = function(nodes) {
     var numberOfInputs = this.inputs.length;
@@ -1103,7 +1099,19 @@ PassThroughNode.prototype.createOutputSamples = function(length) {
             output.samples = input.samples;
         }
         else {
-            output.samples = new Array(output.getNumberOfChannels());
+            // Create the correct number of output samples
+            var numberOfChannels = output.getNumberOfChannels();
+            if (output.samples.length == numberOfChannels) {
+                continue;
+            }
+            else if (output.samples.length > numberOfChannels) {
+                output.samples = output.samples.slice(0, numberOfChannels);
+                continue;
+            }
+
+            for (var j = output.samples.length; j < numberOfChannels; j++) {
+                output.samples[j] = 0;
+            }
         }
     }
 };
@@ -1803,42 +1811,19 @@ BiquadFilter.prototype.calculateCoefficients = function(frequency) {
  * @param {AudioletBuffer[]} inputBuffers Samples received from the inputs.
  * @param {AudioletBuffer[]} outputBuffers Samples to be sent to the outputs.
  */
-BiquadFilter.prototype.generate = function(inputBuffers, outputBuffers) {
-    var inputBuffer = inputBuffers[0];
-    var outputBuffer = outputBuffers[0];
-
-    if (inputBuffer.isEmpty) {
-        outputBuffer.isEmpty = true;
-        return;
-    }
-
+BiquadFilter.prototype.generate = function() {
+    var input = this.inputs[0];
+    var output = this.outputs[0]
     var xValueArray = this.xValues;
     var yValueArray = this.yValues;
 
-    var inputChannels = [];
-    var outputChannels = [];
-    var numberOfChannels = inputBuffer.numberOfChannels;
-    for (var i = 0; i < numberOfChannels; i++) {
-        inputChannels.push(inputBuffer.getChannelData(i));
-        outputChannels.push(outputBuffer.getChannelData(i));
-        if (i >= xValueArray.length) {
-            xValueArray.push([0, 0]);
-            yValueArray.push([0, 0]);
-        }
-    }
+    var frequency = this.frequency.getValue();
 
-    // Local processing variables
-    var frequencyParameter = this.frequency;
-    var frequency, frequencyChannel;
-    if (frequencyParameter.isStatic()) {
-        frequency = frequencyParameter.getValue();
+    if (frequency != this.lastFrequency) {
+        // Recalculate the coefficients
+        this.calculateCoefficients(frequency);
+        this.lastFrequency = frequency;
     }
-    else {
-        frequencyChannel = frequencyParameter.getChannel();
-    }
-
-
-    var lastFrequency = this.lastFrequency;
 
     var a0 = this.a0;
     var a1 = this.a1;
@@ -1847,52 +1832,34 @@ BiquadFilter.prototype.generate = function(inputBuffers, outputBuffers) {
     var b1 = this.b1;
     var b2 = this.b2;
 
-    var bufferLength = outputBuffer.length;
-    for (var i = 0; i < bufferLength; i++) {
-        if (frequencyChannel) {
-            var frequency = frequencyChannel[i];
+    var numberOfChannels = input.samples.length;
+    for (var i = 0; i < numberOfChannels; i++) {
+        if (i >= xValueArray.length) {
+            xValueArray.push([0, 0]);
+            yValueArray.push([0, 0]);
         }
 
-        if (frequency != lastFrequency) {
-            // Recalculate and make the coefficients local
-            this.calculateCoefficients(frequency);
-            lastFrequency = frequency;
-            a0 = this.a0;
-            a1 = this.a1;
-            a2 = this.a2;
-            b0 = this.b0;
-            b1 = this.b1;
-            b2 = this.b2;
-        }
+        var xValues = xValueArray[i];
+        var x1 = xValues[0];
+        var x2 = xValues[1];
+        var yValues = yValueArray[i];
+        var y1 = yValues[0];
+        var y2 = yValues[1];
 
-        for (var j = 0; j < numberOfChannels; j++) {
-            var inputChannel = inputChannels[j];
-            var outputChannel = outputChannels[j];
+        var x0 = input.samples[i];
+        var y0 = (b0 / a0) * x0 +
+                 (b1 / a0) * x1 +
+                 (b2 / a0) * x2 -
+                 (a1 / a0) * y1 -
+                 (a2 / a0) * y2;
 
-            var xValues = xValueArray[j];
-            var x1 = xValues[0];
-            var x2 = xValues[1];
-            var yValues = yValueArray[j];
-            var y1 = yValues[0];
-            var y2 = yValues[1];
+        output.samples[i] = y0;
 
-            var x0 = inputChannel[i];
-            var y0 = (b0 / a0) * x0 +
-                     (b1 / a0) * x1 +
-                     (b2 / a0) * x2 -
-                     (a1 / a0) * y1 -
-                     (a2 / a0) * y2;
-
-            outputChannel[i] = y0;
-
-
-            xValues[0] = x0;
-            xValues[1] = x1;
-            yValues[0] = y0;
-            yValues[1] = y1;
-        }
+        xValues[0] = x0;
+        xValues[1] = x1;
+        yValues[0] = y0;
+        yValues[1] = y1;
     }
-    this.lastFrequency = lastFrequency;
 };
 
 /**
@@ -1998,30 +1965,18 @@ var Amplitude = function(audiolet, attack, release) {
     this.linkNumberOfOutputChannels(0, 0);
 
     this.followers = [];
-    var sampleRate = this.audiolet.device.sampleRate;
 
-    //        attack = Math.pow(0.01, 1 / (attack * sampleRate));
     this.attack = new AudioletParameter(this, 1, attack || 0.01);
-
-    //        release = Math.pow(0.01, 1 / (release * sampleRate));
     this.release = new AudioletParameter(this, 2, release || 0.01);
 };
 extend(Amplitude, AudioletNode);
 
 /**
  * Process a block of samples
- *
- * @param {AudioletBuffer[]} inputBuffers Samples received from the inputs.
- * @param {AudioletBuffer[]} outputBuffers Samples to be sent to the outputs.
  */
-Amplitude.prototype.generate = function(inputBuffers, outputBuffers) {
-    var inputBuffer = inputBuffers[0];
-    var outputBuffer = outputBuffers[0];
-
-    if (inputBuffer.isEmpty) {
-        outputBuffer.isEmpty = true;
-        return;
-    }
+Amplitude.prototype.generate = function() {
+    var input = this.inputs[0];
+    var output = this.outputs[0];
 
     var followers = this.followers;
     var numberOfFollowers = followers.length;
@@ -2029,53 +1984,26 @@ Amplitude.prototype.generate = function(inputBuffers, outputBuffers) {
     var sampleRate = this.audiolet.device.sampleRate;
 
     // Local processing variables
-    var attackParameter = this.attack;
-    var attack, attackChannel;
-    if (attackParameter.isStatic()) {
-        attack = Math.pow(0.01, 1 / (attackParameter.getValue() *
-                                     sampleRate));
-    }
-    else {
-        attackChannel = attackParameter.getChannel();
-    }
+    var attack = this.attack.getValue();
+    attack = Math.pow(0.01, 1 / (attack * sampleRate));
+    var release = this.release.getValue();
+    release = Math.pow(0.01, 1 / (release * sampleRate));
 
-    // Local processing variables
-    var releaseParameter = this.release;
-    var release, releaseChannel;
-    if (releaseParameter.isStatic()) {
-        release = Math.pow(0.01, 1 / (releaseParameter.getValue() *
-                                      sampleRate));
-    }
-    else {
-        releaseChannel = releaseParameter.getChannel();
-    }
-
-    var numberOfChannels = inputBuffer.numberOfChannels;
+    var numberOfChannels = input.samples.length;
     for (var i = 0; i < numberOfChannels; i++) {
         if (i >= numberOfFollowers) {
             followers.push(0);
         }
         var follower = followers[i];
 
-        var inputChannel = inputBuffer.getChannelData(i);
-        var outputChannel = outputBuffer.getChannelData(i);
-        var bufferLength = inputBuffer.length;
-        for (var j = 0; j < bufferLength; j++) {
-            var value = Math.abs(inputChannel[j]);
-            if (attackChannel) {
-                attack = Math.pow(0.01, 1 / (attackChannel[j] * sampleRate));
-            }
-            if (releaseChannel) {
-                release = Math.pow(0.01, 1 / (releaseChannel[j] * sampleRate));
-            }
-            if (value > follower) {
-                follower = attack * (follower - value) + value;
-            }
-            else {
-                follower = release * (follower - value) + value;
-            }
-            outputChannel[j] = follower;
+        var value = Math.abs(input.samples[i]);
+        if (value > follower) {
+            follower = attack * (follower - value) + value;
         }
+        else {
+            follower = release * (follower - value) + value;
+        }
+        output.samples[i] = follower;
         followers[i] = follower;
     }
 };
