@@ -28,13 +28,12 @@ extend(PassThroughNode, AudioletNode);
  */
 PassThroughNode.prototype.createOutputSamples = function(length) {
     var numberOfOutputs = this.outputs.length;
-    var numberOfInputs = this.inputs.length;
     // Copy the inputs buffers straight to the output buffers
     for (var i = 0; i < numberOfOutputs; i++) {
+        var input = this.inputs[i];
         var output = this.outputs[i];
-        if (i < numberOfInputs) {
+        if (input && input.samples.length != 0) {
             // Copy the input buffer straight to the output buffers
-            var input = this.inputs[i];
             output.samples = input.samples;
         }
         else {
