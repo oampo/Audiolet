@@ -1,4 +1,4 @@
-window.onload = function() {
+function playExample() {
     var HighSynth = function(audiolet) {
         AudioletGroup.call(this, audiolet, 0, 1);
 
@@ -304,6 +304,6 @@ window.onload = function() {
 
     // Run the demo
     window.demo = new Demo();
-    var processing = new Processing(document.getElementById('signal'),
-                                    document.getElementById('processing').text);
+    var processing = new Processing(document.getElementById('signal'), document.getElementById('processing').text);
+    // document.getElementById('signal').parentElement.style.display = "block"
 };

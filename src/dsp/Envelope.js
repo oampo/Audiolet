@@ -42,7 +42,7 @@ var Envelope = function(audiolet, gate, levels, times, releaseStage,
     this.time = null;
     this.changeTime = null;
 
-    this.level = 0;
+    this.level = this.levels[0];
     this.delta = 0;
     this.gateOn = false;
 };
@@ -64,13 +64,17 @@ Envelope.prototype.generate = function(inputBuffers, outputBuffers) {
         this.gateOn = true;
         this.stage = 0;
         this.time = 0;
-        stageChanged = true;
+        this.delta = 0;
+        this.level = this.levels[0];
+        if (this.stage != this.releaseStage) {
+            stageChanged = true;
+        }
     }
 
     if (this.gateOn && !gate) {
         // Key released
         this.gateOn = false;
-        if (this.releaseStage) {
+        if (this.releaseStage != null) {
             // Jump to the release stage
             this.stage = this.releaseStage;
             stageChanged = true;

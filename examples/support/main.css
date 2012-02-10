@@ -1,0 +1,202 @@
+* {
+  padding: 0;
+  margin: 0;
+  font-weight: normal;
+  border: none;
+}
+
+strong {
+  font-weight: bold;
+}
+
+/* main css */
+
+body {
+  background: #444;
+  font: 100% "Lato", "Lucida Grande", Verdana, sans-serif;
+  color: #fff;
+  min-width: 60em;
+}
+
+#wrap > *, footer {
+  padding: 2em;
+  position: relative;
+}
+
+header {
+  background: #697C00;
+  border-bottom: 1px solid #586F00;
+  z-index: 100;
+  text-shadow: rgba(0, 0, 0, 0.3) 0px 0px 4px
+}
+
+header h1 {
+  font-weight: bold;
+}
+
+#wrap > section {
+  text-shadow: rgba(0, 0, 0, 0.3) 1px 1px 2px;
+  padding-bottom: 0;
+}
+
+#wrap > #abstract {
+  background: #718C00;
+  border-top: 1px solid #7B9D00;
+  box-shadow: rgba(0, 0, 0, 0.3) 0 1px 5px;
+  padding-bottom: 2em;
+}
+
+footer {
+  background: #111;
+  color: #444;
+/*  margin-top: 1em;*/
+  text-align: center;
+  border-top: 2px solid #111;
+  box-shadow: rgba(0, 0, 0, 0.3) 0 -1px 5px;
+  word-spacing: 0.2em;
+  font-size: 0.8em;
+}
+
+footer a {
+  color: #444;
+  border-bottom: 1px dashed #444;
+  text-decoration: none;
+}
+
+footer a:hover {
+  border-bottom: 1px solid #444;
+}
+
+a {
+  color: #fff;
+  border-bottom: 1px dashed #fff;
+  text-decoration: none;
+}
+
+a:hover {
+  border-bottom: 1px solid #fff;
+}
+
+p {
+  margin-bottom: 1em;
+}
+
+p:last-child {
+  margin-bottom: 0;
+}
+
+code {
+  font: 16px 'Inconsolata', 'Courier New', monospace;
+  text-shadow: none;
+}
+
+pre {
+  background: #222 url(code-bg.jpg);
+  padding: 1em;
+  color: #CCC;
+  overflow: auto;
+  border: 3px dashed #7D8E00;
+  box-shadow: 0 1px 10px rgba(0, 0, 0, 0.3);
+}
+
+pre h2 {
+  position: relative;
+  display: inline;
+  padding: .5em .5em;
+  background: #7D8E00;
+  color: #fff;
+  border-top: none;
+  border-left: none;
+  
+  top: -.5em;
+  left: -1em;
+  box-shadow: rgba(0, 0, 0, 0.3) 0 1px 5px;
+  text-shadow: none;
+}
+
+canvas {
+  box-shadow: 0 1px 10px rgba(0, 0, 0, 0.3);
+  background: #222;
+}
+
+button {
+  -moz-box-shadow: inset 0px 1px 0px 0px #ffffff;
+  -webkit-box-shadow: inset 0px 1px 0px 0px #ffffff;
+  box-shadow: inset 0px 1px 0px 0px #ffffff;
+  background: -webkit-gradient( linear, left top, left bottom, color-stop(0.05, #ededed), color-stop(1, #dfdfdf) );
+  background: -moz-linear-gradient( center top, #ededed 5%, #dfdfdf 100% );
+  filter: progid: DXImageTransform.Microsoft.gradient(startColorstr='#ededed', endColorstr='#dfdfdf');
+  background-color: #ededed;
+  
+  -moz-border-radius: 2em;
+  -webkit-border-radius: 2em;
+  border-radius: 2em;
+  
+  border: 1px solid #dcdcdc;
+  display: inline-block;
+  color: #444;
+  font-family: arial;
+  font-size: 15px;
+  font-weight: bold;
+  padding: .1em 1.1em;
+  text-decoration: none;
+  
+  text-shadow: 1px 1px 0px #ffffff;
+  box-shadow: 0 1px 10px rgba(0, 0, 0, 0.3);
+}
+
+button:active {
+  background: -webkit-gradient( linear, left top, left bottom, color-stop(0.05, #dfdfdf), color-stop(1, #ededed) );
+  background: -moz-linear-gradient( center top, #dfdfdf 5%, #ededed 100% );
+  filter: progid: DXImageTransform.Microsoft.gradient(startColorstr='#dfdfdf', endColorstr='#ededed');
+  background-color: #dfdfdf;
+  box-shadow: none;
+}
+
+button:hover {
+  color: #000;
+}
+
+/* hijs colors */
+
+code .keyword { color: #C82829; }
+code .string { color: #718C00; }
+code .regexp { color: #EAB700 }
+code .class { color: #4271AE; }
+code .special { color: #8959A8; }
+code .number { color: #F5871F; }
+code .comment { color: #888 }
+
+/*
+  // comment
+  window //special
+  var // keyword
+  "String"
+  Class
+  (/^[a-z]+/) // regexp
+  50 // number
+*/
+
+/* sticky footer code */
+
+html, body { height: 100%; }
+#wrap { min-height: 100%; }
+
+section.code-block:last-child {
+  overflow:auto;
+  padding-bottom: 7em !important;
+}
+footer {
+  position: relative;
+  margin-top: -5em; /* negative value of footer height */
+  height: 1em;
+  clear:both;
+}
+
+body:before {/* thanks to Maleika (Kohoutec)*/
+  content:"";
+  height:100%;
+  float:left;
+  width:0;
+  margin-top:-32767px;/* thank you Erik J - negate effect of float*/
+}

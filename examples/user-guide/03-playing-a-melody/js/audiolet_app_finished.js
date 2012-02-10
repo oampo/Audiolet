@@ -1,35 +1,3 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <title>Scheduling and Patterns</title>
-    <!-- Production -->
-    <!--
-    <script src="../../../src/audiolet/Audiolet.min.js"></script>
-    -->
-
-    <!-- Development -->
-    <script src="../../../src/audiolet/Audiolet.js"></script>
-
-    <!-- Common -->
-    <script src="js/audiolet_app_finished.js"></script>
-    <link rel="stylesheet" href="../../support/main.css" />
-    <link href='http://fonts.googleapis.com/css?family=Lato:400,700|Inconsolata' rel='stylesheet' type='text/css'>
-  </head>
-  <body>
-    <div id="wrap">
-      <header>
-        <h1>Audiolet - Playing a Melody</h1>
-      </header>
-      <section id="abstract">
-        <p>Audiolet Getting Started - <a href="https://github.com/oampo/Audiolet/wiki/Your-First-Synth" target="_blank">Part Three</a>: Learn about scheduling and patterns</p>
-      </section>
-      <section id="play">
-        <button type="button" onclick="playExample()">&#9654; Play Example</button>
-      </section>
-      <section class="code-block">
-        <pre><h2>js/audiolet_app_finished.js</h2>
-          <code>
 function playExample() {
     var Synth = function(audiolet, frequency) {
         AudioletGroup.apply(this, [audiolet, 0, 1]);
@@ -78,12 +46,4 @@ function playExample() {
     };
 
     this.audioletApp = new AudioletApp();
-};</code></pre>
-      </section>
-    </div>
-    <footer>
-        &copy; 2011 <a href="http://oampo.github.com/Audiolet/" target="_blank">Audiolet</a> &mdash; Code Highlighting by <a href="https://github.com/cloudhead/hijs" target="_blank">hijs</a>
-      </footer>
-    <script src="../../support/hijs.js" type="text/javascript" charset="utf-8"></script>
-  </body>
-</html>
+};

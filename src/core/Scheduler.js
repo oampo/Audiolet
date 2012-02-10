@@ -187,7 +187,7 @@ Scheduler.prototype.tick = function() {
  */
 Scheduler.prototype.tickClock = function() {
     this.time += 1;
-    this.seconds = this.time * this.audiolet.device.sampleRate;
+    this.seconds = this.time / this.audiolet.device.sampleRate;
     if (this.time >= this.lastBeatTime + this.beatLength) {
         this.beat += 1;
         this.beatInBar += 1;

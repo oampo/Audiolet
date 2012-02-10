@@ -1,4 +1,4 @@
-window.onload = function() {
+function playExample() {
     var HighSynth = function(audiolet) {
         AudioletGroup.call(this, audiolet, 0, 1);
 

@@ -59,11 +59,14 @@ Amplitude.prototype.generate = function(inputBuffers, outputBuffers) {
     var followers = this.followers;
     var numberOfFollowers = followers.length;
 
+    var sampleRate = this.audiolet.device.sampleRate;
+
     // Local processing variables
     var attackParameter = this.attack;
     var attack, attackChannel;
     if (attackParameter.isStatic()) {
-        attack = attackParameter.getValue();
+        attack = Math.pow(0.01, 1 / (attackParameter.getValue() *
+                                     sampleRate));
     }
     else {
         attackChannel = attackParameter.getChannel();
@@ -73,7 +76,8 @@ Amplitude.prototype.generate = function(inputBuffers, outputBuffers) {
     var releaseParameter = this.release;
     var release, releaseChannel;
     if (releaseParameter.isStatic()) {
-        release = releaseParameter.getValue();
+        release = Math.pow(0.01, 1 / (releaseParameter.getValue() *
+                                      sampleRate));
     }
     else {
         releaseChannel = releaseParameter.getChannel();
@@ -81,7 +85,7 @@ Amplitude.prototype.generate = function(inputBuffers, outputBuffers) {
 
     var numberOfChannels = inputBuffer.numberOfChannels;
     for (var i = 0; i < numberOfChannels; i++) {
-        if (i > numberOfFollowers) {
+        if (i >= numberOfFollowers) {
             followers.push(0);
         }
         var follower = followers[i];
@@ -92,10 +96,10 @@ Amplitude.prototype.generate = function(inputBuffers, outputBuffers) {
         for (var j = 0; j < bufferLength; j++) {
             var value = Math.abs(inputChannel[j]);
             if (attackChannel) {
-                attack = attackChannel[j];
+                attack = Math.pow(0.01, 1 / (attackChannel[j] * sampleRate));
             }
             if (releaseChannel) {
-                release = releaseChannel[j];
+                release = Math.pow(0.01, 1 / (releaseChannel[j] * sampleRate));
             }
             if (value > follower) {
                 follower = attack * (follower - value) + value;

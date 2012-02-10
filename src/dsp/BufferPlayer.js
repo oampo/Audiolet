@@ -36,9 +36,10 @@
  * @param {Number} [playbackRate=1] The initial playback rate.
  * @param {Number} [startPosition=0] The initial start position.
  * @param {Number} [loop=0] Initial value for whether to loop.
+ * @param {Function} [onComplete] Called when the buffer has finished playing.
  */
 var BufferPlayer = function(audiolet, buffer, playbackRate, startPosition,
-                            loop) {
+                            loop, onComplete) {
     AudioletNode.call(this, audiolet, 3, 1);
     this.buffer = buffer;
     this.setNumberOfOutputChannels(0, this.buffer.numberOfChannels);
@@ -47,6 +48,7 @@ var BufferPlayer = function(audiolet, buffer, playbackRate, startPosition,
     this.restartTrigger = new AudioletParameter(this, 1, 0);
     this.startPosition = new AudioletParameter(this, 2, startPosition || 0);
     this.loop = new AudioletParameter(this, 3, loop || 0);
+    this.onComplete = onComplete;
 
     this.restartTriggerOn = false;
     this.playing = true;
@@ -154,6 +156,9 @@ BufferPlayer.prototype.generate = function(inputBuffers, outputBuffers) {
                 else {
                     // Finish playing until a new restart trigger
                     playing = false;
+                    if (this.onComplete) {
+                        this.onComplete();
+                    }
                 }
             }
         }
