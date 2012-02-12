@@ -20,19 +20,9 @@ extend(WhiteNoise, AudioletNode);
 
 /**
  * Process a block of samples
- *
- * @param {AudioletBuffer[]} inputBuffers Samples received from the inputs.
- * @param {AudioletBuffer[]} outputBuffers Samples to be sent to the outputs.
  */
-WhiteNoise.prototype.generate = function(inputBuffers, outputBuffers) {
-    var buffer = outputBuffers[0];
-    var channel = buffer.getChannelData(0);
-
-    // Processing loop
-    var bufferLength = buffer.length;
-    for (var i = 0; i < bufferLength; i++) {
-        channel[i] = Math.random() * 2 - 1;
-    }
+WhiteNoise.prototype.generate = function() {
+    this.outputs[0].samples[0] = Math.random() * 2 - 1;
 };
 
 /**

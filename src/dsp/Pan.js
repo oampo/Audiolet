@@ -37,44 +37,17 @@ extend(Pan, AudioletNode);
 
 /**
  * Process a block of samples
- *
- * @param {AudioletBuffer[]} inputBuffers Samples received from the inputs.
- * @param {AudioletBuffer[]} outputBuffers Samples to be sent to the outputs.
  */
-Pan.prototype.generate = function(inputBuffers, outputBuffers) {
-    var inputBuffer = inputBuffers[0];
-    var outputBuffer = outputBuffers[0];
+Pan.prototype.generate = function() {
+    var input = this.inputs[0];
+    var output = this.outputs[0];
 
-    if (inputBuffer.isEmpty) {
-        outputBuffer.isEmpty = true;
-        return;
-    }
+    var pan = this.pan.getValue();
 
-    var inputChannel = inputBuffer.getChannelData(0);
-    var leftOutputChannel = outputBuffer.getChannelData(0);
-    var rightOutputChannel = outputBuffer.getChannelData(1);
-
-    // Local processing variables
-    var panParameter = this.pan;
-    var pan, panChannel;
-    if (panParameter.isStatic()) {
-        pan = panParameter.getValue();
-    }
-    else {
-        panChannel = panParameter.getChannel();
-    }
-
-    var bufferLength = outputBuffer.length;
-    for (var i = 0; i < bufferLength; i++) {
-        if (panChannel) {
-            pan = panChannel[i];
-        }
-        var scaledPan = pan * Math.PI / 2;
-        var value = inputChannel[i];
-        // TODO: Use sine/cos tables?
-        leftOutputChannel[i] = value * Math.cos(scaledPan);
-        rightOutputChannel[i] = value * Math.sin(scaledPan);
-    }
+    var value = input.samples[0] || 0;
+    var scaledPan = pan * Math.PI / 2;
+    output.samples[0] = value * Math.cos(scaledPan);
+    output.samples[1] = value * Math.sin(scaledPan);
 };
 
 /**

@@ -89,11 +89,8 @@ extend(Reverb, AudioletNode);
 
 /**
  * Process a block of samples
- *
- * @param {AudioletBuffer[]} inputBuffers Samples received from the inputs.
- * @param {AudioletBuffer[]} outputBuffers Samples to be sent to the outputs.
  */
-Reverb.prototype.generate = function(inputBuffers, outputBuffers) {
+Reverb.prototype.generate = function() {
     var mix = this.mix.getValue();
     var roomSize = this.roomSize.getValue();
     var damping = this.damping.getValue();
