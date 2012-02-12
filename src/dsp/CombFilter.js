@@ -33,7 +33,6 @@ var CombFilter = function(audiolet, maximumDelayTime, delayTime, decayTime) {
     this.maximumDelayTime = maximumDelayTime;
     this.delayTime = new AudioletParameter(this, 1, delayTime || 1);
     this.decayTime = new AudioletParameter(this, 2, decayTime);
-    var bufferSize = maximumDelayTime * this.audiolet.device.sampleRate;
     this.buffers = [];
     this.readWriteIndex = 0;
 };
@@ -41,93 +40,35 @@ extend(CombFilter, AudioletNode);
 
 /**
  * Process a block of samples
- *
- * @param {AudioletBuffer[]} inputBuffers Samples received from the inputs.
- * @param {AudioletBuffer[]} outputBuffers Samples to be sent to the outputs.
  */
-CombFilter.prototype.generate = function(inputBuffers, outputBuffers) {
-    var inputBuffer = inputBuffers[0];
-    var outputBuffer = outputBuffers[0];
+CombFilter.prototype.generate = function() {
+    var input = this.inputs[0];
+    var output = this.outputs[0];
 
-    if (inputBuffer.isEmpty) {
-        outputBuffer.isEmpty = true;
-        return;
-    }
-
-    // Local processing variables
-    var maximumDelayTime = this.maximumDelayTime;
     var sampleRate = this.audiolet.device.sampleRate;
 
-    var delayTimeParameter = this.delayTime;
-    var delayTime, delayTimeChannel;
-    if (delayTimeParameter.isStatic()) {
-        delayTime = Math.floor(delayTimeParameter.getValue() * sampleRate);
-    }
-    else {
-        delayTimeChannel = delayTimeParameter.getChannel();
-    }
+    var delayTime = this.delayTime.getValue() * sampleRate;
+    var decayTime = this.decayTime.getValue() * sampleRate;
+    var feedback = Math.exp(-3 * delayTime / decayTime);
 
-    var decayTimeParameter = this.decayTime;
-    var decayTime, decayTimeChannel;
-    if (decayTimeParameter.isStatic()) {
-        decayTime = Math.floor(decayTimeParameter.getValue() * sampleRate);
-    }
-    else {
-        decayTimeChannel = decayTimeParameter.getChannel();
-    }
-
-
-    var feedback;
-    if (delayTimeParameter.isStatic() && decayTimeParameter.isStatic()) {
-        feedback = Math.exp(-3 * delayTime / decayTime);
-    }
-
-
-
-    var buffers = this.buffers;
-    var readWriteIndex = this.readWriteIndex;
-
-    var inputChannels = inputBuffer.channels;
-    var outputChannels = outputBuffer.channels;
-    var numberOfChannels = inputBuffer.numberOfChannels;
-    var numberOfBuffers = buffers.length;
-    for (var i = numberOfBuffers; i < numberOfChannels; i++) {
-        // Create buffer for channel if it doesn't already exist
-        var bufferSize = maximumDelayTime * sampleRate;
-        buffers.push(new Float32Array(bufferSize));
-    }
-
-
-    var bufferLength = inputBuffer.length;
-    for (var i = 0; i < bufferLength; i++) {
-        if (delayTimeChannel) {
-            delayTime = Math.floor(delayTimeChannel[i] * sampleRate);
+    var numberOfChannels = input.samples.length;
+    for (var i = 0; i < numberOfChannels; i++) {
+        if (i >= this.buffers.length) {
+            // Create buffer for channel if it doesn't already exist
+            var bufferSize = this.maximumDelayTime * sampleRate;
+            this.buffers.push(new Float32Array(bufferSize));
         }
 
-        if (decayTimeChannel) {
-            decayTime = Math.floor(decayTimeChannel[i] * sampleRate);
-        }
-
-        if (delayTimeChannel || decayTimeChannel) {
-            feedback = Math.exp(-3 * delayTime / decayTime);
-        }
-
-        for (var j = 0; j < numberOfChannels; j++) {
-            var inputChannel = inputChannels[j];
-            var outputChannel = outputChannels[j];
-            var buffer = buffers[j];
-            var output = buffer[readWriteIndex];
-            outputChannel[i] = output;
-            buffer[readWriteIndex] = inputChannel[i] +
-                                     feedback * output;
-        }
-
-        readWriteIndex += 1;
-        if (readWriteIndex >= delayTime) {
-            readWriteIndex = 0;
-        }
+        var buffer = this.buffers[i];
+        var outputValue = buffer[this.readWriteIndex];
+        output.samples[i] = outputValue;
+        buffer[this.readWriteIndex] = input.samples[i] + feedback * outputValue;
     }
-    this.readWriteIndex = readWriteIndex;
+
+    this.readWriteIndex += 1;
+    if (this.readWriteIndex >= delayTime) {
+        this.readWriteIndex = 0;
+    }
 };
 
 /**

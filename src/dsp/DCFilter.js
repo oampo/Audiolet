@@ -40,11 +40,8 @@ extend(DCFilter, AudioletNode);
 
 /**
  * Process a block of samples
- *
- * @param {AudioletBuffer[]} inputBuffers Samples received from the inputs.
- * @param {AudioletBuffer[]} outputBuffers Samples to be sent to the outputs.
  */
-DCFilter.prototype.generate = function(inputBuffers, outputBuffers) {
+DCFilter.prototype.generate = function() {
     var coefficient = this.coefficient.getValue();
     var input = this.inputs[0];
     var numberOfChannels = input.samples.length;

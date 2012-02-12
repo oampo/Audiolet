@@ -1,5 +1,5 @@
 /*!
- * @depends ../core/AudioletNode.js
+ * @depends ../operators/Multiply.js
  */
 
 /**
@@ -24,26 +24,11 @@
  * @param {Number} [gain=1] Initial gain.
  */
 var Gain = function(audiolet, gain) {
-    AudioletNode.call(this, audiolet, 2, 1);
-    this.linkNumberOfOutputChannels(0, 0);
-    this.gain = new AudioletParameter(this, 1, gain || 1);
+    // Same DSP as operators/Multiply.js, but different parameter name
+    Multiply.call(this, audiolet, gain);
+    this.gain = this.value;
 };
-extend(Gain, AudioletNode);
-
-/**
- * Process a block of samples
- *
- * @param {AudioletBuffer[]} inputBuffers Samples received from the inputs.
- * @param {AudioletBuffer[]} outputBuffers Samples to be sent to the outputs.
- */
-Gain.prototype.generate = function(inputBuffers, outputBuffers) {
-    var gain = this.gain.getValue();
-    var input = this.inputs[0];
-    var numberOfChannels = input.samples.length;
-    for (var i = 0; i < numberOfChannels; i++) {
-        this.outputs[0].samples[i] = input.samples[i] * gain;
-    }
-};
+extend(Gain, Multiply);
 
 /**
  * toString

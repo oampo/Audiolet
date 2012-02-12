@@ -46,19 +46,16 @@ extend(FeedbackDelay, AudioletNode);
 
 /**
  * Process a block of samples
- *
- * @param {AudioletBuffer[]} inputBuffers Samples received from the inputs.
- * @param {AudioletBuffer[]} outputBuffers Samples to be sent to the outputs.
  */
-FeedbackDelay.prototype.generate = function(inputBuffers, outputBuffers) {
+FeedbackDelay.prototype.generate = function() {
     var input = this.inputs[0];
     var output = this.outputs[0];
 
-    var delayTime = this.delayTime.getValue();
+    var sampleRate = this.audiolet.output.device.sampleRate;
+
+    var delayTime = this.delayTime.getValue() * sampleRate;
     var feedback = this.feedback.getValue();
     var mix = this.mix.getValue();
-
-    var sampleRate = this.audiolet.output.device.sampleRate;
 
     var numberOfChannels = input.samples.length;
     var numberOfBuffers = this.buffers.length;

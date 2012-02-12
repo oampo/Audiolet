@@ -32,11 +32,8 @@ extend(BitCrusher, AudioletNode);
 
 /**
  * Process a block of samples
- *
- * @param {AudioletBuffer[]} inputBuffers Samples received from the inputs.
- * @param {AudioletBuffer[]} outputBuffers Samples to be sent to the outputs.
  */
-BitCrusher.prototype.generate = function(inputBuffers, outputBuffers) {
+BitCrusher.prototype.generate = function() {
     var input = this.inputs[0];
 
     var maxValue = Math.pow(2, this.bits.getValue()) - 1;

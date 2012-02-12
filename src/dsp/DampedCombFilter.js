@@ -41,116 +41,52 @@ var DampedCombFilter = function(audiolet, maximumDelayTime, delayTime,
     var bufferSize = maximumDelayTime * this.audiolet.device.sampleRate;
     this.buffers = [];
     this.readWriteIndex = 0;
-    this.filterStore = 0;
+    this.filterStores = [];
 };
 extend(DampedCombFilter, AudioletNode);
 
 /**
  * Process a block of samples
- *
- * @param {AudioletBuffer[]} inputBuffers Samples received from the inputs.
- * @param {AudioletBuffer[]} outputBuffers Samples to be sent to the outputs.
  */
-DampedCombFilter.prototype.generate = function(inputBuffers, outputBuffers) {
-    var inputBuffer = inputBuffers[0];
-    var outputBuffer = outputBuffers[0];
+DampedCombFilter.prototype.generate = function() {
+    var input = this.inputs[0];
+    var output = this.outputs[0];
 
-    if (inputBuffer.isEmpty) {
-        outputBuffer.isEmpty = true;
-        return;
-    }
-
-    // Local processing variables
-    var maximumDelayTime = this.maximumDelayTime;
     var sampleRate = this.audiolet.device.sampleRate;
 
-    var delayTimeParameter = this.delayTime;
-    var delayTime, delayTimeChannel;
-    if (delayTimeParameter.isStatic()) {
-        delayTime = Math.floor(delayTimeParameter.getValue() * sampleRate);
-    }
-    else {
-        delayTimeChannel = delayTimeParameter.getChannel();
-    }
+    var delayTime = this.delayTime.getValue() * sampleRate;
+    var decayTime = this.decayTime.getValue() * sampleRate;
+    var damping = this.damping.getValue();
+    var feedback = Math.exp(-3 * delayTime / decayTime);
 
-    var decayTimeParameter = this.decayTime;
-    var decayTime, decayTimeChannel;
-    if (decayTimeParameter.isStatic()) {
-        decayTime = Math.floor(decayTimeParameter.getValue() * sampleRate);
-    }
-    else {
-        decayTimeChannel = decayTimeParameter.getChannel();
-    }
-
-    var dampingParameter = this.damping;
-    var damping, dampingChannel;
-    if (dampingParameter.isStatic()) {
-        damping = dampingParameter.getValue();
-    }
-    else {
-        dampingChannel = dampingParameter.getChannel();
-    }
-
-
-    var feedback;
-    if (delayTimeParameter.isStatic() && decayTimeParameter.isStatic()) {
-        feedback = Math.exp(-3 * delayTime / decayTime);
-    }
-
-
-
-    var buffers = this.buffers;
-    var readWriteIndex = this.readWriteIndex;
-    var filterStore = this.filterStore;
-
-    var inputChannels = inputBuffer.channels;
-    var outputChannels = outputBuffer.channels;
-    var numberOfChannels = inputBuffer.numberOfChannels;
-    var numberOfBuffers = buffers.length;
-    for (var i = numberOfBuffers; i < numberOfChannels; i++) {
-        // Create buffer for channel if it doesn't already exist
-        var bufferSize = maximumDelayTime * sampleRate;
-        buffers.push(new Float32Array(bufferSize));
-    }
-
-
-    var bufferLength = inputBuffer.length;
-    for (var i = 0; i < bufferLength; i++) {
-        if (delayTimeChannel) {
-            delayTime = Math.floor(delayTimeChannel[i] * sampleRate);
+    var numberOfChannels = input.samples.length;
+    for (var i = 0; i < numberOfChannels; i++) {
+        if (i >= this.buffers.length) {
+            var bufferSize = this.maximumDelayTime * sampleRate;
+            this.buffers.push(new Float32Array(bufferSize));
         }
 
-        if (decayTimeChannel) {
-            decayTime = Math.floor(decayTimeChannel[i] * sampleRate);
+        if (i >= this.filterStores.length) {
+            this.filterStores.push(0);
         }
 
-        if (dampingChannel) {
-            damping = dampingChannel[i];
-        }
+        var buffer = this.buffers[i];
+        var filterStore = this.filterStores[i];
 
-        if (delayTimeChannel || decayTimeChannel) {
-            feedback = Math.exp(-3 * delayTime / decayTime);
-        }
+        var outputValue = buffer[this.readWriteIndex];
+        filterStore = (outputValue * (1 - damping)) +
+                      (filterStore * damping);
+        output.samples[i] = outputValue;
+        buffer[this.readWriteIndex] = input.samples[i] +
+                                      feedback * filterStore;
 
-        for (var j = 0; j < numberOfChannels; j++) {
-            var inputChannel = inputChannels[j];
-            var outputChannel = outputChannels[j];
-            var buffer = buffers[j];
-            var output = buffer[readWriteIndex];
-            filterStore = (output * (1 - damping)) +
-                          (filterStore * damping);
-            outputChannel[i] = output;
-            buffer[readWriteIndex] = inputChannel[i] +
-                                     feedback * filterStore;
-        }
-
-        readWriteIndex += 1;
-        if (readWriteIndex >= delayTime) {
-            readWriteIndex = 0;
-        }
+        this.filterStores[i] = filterStore;
     }
-    this.readWriteIndex = readWriteIndex;
-    this.filterStore = filterStore;
+
+    this.readWriteIndex += 1;
+    if (this.readWriteIndex >= delayTime) {
+        this.readWriteIndex = 0;
+    }
 };
 
 /**

@@ -40,50 +40,31 @@ extend(DiscontinuityDetector, AudioletNode);
  * @param {Number} channel The index of the channel the samples were found in.
  * @param {Number} index The sample index the discontinuity was found at.
  */
-DiscontinuityDetector.prototype.callback = function(size, channel, index) {
+DiscontinuityDetector.prototype.callback = function(size, channel) {
     console.error('Discontinuity of ' + size + ' detected on channel ' +
-                  channel + ' index ' + index);
+                  channel);
 };
 
 /**
  * Process a block of samples
- *
- * @param {AudioletBuffer[]} inputBuffers Samples received from the inputs.
- * @param {AudioletBuffer[]} outputBuffers Samples to be sent to the outputs.
  */
-DiscontinuityDetector.prototype.generate = function(inputBuffers,
-                                                    outputBuffers) {
-    var inputBuffer = inputBuffers[0];
+DiscontinuityDetector.prototype.generate = function() {
+    var input = this.inputs[0];
+    var output = this.outputs[0];
 
-    if (inputBuffer.isEmpty) {
-        this.lastValues = [];
-        return;
-    }
-
-    var lastValues = this.lastValues;
-    var threshold = this.threshold;
-
-    var numberOfChannels = inputBuffer.numberOfChannels;
+    var numberOfChannels = input.samples.length;
     for (var i = 0; i < numberOfChannels; i++) {
-        var channel = inputBuffer.getChannelData(i);
-
-        if (i >= lastValues.length) {
-            lastValues.push(null);
-        }
-        var lastValue = lastValues[i];
-
-        var bufferLength = inputBuffer.length;
-        for (var j = 0; j < bufferLength; j++) {
-            var value = channel[j];
-            if (lastValue != null) {
-                if (Math.abs(lastValue - value) > threshold) {
-                    this.callback(Math.abs(lastValue - value), i, j);
-                }
-            }
-            lastValue = value;
+        if (i >= this.lastValues.length) {
+            this.lastValues.push(0);
         }
 
-        lastValues[i] = lastValue;
+        var value = input.samples[i];
+        var diff = Math.abs(this.lastValues[i] - value);
+        if (diff > this.threshold) {
+            this.callback(diff, i);
+        }
+
+        this.lastValues[i] = value;
     }
 };
 
