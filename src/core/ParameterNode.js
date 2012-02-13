@@ -36,7 +36,7 @@ extend(ParameterNode, AudioletNode);
  * Process a block of samples
  */
 ParameterNode.prototype.generate = function() {
-    output.samples[0] = this.parameter.getValue();
+    this.outputs[0].samples[0] = this.parameter.getValue();
 };
 
 /**
