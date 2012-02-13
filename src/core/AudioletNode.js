@@ -109,9 +109,9 @@ AudioletNode.prototype.tick = function() {
 };
 
 AudioletNode.prototype.traverse = function(nodes) {
-    nodes = this.traverseParents(nodes);
     if (nodes.indexOf(this) == -1) {
         nodes.push(this);
+        nodes = this.traverseParents(nodes);
     }
     return nodes;
 };
@@ -148,9 +148,6 @@ AudioletNode.prototype.createInputSamples = function() {
     var numberOfInputs = this.inputs.length;
     for (var i = 0; i < numberOfInputs; i++) {
         var input = this.inputs[i];
-        if (!input.connectedFrom.length) {
-            continue;
-        }
 
         var numberOfInputChannels = 0;
 
@@ -167,6 +164,7 @@ AudioletNode.prototype.createInputSamples = function() {
                 }
             }
         }
+
         if (input.samples.length > numberOfInputChannels) {
             input.samples = input.samples.slice(0, numberOfInputChannels);
         }

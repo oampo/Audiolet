@@ -50,8 +50,8 @@ AudioletDevice.prototype.tick = function(buffer, numberOfChannels) {
                 this.needTraverse = false;
             }
 
-            // Tick up to, but not including this node
-            for (var j = 0; j < this.nodes.length - 1; j++) {
+            // Tick in reverse order up to, but not including this node
+            for (var j = this.nodes.length - 1; j > 0; j--) {
                 this.nodes[j].tick();
             }
             // Cut down tick to just sum the input samples 
