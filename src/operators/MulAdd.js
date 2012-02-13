@@ -41,47 +41,15 @@ extend(MulAdd, AudioletNode);
  * @param {AudioletBuffer[]} outputBuffers Samples to be sent to the outputs.
  */
 MulAdd.prototype.generate = function(inputBuffers, outputBuffers) {
-    var inputBuffer = inputBuffers[0];
-    var outputBuffer = outputBuffers[0];
+    var input = this.inputs[0];
+    var output = this.outputs[0];
 
-    if (inputBuffer.isEmpty) {
-        outputBuffer.isEmpty = true;
-        return;
-    }
+    var mul = this.mul.getValue();
+    var add = this.add.getValue();
 
-    // Local processing variables
-    var mulParameter = this.mul;
-    var mul, mulChannel;
-    if (mulParameter.isStatic()) {
-        mul = mulParameter.getValue();
-    }
-    else {
-        mulChannel = mulParameter.getChannel();
-    }
-
-    var addParameter = this.add;
-    var add, addChannel;
-    if (addParameter.isStatic()) {
-        add = addParameter.getValue();
-    }
-    else {
-        addChannel = addParameter.getChannel();
-    }
-
-    var numberOfChannels = inputBuffer.numberOfChannels;
+    var numberOfChannels = input.samples.length;
     for (var i = 0; i < numberOfChannels; i++) {
-        var inputChannel = inputBuffer.getChannelData(i);
-        var outputChannel = outputBuffer.getChannelData(i);
-        var bufferLength = inputBuffer.length;
-        for (var j = 0; j < bufferLength; j++) {
-            if (mulChannel) {
-                mul = mulChannel[j];
-            }
-            if (addChannel) {
-                add = addChannel[j];
-            }
-            outputChannel[j] = inputChannel[j] * mul + add;
-        }
+        output.samples[i] = input.samples[i] * mul + add;
     }
 };
 

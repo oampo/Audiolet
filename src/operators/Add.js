@@ -32,40 +32,16 @@ extend(Add, AudioletNode);
 
 /**
  * Process a block of samples
- *
- * @param {AudioletBuffer[]} inputBuffers Samples received from the inputs.
- * @param {AudioletBuffer[]} outputBuffers Samples to be sent to the outputs.
  */
-Add.prototype.generate = function(inputBuffers, outputBuffers) {
-    var inputBuffer = inputBuffers[0];
-    var outputBuffer = outputBuffers[0];
+Add.prototype.generate = function() {
+    var input = this.inputs[0];
+    var output = this.outputs[0];
 
-    if (inputBuffer.isEmpty) {
-        outputBuffer.isEmpty = true;
-        return;
-    }
+    var value = this.value.getValue();
 
-    // Local processing variables
-    var valueParameter = this.value;
-    var value, valueChannel;
-    if (valueParameter.isStatic()) {
-        value = valueParameter.getValue();
-    }
-    else {
-        valueChannel = valueParameter.getChannel();
-    }
-
-    var numberOfChannels = inputBuffer.numberOfChannels;
+    var numberOfChannels = input.samples.length;
     for (var i = 0; i < numberOfChannels; i++) {
-        var inputChannel = inputBuffer.getChannelData(i);
-        var outputChannel = outputBuffer.getChannelData(i);
-        var bufferLength = inputBuffer.length;
-        for (var j = 0; j < bufferLength; j++) {
-            if (valueChannel) {
-                value = valueChannel[j];
-            }
-            outputChannel[j] = inputChannel[j] + value;
-        }
+        output.samples[i] = input.samples[i] + value;
     }
 };
 
