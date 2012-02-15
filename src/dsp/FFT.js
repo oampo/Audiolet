@@ -42,6 +42,10 @@ FFT.prototype.generate = function() {
     var input = this.inputs[0];
     var output = this.outputs[0];
 
+    if (input.samples.length == 0) {
+        return;
+    }
+
     this.buffer[this.readWriteIndex] = input.samples[0];
     output.samples[0] = [this.realBuffer[this.readWriteIndex],
                          this.imaginaryBuffer[this.readWriteIndex]];

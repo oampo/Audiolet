@@ -46,6 +46,10 @@ IFFT.prototype.generate = function() {
     var input = this.inputs[0];
     var output = this.outputs[0];
 
+    if (!input.samples.length) {
+        return;
+    }
+
     var values = input.samples[0];
     this.realBuffer[this.readWriteIndex] = values[0];
     this.imaginaryBuffer[this.readWriteIndex] = values[1];
