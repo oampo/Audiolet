@@ -98,7 +98,7 @@ Reverb.prototype.generate = function() {
     var numberOfCombs = this.combTuning.length;
     var numberOfFilters = this.allPassTuning.length;
 
-    var value = this.inputs[0].samples[0];
+    var value = this.inputs[0].samples[0] || 0;
     var dryValue = value;
 
     value *= this.fixedGain;
