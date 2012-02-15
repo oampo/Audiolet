@@ -3063,6 +3063,142 @@ FeedbackDelay.prototype.toString = function() {
  * @depends ../core/AudioletNode.js
  */
 
+/**
+ * Fast Fourier Transform
+ *
+ * **Inputs**
+ *
+ * - Audio
+ * - Delay Time
+ *
+ * **Outputs**
+ *
+ * - Fourier transformed audio
+ *
+ * @constructor
+ * @extends AudioletNode
+ * @param {Audiolet} audiolet The audiolet object.
+ * @param {Number} bufferSize The FFT buffer size.
+ */
+var FFT = function(audiolet, bufferSize) {
+    AudioletNode.call(this, audiolet, 2, 1);
+    this.linkNumberOfOutputChannels(0, 0);
+    this.bufferSize = bufferSize;
+    this.readWriteIndex = 0;
+
+    this.buffer = new Float32Array(this.bufferSize);
+
+    this.realBuffer = new Float32Array(this.bufferSize);
+    this.imaginaryBuffer = new Float32Array(this.bufferSize);
+
+    this.reverseTable = new Uint32Array(this.bufferSize);
+    this.calculateReverseTable();
+};
+extend(FFT, AudioletNode);
+
+/**
+ * Process a block of samples
+ */
+FFT.prototype.generate = function() {
+    var input = this.inputs[0];
+    var output = this.outputs[0];
+
+    if (input.samples.length == 0) {
+        return;
+    }
+
+    this.buffer[this.readWriteIndex] = input.samples[0];
+    output.samples[0] = [this.realBuffer[this.readWriteIndex],
+                         this.imaginaryBuffer[this.readWriteIndex]];
+
+    this.readWriteIndex += 1;
+    if (this.readWriteIndex >= this.bufferSize) {
+        this.transform();
+        this.readWriteIndex = 0;
+    }
+};
+
+/**
+ * Precalculate the reverse table.
+ * TODO: Split the function out so it can be reused in FFT and IFFT
+ */
+FFT.prototype.calculateReverseTable = function() {
+    var limit = 1;
+    var bit = this.bufferSize >> 1;
+
+    while (limit < this.bufferSize) {
+        for (var i = 0; i < limit; i++) {
+            this.reverseTable[i + limit] = this.reverseTable[i] + bit;
+        }
+
+        limit = limit << 1;
+        bit = bit >> 1;
+    }
+};
+
+
+/**
+ * Calculate the FFT for the saved buffer
+ */
+FFT.prototype.transform = function() {
+    for (var i = 0; i < this.bufferSize; i++) {
+        this.realBuffer[i] = this.buffer[this.reverseTable[i]];
+        this.imaginaryBuffer[i] = 0;
+    }
+
+    var halfSize = 1;
+
+    while (halfSize < this.bufferSize) {
+        var phaseShiftStepReal = Math.cos(-Math.PI / halfSize);
+        var phaseShiftStepImag = Math.sin(-Math.PI / halfSize);
+
+        var currentPhaseShiftReal = 1;
+        var currentPhaseShiftImag = 0;
+
+        for (var fftStep = 0; fftStep < halfSize; fftStep++) {
+            var i = fftStep;
+
+            while (i < this.bufferSize) {
+                var off = i + halfSize;
+                var tr = (currentPhaseShiftReal * this.realBuffer[off]) -
+                         (currentPhaseShiftImag * this.imaginaryBuffer[off]);
+                var ti = (currentPhaseShiftReal * this.imaginaryBuffer[off]) +
+                         (currentPhaseShiftImag * this.realBuffer[off]);
+
+                this.realBuffer[off] = this.realBuffer[i] - tr;
+                this.imaginaryBuffer[off] = this.imaginaryBuffer[i] - ti;
+                this.realBuffer[i] += tr;
+                this.imaginaryBuffer[i] += ti;
+
+                i += halfSize << 1;
+            }
+
+            var tmpReal = currentPhaseShiftReal;
+            currentPhaseShiftReal = (tmpReal * phaseShiftStepReal) -
+                                    (currentPhaseShiftImag *
+                                     phaseShiftStepImag);
+            currentPhaseShiftImag = (tmpReal * phaseShiftStepImag) +
+                                    (currentPhaseShiftImag *
+                                     phaseShiftStepReal);
+        }
+
+        halfSize = halfSize << 1;
+    }
+};
+
+/**
+ * toString
+ *
+ * @return {String} String representation.
+ */
+FFT.prototype.toString = function() {
+    return 'FFT';
+};
+
+/*!
+ * @depends ../core/AudioletNode.js
+ */
+
 /*
  * Multiply values
  *
@@ -3215,6 +3351,157 @@ HighPassFilter.prototype.calculateCoefficients = function(frequency) {
  */
 HighPassFilter.prototype.toString = function() {
     return 'High Pass Filter';
+};
+
+/*!
+ * @depends ../core/AudioletNode.js
+ */
+
+/**
+ * Inverse Fast Fourier Transform.  Code liberally stolen with kind permission
+ * of Corben Brook from DSP.js (https://github.com/corbanbrook/dsp.js).
+ *
+ * **Inputs**
+ *
+ * - Fourier transformed audio
+ * - Delay Time
+ *
+ * **Outputs**
+ *
+ * - Audio
+ *
+ * @constructor
+ * @extends AudioletNode
+ * @param {Audiolet} audiolet The audiolet object.
+ * @param {Number} bufferSize The FFT buffer size.
+ */
+var IFFT = function(audiolet, bufferSize) {
+    AudioletNode.call(this, audiolet, 2, 1);
+    this.linkNumberOfOutputChannels(0, 0);
+    this.bufferSize = bufferSize;
+    this.readWriteIndex = 0;
+
+    this.buffer = new Float32Array(this.bufferSize);
+
+    this.realBuffer = new Float32Array(this.bufferSize);
+    this.imaginaryBuffer = new Float32Array(this.bufferSize);
+
+    this.reverseTable = new Uint32Array(this.bufferSize);
+    this.calculateReverseTable();
+
+    this.reverseReal = new Float32Array(this.bufferSize);
+    this.reverseImaginary = new Float32Array(this.bufferSize);
+};
+extend(IFFT, AudioletNode);
+
+/**
+ * Process a block of samples
+ */
+IFFT.prototype.generate = function() {
+    var input = this.inputs[0];
+    var output = this.outputs[0];
+
+    if (!input.samples.length) {
+        return;
+    }
+
+    var values = input.samples[0];
+    this.realBuffer[this.readWriteIndex] = values[0];
+    this.imaginaryBuffer[this.readWriteIndex] = values[1];
+    output.samples[0] = this.buffer[this.readWriteIndex];
+
+    this.readWriteIndex += 1;
+    if (this.readWriteIndex >= this.bufferSize) {
+        this.transform();
+        this.readWriteIndex = 0;
+    }
+};
+
+/**
+ * Precalculate the reverse table.
+ * TODO: Split the function out so it can be reused in FFT and IFFT
+ */
+IFFT.prototype.calculateReverseTable = function() {
+    var limit = 1;
+    var bit = this.bufferSize >> 1;
+
+    while (limit < this.bufferSize) {
+        for (var i = 0; i < limit; i++) {
+            this.reverseTable[i + limit] = this.reverseTable[i] + bit;
+        }
+
+        limit = limit << 1;
+        bit = bit >> 1;
+    }
+};
+
+/**
+ * Calculate the inverse FFT for the saved real and imaginary buffers
+ */
+IFFT.prototype.transform = function() {
+    var halfSize = 1;
+
+    for (var i = 0; i < this.bufferSize; i++) {
+        this.imaginaryBuffer[i] *= -1;
+    }
+
+    for (var i = 0; i < this.bufferSize; i++) {
+        this.reverseReal[i] = this.realBuffer[this.reverseTable[i]];
+        this.reverseImaginary[i] = this.imaginaryBuffer[this.reverseTable[i]];
+    }
+ 
+    this.realBuffer.set(this.reverseReal);
+    this.imaginaryBuffer.set(this.reverseImaginary);
+
+
+    while (halfSize < this.bufferSize) {
+        var phaseShiftStepReal = Math.cos(-Math.PI / halfSize);
+        var phaseShiftStepImag = Math.sin(-Math.PI / halfSize);
+        var currentPhaseShiftReal = 1;
+        var currentPhaseShiftImag = 0;
+
+        for (var fftStep = 0; fftStep < halfSize; fftStep++) {
+            i = fftStep;
+
+            while (i < this.bufferSize) {
+                var off = i + halfSize;
+                var tr = (currentPhaseShiftReal * this.realBuffer[off]) -
+                         (currentPhaseShiftImag * this.imaginaryBuffer[off]);
+                var ti = (currentPhaseShiftReal * this.imaginaryBuffer[off]) +
+                         (currentPhaseShiftImag * this.realBuffer[off]);
+
+                this.realBuffer[off] = this.realBuffer[i] - tr;
+                this.imaginaryBuffer[off] = this.imaginaryBuffer[i] - ti;
+                this.realBuffer[i] += tr;
+                this.imaginaryBuffer[i] += ti;
+
+                i += halfSize << 1;
+            }
+
+            var tmpReal = currentPhaseShiftReal;
+            currentPhaseShiftReal = (tmpReal * phaseShiftStepReal) -
+                                    (currentPhaseShiftImag *
+                                     phaseShiftStepImag);
+            currentPhaseShiftImag = (tmpReal * phaseShiftStepImag) +
+                                    (currentPhaseShiftImag *
+                                     phaseShiftStepReal);
+        }
+
+        halfSize = halfSize << 1;
+    }
+
+    for (i = 0; i < this.bufferSize; i++) {
+        this.buffer[i] = this.realBuffer[i] / this.bufferSize;
+    }
+};
+
+/**
+ * toString
+ *
+ * @return {String} String representation.
+ */
+IFFT.prototype.toString = function() {
+    return 'IFFT';
 };
 
 /*!
@@ -3979,7 +4266,7 @@ Reverb.prototype.generate = function() {
     var numberOfCombs = this.combTuning.length;
     var numberOfFilters = this.allPassTuning.length;
 
-    var value = this.inputs[0].samples[0];
+    var value = this.inputs[0].samples[0] || 0;
     var dryValue = value;
 
     value *= this.fixedGain;
@@ -4345,69 +4632,134 @@ UpMixer.prototype.toString = function() {
 };
 
 
-var WebKitBufferPlayer = function(audiolet, url) {
+var WebKitBufferPlayer = function(audiolet, onComplete) {
     AudioletNode.call(this, audiolet, 0, 1);
+    this.onComplete = onComplete;
     this.isWebKit = this.audiolet.device.sink instanceof Sink.sinks.webkit;
-
-    this.context = this.audiolet.device.sink._context;
-
-    if (this.isWebKit) {
-        this.xhr = new XMLHttpRequest();
-        this.xhr.open("GET", url, true);
-        this.xhr.responseType = "arraybuffer";
-        this.xhr.onload = this.onLoad.bind(this);
-        this.xhr.send();
-    }
-
     this.ready = false;
-};
-extend(WebKitBufferPlayer, AudioletNode);
 
-WebKitBufferPlayer.prototype.onLoad = function() {
-    this.fileBuffer = this.context.createBuffer(this.xhr.response, false);
-    this.setNumberOfOutputChannels(0, this.fileBuffer.numberOfChannels);
-
-    this.jsNode = this.context.createJavaScriptNode(4096, this.fileBuffer.numberOfChannels, 0);
-    this.jsNode.onaudioprocess = this.onData.bind(this);
-
-    this.source = this.context.createBufferSource();
-    this.source.buffer = this.fileBuffer;
-
-    this.source.connect(this.jsNode);
-    this.jsNode.connect(this.context.destination);
-    this.source.noteOn(0);
-
-    this.buffer = new AudioletBuffer(this.fileBuffer.numberOfChannels, 1024);
-    this.ready = true;
-};
-
-WebKitBufferPlayer.prototype.onData = function(event) {
-    var oldLength = this.buffer.length;
-    var newLength = oldLength + event.inputBuffer.length;
-    this.buffer.resize(this.buffer.numberOfChannels, newLength);
-
-    for (var i=0; i<event.inputBuffer.numberOfChannels; i++) {
-        var channelA = event.inputBuffer.getChannelData(i);
-        var channelB = this.buffer.getChannelData(i);
-        var bufferLength = event.inputBuffer.length;
-        for (var j=0; j<event.inputBuffer.length; j++) {
-            channelB[oldLength + j] = channelA[j];
-        }
-    }
-};
-
-WebKitBufferPlayer.prototype.generate = function(inputBuffers, outputBuffers) {
-    var outputBuffer = outputBuffers[0];
-    if (!this.ready) {
-        outputBuffer.isEmpty = true;
+    // Until we are loaded, output no channels.
+    this.setNumberOfOutputChannels(0, 0);
+    
+    if (!this.isWebKit) {
         return;
     }
 
-    if (this.buffer.length > outputBuffer.length) {
-        this.buffer.shift(outputBuffer);
+    this.context = this.audiolet.device.sink._context;
+    this.jsNode = null;
+    this.source = null;
+
+    this.ready = false;
+    this.loaded = false;
+
+    this.buffers = [];
+    this.readPosition = 0;
+
+    this.endTime = null;
+};
+extend(WebKitBufferPlayer, AudioletNode);
+
+WebKitBufferPlayer.prototype.load = function(url, onLoad, onError) {
+    if (!this.isWebKit) {
+        return;
     }
-    else {
-        outputBuffer.isEmpty = true;
+
+    this.stop();
+
+    // Request the new file
+    this.xhr = new XMLHttpRequest();
+    this.xhr.open("GET", url, true);
+    this.xhr.responseType = "arraybuffer";
+    this.xhr.onload = this.onLoad.bind(this, onLoad, onError);
+    this.xhr.onerror = onError;
+    this.xhr.send();
+};
+
+WebKitBufferPlayer.prototype.stop = function() {
+    this.ready = false;
+    this.loaded = false;
+
+    this.buffers = [];
+    this.readPosition = 0;
+    this.endTime = null;
+
+    this.setNumberOfOutputChannels(0);
+   
+    this.disconnectWebKitNodes();
+};
+
+WebKitBufferPlayer.prototype.disconnectWebKitNodes = function() {
+    if (this.source && this.jsNode) {
+        this.source.disconnect(this.jsNode);
+        this.jsNode.disconnect(this.context.destination);
+        this.source = null;
+        this.jsNode = null;
+    }
+};
+
+WebKitBufferPlayer.prototype.onLoad = function(onLoad, onError) {
+    // Load the buffer into memory for decoding
+//    this.fileBuffer = this.context.createBuffer(this.xhr.response, false);
+    this.context.decodeAudioData(this.xhr.response, function(buffer) {
+        this.onDecode(buffer);
+        onLoad();
+    }.bind(this), onError);
+};
+
+WebKitBufferPlayer.prototype.onDecode = function(buffer) {
+    this.fileBuffer = buffer;
+
+    // Create the WebKit buffer source for playback
+    this.source = this.context.createBufferSource();
+    this.source.buffer = this.fileBuffer;
+
+    // Make sure we are outputting the right number of channels on Audiolet's
+    // side
+    var numberOfChannels = this.fileBuffer.numberOfChannels;
+    this.setNumberOfOutputChannels(0, numberOfChannels);
+
+    // Create the JavaScript node for reading the data into Audiolet
+    this.jsNode = this.context.createJavaScriptNode(4096, numberOfChannels, 0);
+    this.jsNode.onaudioprocess = this.onData.bind(this);
+
+    // Connect it all up
+    this.source.connect(this.jsNode);
+    this.jsNode.connect(this.context.destination);
+    this.source.noteOn(0);
+    this.endTime = this.context.currentTime + this.fileBuffer.duration;
+
+    this.loaded = true;
+};
+
+WebKitBufferPlayer.prototype.onData = function(event) {
+    if (this.loaded) {
+        this.ready = true;
+    }
+
+    var numberOfChannels = event.inputBuffer.numberOfChannels;
+
+    for (var i=0; i<numberOfChannels; i++) {
+        this.buffers[i] = event.inputBuffer.getChannelData(i);
+        this.readPosition = 0;
+    }
+};
+
+WebKitBufferPlayer.prototype.generate = function() {
+    if (!this.ready) {
+        return;
+    }
+
+    var output = this.outputs[0];
+
+    var numberOfChannels = output.samples.length;
+    for (var i=0; i<numberOfChannels; i++) {
+        output.samples[i] = this.buffers[i][this.readPosition];
+    }
+    this.readPosition += 1;
+
+    if (this.context.currentTime > this.endTime) {
+        this.stop();
+        this.onComplete();
     }
 };
 
