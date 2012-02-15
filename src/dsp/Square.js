@@ -1,9 +1,9 @@
 /*!
- * @depends TableLookupOscillator.js
+ * @depends ../core/AudioletNode.js
  */
 
 /**
- * Square wave oscillator using a lookup table
+ * Square wave oscillator
  *
  * **Inputs**
  *
@@ -18,14 +18,33 @@
  * - frequency The frequency of the oscillator.  Linked to input 0.
  *
  * @constructor
- * @extends TableLookupOscillator
+ * @extends AudioletNode
  * @param {Audiolet} audiolet The audiolet object.
  * @param {Number} [frequency=440] Initial frequency.
  */
 var Square = function(audiolet, frequency) {
-    TableLookupOscillator.call(this, audiolet, Square.TABLE, frequency);
+    AudioletNode.call(this, audiolet, 1, 1);
+    this.frequency = new AudioletParameter(this, 0, frequency || 440);
+    this.phase = 0;
 };
-extend(Square, TableLookupOscillator);
+extend(Square, AudioletNode);
+
+/**
+ * Process samples
+ */
+Square.prototype.generate = function() {
+    var output = this.outputs[0];
+
+    var frequency = this.frequency.getValue();
+    var sampleRate = this.audiolet.device.sampleRate;
+
+    output.samples[0] = this.phase > 0.5 ? 1 : -1;
+
+    this.phase += frequency / sampleRate;
+    if (this.phase > 1) {
+        this.phase %= 1;
+    }
+};
 
 /**
  * toString
@@ -35,13 +54,4 @@ extend(Square, TableLookupOscillator);
 Square.prototype.toString = function() {
     return 'Square';
 };
-
-/**
- * Square wave table
- */
-Square.TABLE = [];
-for (var i = 0; i < 8192; i++) {
-    Square.TABLE.push(((i - 4096) / 8192) < 0 ? 1 : -1);
-}
-
 

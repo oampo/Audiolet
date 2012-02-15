@@ -2470,65 +2470,7 @@ CombFilter.prototype.toString = function() {
  */
 
 /**
- * Oscillator which reads waveform values from a look-up table
- *
- * **Inputs**
- *
- * - Frequency
- *
- * **Outputs**
- *
- * - Waveform
- *
- * **Parameters**
- *
- * - frequency The oscillator frequency.  Linked to input 0.
- *
- * @constructor
- * @extends AudioletNode
- * @param {Audiolet} audiolet The audiolet object.
- * @param {Number} [frequency=440] The initial frequency.
- */
-var TableLookupOscillator = function(audiolet, table, frequency) {
-    AudioletNode.call(this, audiolet, 1, 1);
-    this.table = table;
-    this.frequency = new AudioletParameter(this, 0, frequency || 440);
-    this.phase = 0;
-};
-extend(TableLookupOscillator, AudioletNode);
-
-/**
- * Process a block of samples
- */
-TableLookupOscillator.prototype.generate = function() {
-    this.outputs[0].samples[0] = this.table[Math.floor(this.phase)];
-
-    var sampleRate = this.audiolet.device.sampleRate;
-    var frequency = this.frequency.getValue();
-    var tableSize = this.table.length;
-
-    this.phase += frequency * tableSize / sampleRate;
-    if (this.phase > tableSize) {
-        this.phase %= tableSize;
-    }
-};
-
-/**
- * toString
- *
- * @return {String} String representation.
- */
-TableLookupOscillator.prototype.toString = function() {
-    return 'Table Lookup Oscillator';
-};
-
-
-/*!
- * @depends TableLookupOscillator.js
- */
-
-/**
- * Sine wave oscillator using a lookup table
+ * Sine wave oscillator
  *
  * **Inputs**
  *
@@ -2543,14 +2485,33 @@ TableLookupOscillator.prototype.toString = function() {
  * - frequency The frequency of the oscillator.  Linked to input 0.
  *
  * @constructor
- * @extends TableLookupOscillator
+ * @extends AudioletNode
  * @param {Audiolet} audiolet The audiolet object.
  * @param {Number} [frequency=440] Initial frequency.
  */
 var Sine = function(audiolet, frequency) {
-    TableLookupOscillator.call(this, audiolet, Sine.TABLE, frequency);
+    AudioletNode.call(this, audiolet, 1, 1);
+    this.frequency = new AudioletParameter(this, 0, frequency || 440);
+    this.phase = 0;
 };
-extend(Sine, TableLookupOscillator);
+extend(Sine, AudioletNode);
+
+/**
+ * Process samples
+ */
+Sine.prototype.generate = function() {
+    var output = this.outputs[0];
+
+    var frequency = this.frequency.getValue();
+    var sampleRate = this.audiolet.device.sampleRate;
+
+    output.samples[0] = Math.sin(this.phase);
+
+    this.phase += 2 * Math.PI * frequency / sampleRate;
+    if (this.phase > 2 * Math.PI) {
+        this.phase %= 2 * Math.PI;
+    }
+};
 
 /**
  * toString
@@ -2560,14 +2521,6 @@ extend(Sine, TableLookupOscillator);
 Sine.prototype.toString = function() {
     return 'Sine';
 };
-
-/**
- * Sine table
- */
-Sine.TABLE = [];
-for (var i = 0; i < 8192; i++) {
-    Sine.TABLE.push(Math.sin(i * 2 * Math.PI / 8192));
-}
 
 
 /*!
@@ -4327,7 +4280,7 @@ Reverb.prototype.toString = function() {
 
 
 /*!
- * @depends TableLookupOscillator.js
+ * @depends ../core/AudioletNode.js
  */
 
 /**
@@ -4346,14 +4299,32 @@ Reverb.prototype.toString = function() {
  * - frequency The frequency of the oscillator.  Linked to input 0.
  *
  * @constructor
- * @extends TableLookupOscillator
+ * @extends AudioletNode
  * @param {Audiolet} audiolet The audiolet object.
  * @param {Number} [frequency=440] Initial frequency.
  */
 var Saw = function(audiolet, frequency) {
-    TableLookupOscillator.call(this, audiolet, Saw.TABLE, frequency);
+    AudioletNode.call(this, audiolet, 1, 1);
+    this.frequency = new AudioletParameter(this, 0, frequency || 440);
+    this.phase = 0;
 };
-extend(Saw, TableLookupOscillator);
+extend(Saw, AudioletNode);
+
+/**
+ * Process samples
+ */
+Saw.prototype.generate = function() {
+    var output = this.outputs[0];
+    var frequency = this.frequency.getValue();
+    var sampleRate = this.audiolet.device.sampleRate;
+
+    output.samples[0] = ((this.phase / 2 + 0.25) % 0.5 - 0.25) * 4;
+    this.phase += frequency / sampleRate;
+
+    if (this.phase > 1) {
+        this.phase %= 1;
+    }
+};
 
 /**
  * toString
@@ -4363,14 +4334,6 @@ extend(Saw, TableLookupOscillator);
 Saw.prototype.toString = function() {
     return 'Saw';
 };
-
-/**
- * Saw table
- */
-Saw.TABLE = [];
-for (var i = 0; i < 8192; i++) {
-    Saw.TABLE.push(((((i - 4096) / 8192) % 1) + 1) % 1 * 2 - 1);
-}
 
 
 /*!
@@ -4429,11 +4392,11 @@ SoftClip.prototype.toString = function() {
 
 
 /*!
- * @depends TableLookupOscillator.js
+ * @depends ../core/AudioletNode.js
  */
 
 /**
- * Square wave oscillator using a lookup table
+ * Square wave oscillator
  *
  * **Inputs**
  *
@@ -4448,14 +4411,33 @@ SoftClip.prototype.toString = function() {
  * - frequency The frequency of the oscillator.  Linked to input 0.
  *
  * @constructor
- * @extends TableLookupOscillator
+ * @extends AudioletNode
  * @param {Audiolet} audiolet The audiolet object.
  * @param {Number} [frequency=440] Initial frequency.
  */
 var Square = function(audiolet, frequency) {
-    TableLookupOscillator.call(this, audiolet, Square.TABLE, frequency);
+    AudioletNode.call(this, audiolet, 1, 1);
+    this.frequency = new AudioletParameter(this, 0, frequency || 440);
+    this.phase = 0;
 };
-extend(Square, TableLookupOscillator);
+extend(Square, AudioletNode);
+
+/**
+ * Process samples
+ */
+Square.prototype.generate = function() {
+    var output = this.outputs[0];
+
+    var frequency = this.frequency.getValue();
+    var sampleRate = this.audiolet.device.sampleRate;
+
+    output.samples[0] = this.phase > 0.5 ? 1 : -1;
+
+    this.phase += frequency / sampleRate;
+    if (this.phase > 1) {
+        this.phase %= 1;
+    }
+};
 
 /**
  * toString
@@ -4466,18 +4448,9 @@ Square.prototype.toString = function() {
     return 'Square';
 };
 
-/**
- * Square wave table
- */
-Square.TABLE = [];
-for (var i = 0; i < 8192; i++) {
-    Square.TABLE.push(((i - 4096) / 8192) < 0 ? 1 : -1);
-}
-
-
 
 /*!
- * @depends TableLookupOscillator.js
+ * @depends ../core/AudioletNode.js
  */
 
 /**
@@ -4496,14 +4469,33 @@ for (var i = 0; i < 8192; i++) {
  * - frequency The frequency of the oscillator.  Linked to input 0.
  *
  * @constructor
- * @extends TableLookupOscillator
+ * @extends AudioletNode
  * @param {Audiolet} audiolet The audiolet object.
  * @param {Number} [frequency=440] Initial frequency.
  */
 var Triangle = function(audiolet, frequency) {
-    TableLookupOscillator.call(this, audiolet, Triangle.TABLE, frequency);
+    AudioletNode.call(this, audiolet, 1, 1);
+    this.frequency = new AudioletParameter(this, 0, frequency || 440);
+    this.phase = 0;
 };
-extend(Triangle, TableLookupOscillator);
+extend(Triangle, AudioletNode);
+
+/**
+ * Process samples
+ */
+Triangle.prototype.generate = function() {
+    var output = this.outputs[0];
+
+    var frequency = this.frequency.getValue();
+    var sampleRate = this.audiolet.device.sampleRate;
+
+    output.samples[0] = 1 - 4 * Math.abs((this.phase + 0.25) % 1 - 0.5);
+
+    this.phase += frequency / sampleRate;
+    if (this.phase > 1) {
+        this.phase %= 1;
+    }
+};
 
 /**
  * toString
@@ -4513,15 +4505,6 @@ extend(Triangle, TableLookupOscillator);
 Triangle.prototype.toString = function() {
     return 'Triangle';
 };
-
-/**
- * Triangle table
- */
-Triangle.TABLE = [];
-for (var i = 0; i < 8192; i++) {
-    // Smelly, but looks right...
-    Triangle.TABLE.push(Math.abs(((((i - 2048) / 8192) % 1) + 1) % 1 * 2 - 1) * 2 - 1);
-}
 
 
 /*!

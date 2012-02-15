@@ -1,5 +1,5 @@
 /*!
- * @depends TableLookupOscillator.js
+ * @depends ../core/AudioletNode.js
  */
 
 /**
@@ -18,14 +18,33 @@
  * - frequency The frequency of the oscillator.  Linked to input 0.
  *
  * @constructor
- * @extends TableLookupOscillator
+ * @extends AudioletNode
  * @param {Audiolet} audiolet The audiolet object.
  * @param {Number} [frequency=440] Initial frequency.
  */
 var Triangle = function(audiolet, frequency) {
-    TableLookupOscillator.call(this, audiolet, Triangle.TABLE, frequency);
+    AudioletNode.call(this, audiolet, 1, 1);
+    this.frequency = new AudioletParameter(this, 0, frequency || 440);
+    this.phase = 0;
 };
-extend(Triangle, TableLookupOscillator);
+extend(Triangle, AudioletNode);
+
+/**
+ * Process samples
+ */
+Triangle.prototype.generate = function() {
+    var output = this.outputs[0];
+
+    var frequency = this.frequency.getValue();
+    var sampleRate = this.audiolet.device.sampleRate;
+
+    output.samples[0] = 1 - 4 * Math.abs((this.phase + 0.25) % 1 - 0.5);
+
+    this.phase += frequency / sampleRate;
+    if (this.phase > 1) {
+        this.phase %= 1;
+    }
+};
 
 /**
  * toString
@@ -35,13 +54,4 @@ extend(Triangle, TableLookupOscillator);
 Triangle.prototype.toString = function() {
     return 'Triangle';
 };
-
-/**
- * Triangle table
- */
-Triangle.TABLE = [];
-for (var i = 0; i < 8192; i++) {
-    // Smelly, but looks right...
-    Triangle.TABLE.push(Math.abs(((((i - 2048) / 8192) % 1) + 1) % 1 * 2 - 1) * 2 - 1);
-}
 
