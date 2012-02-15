@@ -1,65 +1,130 @@
-var WebKitBufferPlayer = function(audiolet, url) {
+var WebKitBufferPlayer = function(audiolet, onComplete) {
     AudioletNode.call(this, audiolet, 0, 1);
+    this.onComplete = onComplete;
     this.isWebKit = this.audiolet.device.sink instanceof Sink.sinks.webkit;
-
-    this.context = this.audiolet.device.sink._context;
-
-    if (this.isWebKit) {
-        this.xhr = new XMLHttpRequest();
-        this.xhr.open("GET", url, true);
-        this.xhr.responseType = "arraybuffer";
-        this.xhr.onload = this.onLoad.bind(this);
-        this.xhr.send();
-    }
-
     this.ready = false;
-};
-extend(WebKitBufferPlayer, AudioletNode);
 
-WebKitBufferPlayer.prototype.onLoad = function() {
-    this.fileBuffer = this.context.createBuffer(this.xhr.response, false);
-    this.setNumberOfOutputChannels(0, this.fileBuffer.numberOfChannels);
-
-    this.jsNode = this.context.createJavaScriptNode(4096, this.fileBuffer.numberOfChannels, 0);
-    this.jsNode.onaudioprocess = this.onData.bind(this);
-
-    this.source = this.context.createBufferSource();
-    this.source.buffer = this.fileBuffer;
-
-    this.source.connect(this.jsNode);
-    this.jsNode.connect(this.context.destination);
-    this.source.noteOn(0);
-
-    this.buffer = new AudioletBuffer(this.fileBuffer.numberOfChannels, 1024);
-    this.ready = true;
-};
-
-WebKitBufferPlayer.prototype.onData = function(event) {
-    var oldLength = this.buffer.length;
-    var newLength = oldLength + event.inputBuffer.length;
-    this.buffer.resize(this.buffer.numberOfChannels, newLength);
-
-    for (var i=0; i<event.inputBuffer.numberOfChannels; i++) {
-        var channelA = event.inputBuffer.getChannelData(i);
-        var channelB = this.buffer.getChannelData(i);
-        var bufferLength = event.inputBuffer.length;
-        for (var j=0; j<event.inputBuffer.length; j++) {
-            channelB[oldLength + j] = channelA[j];
-        }
-    }
-};
-
-WebKitBufferPlayer.prototype.generate = function(inputBuffers, outputBuffers) {
-    var outputBuffer = outputBuffers[0];
-    if (!this.ready) {
-        outputBuffer.isEmpty = true;
+    // Until we are loaded, output no channels.
+    this.setNumberOfOutputChannels(0, 0);
+    
+    if (!this.isWebKit) {
         return;
     }
 
-    if (this.buffer.length > outputBuffer.length) {
-        this.buffer.shift(outputBuffer);
+    this.context = this.audiolet.device.sink._context;
+    this.jsNode = null;
+    this.source = null;
+
+    this.ready = false;
+    this.loaded = false;
+
+    this.buffers = [];
+    this.readPosition = 0;
+
+    this.endTime = null;
+};
+extend(WebKitBufferPlayer, AudioletNode);
+
+WebKitBufferPlayer.prototype.load = function(url, onLoad, onError) {
+    if (!this.isWebKit) {
+        return;
     }
-    else {
-        outputBuffer.isEmpty = true;
+
+    this.stop();
+
+    // Request the new file
+    this.xhr = new XMLHttpRequest();
+    this.xhr.open("GET", url, true);
+    this.xhr.responseType = "arraybuffer";
+    this.xhr.onload = this.onLoad.bind(this, onLoad, onError);
+    this.xhr.onerror = onError;
+    this.xhr.send();
+};
+
+WebKitBufferPlayer.prototype.stop = function() {
+    this.ready = false;
+    this.loaded = false;
+
+    this.buffers = [];
+    this.readPosition = 0;
+    this.endTime = null;
+
+    this.setNumberOfOutputChannels(0);
+   
+    this.disconnectWebKitNodes();
+};
+
+WebKitBufferPlayer.prototype.disconnectWebKitNodes = function() {
+    if (this.source && this.jsNode) {
+        this.source.disconnect(this.jsNode);
+        this.jsNode.disconnect(this.context.destination);
+        this.source = null;
+        this.jsNode = null;
+    }
+};
+
+WebKitBufferPlayer.prototype.onLoad = function(onLoad, onError) {
+    // Load the buffer into memory for decoding
+//    this.fileBuffer = this.context.createBuffer(this.xhr.response, false);
+    this.context.decodeAudioData(this.xhr.response, function(buffer) {
+        this.onDecode(buffer);
+        onLoad();
+    }.bind(this), onError);
+};
+
+WebKitBufferPlayer.prototype.onDecode = function(buffer) {
+    this.fileBuffer = buffer;
+
+    // Create the WebKit buffer source for playback
+    this.source = this.context.createBufferSource();
+    this.source.buffer = this.fileBuffer;
+
+    // Make sure we are outputting the right number of channels on Audiolet's
+    // side
+    var numberOfChannels = this.fileBuffer.numberOfChannels;
+    this.setNumberOfOutputChannels(0, numberOfChannels);
+
+    // Create the JavaScript node for reading the data into Audiolet
+    this.jsNode = this.context.createJavaScriptNode(4096, numberOfChannels, 0);
+    this.jsNode.onaudioprocess = this.onData.bind(this);
+
+    // Connect it all up
+    this.source.connect(this.jsNode);
+    this.jsNode.connect(this.context.destination);
+    this.source.noteOn(0);
+    this.endTime = this.context.currentTime + this.fileBuffer.duration;
+
+    this.loaded = true;
+};
+
+WebKitBufferPlayer.prototype.onData = function(event) {
+    if (this.loaded) {
+        this.ready = true;
+    }
+
+    var numberOfChannels = event.inputBuffer.numberOfChannels;
+
+    for (var i=0; i<numberOfChannels; i++) {
+        this.buffers[i] = event.inputBuffer.getChannelData(i);
+        this.readPosition = 0;
+    }
+};
+
+WebKitBufferPlayer.prototype.generate = function() {
+    if (!this.ready) {
+        return;
+    }
+
+    var output = this.outputs[0];
+
+    var numberOfChannels = output.samples.length;
+    for (var i=0; i<numberOfChannels; i++) {
+        output.samples[i] = this.buffers[i][this.readPosition];
+    }
+    this.readPosition += 1;
+
+    if (this.context.currentTime > this.endTime) {
+        this.stop();
+        this.onComplete();
     }
 };
