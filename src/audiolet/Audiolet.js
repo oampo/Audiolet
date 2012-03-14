@@ -1925,7 +1925,9 @@ for (var i = 0; i < types.length; ++i) {
 var Envelope = function(audiolet, gate, levels, times, releaseStage,
                         onComplete) {
     AudioletNode.call(this, audiolet, 1, 1);
-    this.gate = new AudioletParameter(this, 0, gate || 1);
+	if(gate !== 0)
+		gate = gate || 1;
+    this.gate = new AudioletParameter(this, 0, gate);
 
     this.levels = levels;
     this.times = times;
@@ -4002,7 +4004,9 @@ FeedbackDelay.prototype.toString = function() {
 var Gain = function(audiolet, gain) {
     AudioletNode.call(this, audiolet, 2, 1);
     this.linkNumberOfOutputChannels(0, 0);
-    this.gain = new AudioletParameter(this, 1, gain || 1);
+	if(gain !== 0)
+		gain = gain || 1;
+    this.gain = new AudioletParameter(this, 1, gain);
 };
 extend(Gain, AudioletNode);
 
