@@ -57,7 +57,7 @@ BiquadFilter.prototype.calculateCoefficients = function(frequency) {
 };
 
 /**
- * Process a block of samples
+ * Process samples
  */
 BiquadFilter.prototype.generate = function() {
     var input = this.inputs[0];

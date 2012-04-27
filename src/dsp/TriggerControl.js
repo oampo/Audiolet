@@ -3,8 +3,8 @@
  */
 
 /**
- * Simple trigger which allows you to set a single sample to be 1 at the start
- * of a processing block
+ * Simple trigger which allows you to set a single sample to be 1 and then
+ * resets itself.
  *
  * **Outputs**
  *
@@ -26,12 +26,9 @@ var TriggerControl = function(audiolet, trigger) {
 extend(TriggerControl, AudioletNode);
 
 /**
- * Process a block of samples
- *
- * @param {AudioletBuffer[]} inputBuffers Samples received from the inputs.
- * @param {AudioletBuffer[]} outputBuffers Samples to be sent to the outputs.
+ * Process samples
  */
-TriggerControl.prototype.generate = function(inputBuffers, outputBuffers) {
+TriggerControl.prototype.generate = function() {
     if (this.trigger.getValue() > 0) {
         this.outputs[0].samples[0] = 1;
         this.trigger.setValue(0);

@@ -56,7 +56,7 @@ var BufferPlayer = function(audiolet, buffer, playbackRate, startPosition,
 extend(BufferPlayer, AudioletNode);
 
 /**
- * Process a block of samples
+ * Process samples
  */
 BufferPlayer.prototype.generate = function() {
     var output = this.outputs[0];

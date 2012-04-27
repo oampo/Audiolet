@@ -88,7 +88,7 @@ var Reverb = function(audiolet, mix, roomSize, damping) {
 extend(Reverb, AudioletNode);
 
 /**
- * Process a block of samples
+ * Process samples
  */
 Reverb.prototype.generate = function() {
     var mix = this.mix.getValue();

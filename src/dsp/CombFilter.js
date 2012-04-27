@@ -39,7 +39,7 @@ var CombFilter = function(audiolet, maximumDelayTime, delayTime, decayTime) {
 extend(CombFilter, AudioletNode);
 
 /**
- * Process a block of samples
+ * Process samples
  */
 CombFilter.prototype.generate = function() {
     var input = this.inputs[0];

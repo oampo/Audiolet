@@ -36,7 +36,7 @@ var Pan = function(audiolet, pan) {
 extend(Pan, AudioletNode);
 
 /**
- * Process a block of samples
+ * Process samples
  */
 Pan.prototype.generate = function() {
     var input = this.inputs[0];

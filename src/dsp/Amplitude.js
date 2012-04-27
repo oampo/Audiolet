@@ -38,7 +38,7 @@ var Amplitude = function(audiolet, attack, release) {
 extend(Amplitude, AudioletNode);
 
 /**
- * Process a block of samples
+ * Process samples
  */
 Amplitude.prototype.generate = function() {
     var input = this.inputs[0];

@@ -34,7 +34,7 @@ var CrossFade = function(audiolet, position) {
 extend(CrossFade, AudioletNode);
 
 /**
- * Process a block of samples
+ * Process samples
  */
 CrossFade.prototype.generate = function() {
     var inputA = this.inputs[0];

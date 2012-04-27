@@ -25,7 +25,7 @@ var UpMixer = function(audiolet, outputChannels) {
 extend(UpMixer, AudioletNode);
 
 /**
- * Process a block of samples
+ * Process samples
  */
 UpMixer.prototype.generate = function() {
     var input = this.inputs[0];

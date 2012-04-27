@@ -46,7 +46,7 @@ DiscontinuityDetector.prototype.callback = function(size, channel) {
 };
 
 /**
- * Process a block of samples
+ * Process samples
  */
 DiscontinuityDetector.prototype.generate = function() {
     var input = this.inputs[0];

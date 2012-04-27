@@ -36,7 +36,7 @@ var Lag = function(audiolet, value, lagTime) {
 extend(Lag, AudioletNode);
 
 /**
- * Process a block of samples
+ * Process samples
  */
 Lag.prototype.generate = function() {
     var input = this.inputs[0];

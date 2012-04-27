@@ -39,7 +39,7 @@ var DCFilter = function(audiolet, coefficient) {
 extend(DCFilter, AudioletNode);
 
 /**
- * Process a block of samples
+ * Process samples
  */
 DCFilter.prototype.generate = function() {
     var coefficient = this.coefficient.getValue();

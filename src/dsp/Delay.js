@@ -36,7 +36,7 @@ var Delay = function(audiolet, maximumDelayTime, delayTime) {
 extend(Delay, AudioletNode);
 
 /**
- * Process a block of samples
+ * Process samples
  */
 Delay.prototype.generate = function() {
     var input = this.inputs[0];

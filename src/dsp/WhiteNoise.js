@@ -19,7 +19,7 @@ var WhiteNoise = function(audiolet) {
 extend(WhiteNoise, AudioletNode);
 
 /**
- * Process a block of samples
+ * Process samples
  */
 WhiteNoise.prototype.generate = function() {
     this.outputs[0].samples[0] = Math.random() * 2 - 1;

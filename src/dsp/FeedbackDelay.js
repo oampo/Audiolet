@@ -45,7 +45,7 @@ var FeedbackDelay = function(audiolet, maximumDelayTime, delayTime, feedback,
 extend(FeedbackDelay, AudioletNode);
 
 /**
- * Process a block of samples
+ * Process samples
  */
 FeedbackDelay.prototype.generate = function() {
     var input = this.inputs[0];

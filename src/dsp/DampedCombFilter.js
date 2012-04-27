@@ -46,7 +46,7 @@ var DampedCombFilter = function(audiolet, maximumDelayTime, delayTime,
 extend(DampedCombFilter, AudioletNode);
 
 /**
- * Process a block of samples
+ * Process samples
  */
 DampedCombFilter.prototype.generate = function() {
     var input = this.inputs[0];

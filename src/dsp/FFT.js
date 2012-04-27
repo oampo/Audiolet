@@ -36,7 +36,7 @@ var FFT = function(audiolet, bufferSize) {
 extend(FFT, AudioletNode);
 
 /**
- * Process a block of samples
+ * Process samples
  */
 FFT.prototype.generate = function() {
     var input = this.inputs[0];

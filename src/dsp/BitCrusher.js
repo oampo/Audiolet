@@ -31,7 +31,7 @@ var BitCrusher = function(audiolet, bits) {
 extend(BitCrusher, AudioletNode);
 
 /**
- * Process a block of samples
+ * Process samples
  */
 BitCrusher.prototype.generate = function() {
     var input = this.inputs[0];

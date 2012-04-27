@@ -49,12 +49,9 @@ var Envelope = function(audiolet, gate, levels, times, releaseStage,
 extend(Envelope, AudioletNode);
 
 /**
- * Process a block of samples
- *
- * @param {AudioletBuffer[]} inputBuffers Samples received from the inputs.
- * @param {AudioletBuffer[]} outputBuffers Samples to be sent to the outputs.
+ * Process samples
  */
-Envelope.prototype.generate = function(inputBuffers, outputBuffers) {
+Envelope.prototype.generate = function() {
     var gate = this.gate.getValue();
 
     var stageChanged = false;

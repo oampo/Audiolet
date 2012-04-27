@@ -25,7 +25,7 @@ var SoftClip = function(audiolet) {
 extend(SoftClip, AudioletNode);
 
 /**
- * Process a block of samples
+ * Process samples
  */
 SoftClip.prototype.generate = function() {
     var input = this.inputs[0];

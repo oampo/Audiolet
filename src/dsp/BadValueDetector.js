@@ -41,7 +41,7 @@ BadValueDetector.prototype.callback = function(value, channel) {
 };
 
 /**
- * Process a block of samples
+ * Process samples
  */
 BadValueDetector.prototype.generate = function() {
     var input = this.inputs[0];

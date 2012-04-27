@@ -33,7 +33,7 @@ var LinearCrossFade = function(audiolet, position) {
 extend(LinearCrossFade, AudioletNode);
 
 /**
- * Process a block of samples
+ * Process samples
  */
 LinearCrossFade.prototype.generate = function() {
     var inputA = this.inputs[0];

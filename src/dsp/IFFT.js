@@ -40,7 +40,7 @@ var IFFT = function(audiolet, bufferSize) {
 extend(IFFT, AudioletNode);
 
 /**
- * Process a block of samples
+ * Process samples
  */
 IFFT.prototype.generate = function() {
     var input = this.inputs[0];

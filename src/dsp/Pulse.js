@@ -34,12 +34,9 @@ var Pulse = function(audiolet, frequency, pulseWidth) {
 extend(Pulse, AudioletNode);
 
 /**
- * Process a block of samples
- *
- * @param {AudioletBuffer[]} inputBuffers Samples received from the inputs.
- * @param {AudioletBuffer[]} outputBuffers Samples to be sent to the outputs.
+ * Process samples
  */
-Pulse.prototype.generate = function(inputBuffers, outputBuffers) {
+Pulse.prototype.generate = function() {
     var pulseWidth = this.pulseWidth.getValue();
     this.outputs[0].samples[0] = (this.phase < pulseWidth) ? 1 : -1;
 

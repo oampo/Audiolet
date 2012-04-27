@@ -43,7 +43,7 @@ var Limiter = function(audiolet, threshold, attack, release) {
 extend(Limiter, AudioletNode);
 
 /**
- * Process a block of samples
+ * Process samples
  */
 Limiter.prototype.generate = function() {
     var input = this.inputs[0];
