@@ -15,14 +15,12 @@ oxo -t 'Audiolet API Documentation' \
        ../trunk/src/core/Scheduler.js \
        ../trunk/src/core/PassThroughNode.js \
        ../trunk/src/core/ParameterNode.js \
-       ../trunk/src/core/BlockSizeLimiter.js \
        ../trunk/src/core/PriorityQueue.js \
        ../trunk/src/core/Extend.js \
        ../trunk/src/core/TypedArrayShim.js \
     -s 'DSP' \
     -a 'Audio generation and processing nodes' \
-    -i ../trunk/src/dsp/TableLookupOscillator.js \
-       ../trunk/src/dsp/Sine.js \
+    -i ../trunk/src/dsp/Sine.js \
        ../trunk/src/dsp/Triangle.js \
        ../trunk/src/dsp/Saw.js \
        ../trunk/src/dsp/Square.js \
@@ -51,13 +49,14 @@ oxo -t 'Audiolet API Documentation' \
        ../trunk/src/dsp/CombFilter.js \
        ../trunk/src/dsp/DampedCombFilter.js \
        ../trunk/src/dsp/Reverb.js \
-       ../trunk/src/dsp/ReverbB.js \
        ../trunk/src/dsp/SoftClip.js \
        ../trunk/src/dsp/BitCrusher.js \
        ../trunk/src/dsp/Amplitude.js \
        ../trunk/src/dsp/DiscontinuityDetector.js \
        ../trunk/src/dsp/BadValueDetector.js \
        ../trunk/src/dsp/TriggerControl.js \
+       ../trunk/src/dsp/FFT.js \
+       ../trunk/src/dsp/IFFT.js \
     -s 'Operators' \
     -a 'Mathematical operator nodes' \
     -i ../trunk/src/operators/Add.js \
