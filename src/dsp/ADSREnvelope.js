@@ -34,6 +34,11 @@ var ADSREnvelope = function(audiolet, gate, attack, decay, sustain, release,
     var levels = [0, 1, sustain, 0];
     var times = [attack, decay, release];
     Envelope.call(this, audiolet, gate, levels, times, 2, onComplete);
+
+    this.attack = this.times[0];
+    this.decay = this.times[1];
+    this.sustain = this.levels[2];
+    this.release = this.levels[2];
 };
 extend(ADSREnvelope, Envelope);
 

@@ -1567,8 +1567,16 @@ var Envelope = function(audiolet, gate, levels, times, releaseStage,
     AudioletNode.call(this, audiolet, 1, 1);
     this.gate = new AudioletParameter(this, 0, gate || 1);
 
-    this.levels = levels;
-    this.times = times;
+    this.levels = [];
+    for (var i=0; i<levels.length; i++) {
+        this.levels.push(new AudioletParameter(this, null, levels[i]));
+    }
+
+    this.times = [];
+    for (var i=0; i<times.length; i++) {
+        this.times.push(new AudioletParameter(this, null, times[i]));
+    }
+
     this.releaseStage = releaseStage;
     this.onComplete = onComplete;
 
@@ -1576,7 +1584,7 @@ var Envelope = function(audiolet, gate, levels, times, releaseStage,
     this.time = null;
     this.changeTime = null;
 
-    this.level = this.levels[0];
+    this.level = this.levels[0].getValue();
     this.delta = 0;
     this.gateOn = false;
 };
@@ -1596,7 +1604,7 @@ Envelope.prototype.generate = function() {
         this.stage = 0;
         this.time = 0;
         this.delta = 0;
-        this.level = this.levels[0];
+        this.level = this.levels[0].getValue();
         if (this.stage != this.releaseStage) {
             stageChanged = true;
         }
@@ -1664,8 +1672,9 @@ Envelope.prototype.generate = function() {
  * @return {Number} The change in level.
  */
 Envelope.prototype.calculateDelta = function(stage, level) {
-    var delta = this.levels[stage + 1] - level;
-    var stageTime = this.times[stage] * this.audiolet.device.sampleRate;
+    var delta = this.levels[stage + 1].getValue() - level;
+    var stageTime = this.times[stage].getValue() *
+                    this.audiolet.device.sampleRate;
     return (delta / stageTime);
 };
 
@@ -1677,7 +1686,8 @@ Envelope.prototype.calculateDelta = function(stage, level) {
  * @return {Number} The change time.
  */
 Envelope.prototype.calculateChangeTime = function(stage, time) {
-    var stageTime = this.times[stage] * this.audiolet.device.sampleRate;
+    var stageTime = this.times[stage].getValue() *
+                    this.audiolet.device.sampleRate;
     return (time + stageTime);
 };
 
@@ -1726,6 +1736,11 @@ var ADSREnvelope = function(audiolet, gate, attack, decay, sustain, release,
     var levels = [0, 1, sustain, 0];
     var times = [attack, decay, release];
     Envelope.call(this, audiolet, gate, levels, times, 2, onComplete);
+
+    this.attack = this.times[0];
+    this.decay = this.times[1];
+    this.sustain = this.levels[2];
+    this.release = this.levels[2];
 };
 extend(ADSREnvelope, Envelope);
 
@@ -3834,6 +3849,9 @@ var PercussiveEnvelope = function(audiolet, gate, attack, release,
     var levels = [0, 1, 0];
     var times = [attack, release];
     Envelope.call(this, audiolet, gate, levels, times, null, onComplete);
+
+    this.attack = this.times[0];
+    this.release = this.times[1];
 };
 extend(PercussiveEnvelope, Envelope);
 

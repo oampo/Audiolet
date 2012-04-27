@@ -31,6 +31,9 @@ var PercussiveEnvelope = function(audiolet, gate, attack, release,
     var levels = [0, 1, 0];
     var times = [attack, release];
     Envelope.call(this, audiolet, gate, levels, times, null, onComplete);
+
+    this.attack = this.times[0];
+    this.release = this.times[1];
 };
 extend(PercussiveEnvelope, Envelope);
 
