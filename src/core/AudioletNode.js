@@ -96,8 +96,7 @@ AudioletNode.prototype.linkNumberOfOutputChannels = function(output, input) {
 };
 
 /**
- * Process a buffer of samples, first pulling any necessary data from
- * higher up the processing graph.  This function should not be called
+ * Process samples a from each channel. This function should not be called
  * manually by users, who should instead rely on automatic ticking from
  * connections to the AudioletDevice.
  */
@@ -108,6 +107,12 @@ AudioletNode.prototype.tick = function() {
     this.generate();
 };
 
+/**
+ * Traverse the audio graph, adding this and any parent nodes to the nodes
+ * array.
+ *
+ * @param {AudioletNode[]} nodes Array to add nodes to.
+ */
 AudioletNode.prototype.traverse = function(nodes) {
     if (nodes.indexOf(this) == -1) {
         nodes.push(this);
@@ -117,8 +122,7 @@ AudioletNode.prototype.traverse = function(nodes) {
 };
 
 /**
- * Call the tick function on nodes which are connected to the inputs.  This
- * function should not be called manually by users.
+ * Call the traverse function on nodes which are connected to the inputs.
  */
 AudioletNode.prototype.traverseParents = function(nodes) {
     var numberOfInputs = this.inputs.length;
@@ -133,16 +137,16 @@ AudioletNode.prototype.traverseParents = function(nodes) {
 };
 
 /**
- * Process a block of samples, reading from the input buffers and putting
- * new values into the output buffers.  Override me!
+ * Process a sample for each channel, reading from the inputs and putting new
+ * values into the outputs.  Override me!
  */
 AudioletNode.prototype.generate = function() {
 };
 
 /**
- * Create the input buffers by grabbing data from the outputs of connected
+ * Create the input samples by grabbing data from the outputs of connected
  * nodes and summing it.  If no nodes are connected to an input, then
- * give a one channel empty buffer.
+ * give an empty array
  */
 AudioletNode.prototype.createInputSamples = function() {
     var numberOfInputs = this.inputs.length;
@@ -173,7 +177,7 @@ AudioletNode.prototype.createInputSamples = function() {
 
 
 /**
-* Create output buffers of the correct length.
+* Create output samples for each channel.
 */
 AudioletNode.prototype.createOutputSamples = function() {
     var numberOfOutputs = this.outputs.length;

@@ -4,10 +4,8 @@
 
 /**
  * A sample-accurate scheduler built as an AudioletNode.  The scheduler works
- * by storing a queue of events, and subdividing the tick call from the
- * AudioletDevice if an event is scheduled to happen during the tick.  Any
- * buffers obtained in subdivided ticks are finally merged to produce the
- * single buffer expected at the output.  All timing and events are handled in
+ * by storing a queue of events, and running callback functions when the
+ * correct sample is being processed.  All timing and events are handled in
  * beats, which are converted to sample positions using a master tempo.
  *
  * **Inputs**
@@ -165,11 +163,8 @@ Scheduler.prototype.stop = function(event) {
 };
 
 /**
- * Overridden tick method.  This is where the scheduler magic of splitting down
- * blocks allows sample-accurate changes to happen, and also where we process
- * the events themselves.
- *
- * @param {Number} timestamp A timestamp for the block of samples.
+ * Overridden tick method.  Process any events which are due to take place
+ * either now or previously.
  */
 Scheduler.prototype.tick = function() {
     PassThroughNode.prototype.tick.call(this);

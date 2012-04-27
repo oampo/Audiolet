@@ -33,7 +33,7 @@ var ParameterNode = function(audiolet, value) {
 extend(ParameterNode, AudioletNode);
 
 /**
- * Process a block of samples
+ * Process samples
  */
 ParameterNode.prototype.generate = function() {
     this.outputs[0].samples[0] = this.parameter.getValue();

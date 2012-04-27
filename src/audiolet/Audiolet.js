@@ -540,8 +540,7 @@ AudioletNode.prototype.linkNumberOfOutputChannels = function(output, input) {
 };
 
 /**
- * Process a buffer of samples, first pulling any necessary data from
- * higher up the processing graph.  This function should not be called
+ * Process samples a from each channel. This function should not be called
  * manually by users, who should instead rely on automatic ticking from
  * connections to the AudioletDevice.
  */
@@ -552,6 +551,12 @@ AudioletNode.prototype.tick = function() {
     this.generate();
 };
 
+/**
+ * Traverse the audio graph, adding this and any parent nodes to the nodes
+ * array.
+ *
+ * @param {AudioletNode[]} nodes Array to add nodes to.
+ */
 AudioletNode.prototype.traverse = function(nodes) {
     if (nodes.indexOf(this) == -1) {
         nodes.push(this);
@@ -561,8 +566,7 @@ AudioletNode.prototype.traverse = function(nodes) {
 };
 
 /**
- * Call the tick function on nodes which are connected to the inputs.  This
- * function should not be called manually by users.
+ * Call the traverse function on nodes which are connected to the inputs.
  */
 AudioletNode.prototype.traverseParents = function(nodes) {
     var numberOfInputs = this.inputs.length;
@@ -577,16 +581,16 @@ AudioletNode.prototype.traverseParents = function(nodes) {
 };
 
 /**
- * Process a block of samples, reading from the input buffers and putting
- * new values into the output buffers.  Override me!
+ * Process a sample for each channel, reading from the inputs and putting new
+ * values into the outputs.  Override me!
  */
 AudioletNode.prototype.generate = function() {
 };
 
 /**
- * Create the input buffers by grabbing data from the outputs of connected
+ * Create the input samples by grabbing data from the outputs of connected
  * nodes and summing it.  If no nodes are connected to an input, then
- * give a one channel empty buffer.
+ * give an empty array
  */
 AudioletNode.prototype.createInputSamples = function() {
     var numberOfInputs = this.inputs.length;
@@ -617,7 +621,7 @@ AudioletNode.prototype.createInputSamples = function() {
 
 
 /**
-* Create output buffers of the correct length.
+* Create output samples for each channel.
 */
 AudioletNode.prototype.createOutputSamples = function() {
     var numberOfOutputs = this.outputs.length;
@@ -1042,7 +1046,7 @@ var ParameterNode = function(audiolet, value) {
 extend(ParameterNode, AudioletNode);
 
 /**
- * Process a block of samples
+ * Process samples
  */
 ParameterNode.prototype.generate = function() {
     this.outputs[0].samples[0] = this.parameter.getValue();
@@ -1080,12 +1084,10 @@ var PassThroughNode = function(audiolet, numberOfInputs, numberOfOutputs) {
 extend(PassThroughNode, AudioletNode);
 
 /**
- * Create output buffers of the correct length, copying any input buffers to
+ * Create output samples for each channel, copying any input samples to
  * the corresponding outputs.
- *
- * @param {Number} length The number of samples for the resulting buffers.
  */
-PassThroughNode.prototype.createOutputSamples = function(length) {
+PassThroughNode.prototype.createOutputSamples = function() {
     var numberOfOutputs = this.outputs.length;
     // Copy the inputs buffers straight to the output buffers
     for (var i = 0; i < numberOfOutputs; i++) {
@@ -1257,10 +1259,8 @@ PriorityQueue.prototype.compare = function(a, b) {
 
 /**
  * A sample-accurate scheduler built as an AudioletNode.  The scheduler works
- * by storing a queue of events, and subdividing the tick call from the
- * AudioletDevice if an event is scheduled to happen during the tick.  Any
- * buffers obtained in subdivided ticks are finally merged to produce the
- * single buffer expected at the output.  All timing and events are handled in
+ * by storing a queue of events, and running callback functions when the
+ * correct sample is being processed.  All timing and events are handled in
  * beats, which are converted to sample positions using a master tempo.
  *
  * **Inputs**
@@ -1418,11 +1418,8 @@ Scheduler.prototype.stop = function(event) {
 };
 
 /**
- * Overridden tick method.  This is where the scheduler magic of splitting down
- * blocks allows sample-accurate changes to happen, and also where we process
- * the events themselves.
- *
- * @param {Number} timestamp A timestamp for the block of samples.
+ * Overridden tick method.  Process any events which are due to take place
+ * either now or previously.
  */
 Scheduler.prototype.tick = function() {
     PassThroughNode.prototype.tick.call(this);
