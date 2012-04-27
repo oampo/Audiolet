@@ -31,7 +31,7 @@ var Add = function(audiolet, value) {
 extend(Add, AudioletNode);
 
 /**
- * Process a block of samples
+ * Process samples
  */
 Add.prototype.generate = function() {
     var input = this.inputs[0];

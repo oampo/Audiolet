@@ -31,12 +31,9 @@ var Multiply = function(audiolet, value) {
 extend(Multiply, AudioletNode);
 
 /**
- * Process a block of samples
- *
- * @param {AudioletBuffer[]} inputBuffers Samples received from the inputs.
- * @param {AudioletBuffer[]} outputBuffers Samples to be sent to the outputs.
+ * Process samples
  */
-Multiply.prototype.generate = function(inputBuffers, outputBuffers) {
+Multiply.prototype.generate = function() {
     var value = this.value.getValue();
     var input = this.inputs[0];
     var numberOfChannels = input.samples.length;

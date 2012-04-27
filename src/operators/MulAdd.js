@@ -35,12 +35,9 @@ var MulAdd = function(audiolet, mul, add) {
 extend(MulAdd, AudioletNode);
 
 /**
- * Process a block of samples
- *
- * @param {AudioletBuffer[]} inputBuffers Samples received from the inputs.
- * @param {AudioletBuffer[]} outputBuffers Samples to be sent to the outputs.
+ * Process samples
  */
-MulAdd.prototype.generate = function(inputBuffers, outputBuffers) {
+MulAdd.prototype.generate = function() {
     var input = this.inputs[0];
     var output = this.outputs[0];
 

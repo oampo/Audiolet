@@ -31,12 +31,9 @@ var Subtract = function(audiolet, value) {
 extend(Subtract, AudioletNode);
 
 /**
- * Process a block of samples
- *
- * @param {AudioletBuffer[]} inputBuffers Samples received from the inputs.
- * @param {AudioletBuffer[]} outputBuffers Samples to be sent to the outputs.
+ * Process samples
  */
-Subtract.prototype.generate = function(inputBuffers, outputBuffers) {
+Subtract.prototype.generate = function() {
     var input = this.inputs[0];
     var output = this.outputs[0];
 

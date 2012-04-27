@@ -25,9 +25,9 @@ var Tanh = function(audiolet) {
 extend(Tanh, AudioletNode);
 
 /**
- * Process a block of samples
+ * Process samples
  */
-Tanh.prototype.generate = function(inputBuffers, outputBuffers) {
+Tanh.prototype.generate = function() {
     var input = this.inputs[0];
     var output = this.outputs[0];
 

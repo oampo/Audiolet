@@ -31,7 +31,7 @@ var Divide = function(audiolet, value) {
 extend(Divide, AudioletNode);
 
 /**
- * Process a block of samples
+ * Process samples
  */
 Divide.prototype.generate = function() {
     var input = this.inputs[0];

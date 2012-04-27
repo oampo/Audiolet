@@ -24,7 +24,7 @@ var Reciprocal = function(audiolet) {
 extend(Reciprocal, AudioletNode);
 
 /**
- * Process a block of samples
+ * Process samples
  */
 Reciprocal.prototype.generate = function() {
     var input = this.inputs[0];
