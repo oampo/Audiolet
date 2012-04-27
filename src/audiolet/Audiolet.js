@@ -1583,12 +1583,9 @@ var Envelope = function(audiolet, gate, levels, times, releaseStage,
 extend(Envelope, AudioletNode);
 
 /**
- * Process a block of samples
- *
- * @param {AudioletBuffer[]} inputBuffers Samples received from the inputs.
- * @param {AudioletBuffer[]} outputBuffers Samples to be sent to the outputs.
+ * Process samples
  */
-Envelope.prototype.generate = function(inputBuffers, outputBuffers) {
+Envelope.prototype.generate = function() {
     var gate = this.gate.getValue();
 
     var stageChanged = false;
@@ -1800,7 +1797,7 @@ BiquadFilter.prototype.calculateCoefficients = function(frequency) {
 };
 
 /**
- * Process a block of samples
+ * Process samples
  */
 BiquadFilter.prototype.generate = function() {
     var input = this.inputs[0];
@@ -1963,7 +1960,7 @@ var Amplitude = function(audiolet, attack, release) {
 extend(Amplitude, AudioletNode);
 
 /**
- * Process a block of samples
+ * Process samples
  */
 Amplitude.prototype.generate = function() {
     var input = this.inputs[0];
@@ -2051,7 +2048,7 @@ BadValueDetector.prototype.callback = function(value, channel) {
 };
 
 /**
- * Process a block of samples
+ * Process samples
  */
 BadValueDetector.prototype.generate = function() {
     var input = this.inputs[0];
@@ -2230,7 +2227,7 @@ var BitCrusher = function(audiolet, bits) {
 extend(BitCrusher, AudioletNode);
 
 /**
- * Process a block of samples
+ * Process samples
  */
 BitCrusher.prototype.generate = function() {
     var input = this.inputs[0];
@@ -2312,7 +2309,7 @@ var BufferPlayer = function(audiolet, buffer, playbackRate, startPosition,
 extend(BufferPlayer, AudioletNode);
 
 /**
- * Process a block of samples
+ * Process samples
  */
 BufferPlayer.prototype.generate = function() {
     var output = this.outputs[0];
@@ -2421,7 +2418,7 @@ var CombFilter = function(audiolet, maximumDelayTime, delayTime, decayTime) {
 extend(CombFilter, AudioletNode);
 
 /**
- * Process a block of samples
+ * Process samples
  */
 CombFilter.prototype.generate = function() {
     var input = this.inputs[0];
@@ -2556,7 +2553,7 @@ var CrossFade = function(audiolet, position) {
 extend(CrossFade, AudioletNode);
 
 /**
- * Process a block of samples
+ * Process samples
  */
 CrossFade.prototype.generate = function() {
     var inputA = this.inputs[0];
@@ -2635,7 +2632,7 @@ var DampedCombFilter = function(audiolet, maximumDelayTime, delayTime,
 extend(DampedCombFilter, AudioletNode);
 
 /**
- * Process a block of samples
+ * Process samples
  */
 DampedCombFilter.prototype.generate = function() {
     var input = this.inputs[0];
@@ -2728,7 +2725,7 @@ var DCFilter = function(audiolet, coefficient) {
 extend(DCFilter, AudioletNode);
 
 /**
- * Process a block of samples
+ * Process samples
  */
 DCFilter.prototype.generate = function() {
     var coefficient = this.coefficient.getValue();
@@ -2799,7 +2796,7 @@ var Delay = function(audiolet, maximumDelayTime, delayTime) {
 extend(Delay, AudioletNode);
 
 /**
- * Process a block of samples
+ * Process samples
  */
 Delay.prototype.generate = function() {
     var input = this.inputs[0];
@@ -2885,7 +2882,7 @@ DiscontinuityDetector.prototype.callback = function(size, channel) {
 };
 
 /**
- * Process a block of samples
+ * Process samples
  */
 DiscontinuityDetector.prototype.generate = function() {
     var input = this.inputs[0];
@@ -2964,7 +2961,7 @@ var FeedbackDelay = function(audiolet, maximumDelayTime, delayTime, feedback,
 extend(FeedbackDelay, AudioletNode);
 
 /**
- * Process a block of samples
+ * Process samples
  */
 FeedbackDelay.prototype.generate = function() {
     var input = this.inputs[0];
@@ -3047,7 +3044,7 @@ var FFT = function(audiolet, bufferSize) {
 extend(FFT, AudioletNode);
 
 /**
- * Process a block of samples
+ * Process samples
  */
 FFT.prototype.generate = function() {
     var input = this.inputs[0];
@@ -3178,12 +3175,9 @@ var Multiply = function(audiolet, value) {
 extend(Multiply, AudioletNode);
 
 /**
- * Process a block of samples
- *
- * @param {AudioletBuffer[]} inputBuffers Samples received from the inputs.
- * @param {AudioletBuffer[]} outputBuffers Samples to be sent to the outputs.
+ * Process samples
  */
-Multiply.prototype.generate = function(inputBuffers, outputBuffers) {
+Multiply.prototype.generate = function() {
     var value = this.value.getValue();
     var input = this.inputs[0];
     var numberOfChannels = input.samples.length;
@@ -3345,7 +3339,7 @@ var IFFT = function(audiolet, bufferSize) {
 extend(IFFT, AudioletNode);
 
 /**
- * Process a block of samples
+ * Process samples
  */
 IFFT.prototype.generate = function() {
     var input = this.inputs[0];
@@ -3492,7 +3486,7 @@ var Lag = function(audiolet, value, lagTime) {
 extend(Lag, AudioletNode);
 
 /**
- * Process a block of samples
+ * Process samples
  */
 Lag.prototype.generate = function() {
     var input = this.inputs[0];
@@ -3565,7 +3559,7 @@ var Limiter = function(audiolet, threshold, attack, release) {
 extend(Limiter, AudioletNode);
 
 /**
- * Process a block of samples
+ * Process samples
  */
 Limiter.prototype.generate = function() {
     var input = this.inputs[0];
@@ -3657,7 +3651,7 @@ var LinearCrossFade = function(audiolet, position) {
 extend(LinearCrossFade, AudioletNode);
 
 /**
- * Process a block of samples
+ * Process samples
  */
 LinearCrossFade.prototype.generate = function() {
     var inputA = this.inputs[0];
@@ -3784,7 +3778,7 @@ var Pan = function(audiolet, pan) {
 extend(Pan, AudioletNode);
 
 /**
- * Process a block of samples
+ * Process samples
  */
 Pan.prototype.generate = function() {
     var input = this.inputs[0];
@@ -3888,12 +3882,9 @@ var Pulse = function(audiolet, frequency, pulseWidth) {
 extend(Pulse, AudioletNode);
 
 /**
- * Process a block of samples
- *
- * @param {AudioletBuffer[]} inputBuffers Samples received from the inputs.
- * @param {AudioletBuffer[]} outputBuffers Samples to be sent to the outputs.
+ * Process samples
  */
-Pulse.prototype.generate = function(inputBuffers, outputBuffers) {
+Pulse.prototype.generate = function() {
     var pulseWidth = this.pulseWidth.getValue();
     this.outputs[0].samples[0] = (this.phase < pulseWidth) ? 1 : -1;
 
@@ -3914,207 +3905,6 @@ Pulse.prototype.toString = function() {
     return 'Pulse';
 };
 
-
-/*!
- * @depends ../core/AudioletNode.js
- * @depends ../core/AudioletGroup.js
- */
-
-/**
- * Port of the Freeverb Schrodoer/Moorer reverb model.  See
- * https://ccrma.stanford.edu/~jos/pasp/Freeverb.html for a description of how
- * each part works.  This is an old, slow, crappy version maintained for
- * backwards compatibility.  It is recommended to that you use Reverb instead.
- *
- * **Inputs**
- *
- * - Audio
- * - Mix
- * - Room Size
- * - Damping
- *
- * **Outputs**
- *
- * - Reverberated Audio
- *
- * **Parameters**
- *
- * - mix The wet/dry mix.  Values between 0 and 1.  Linked to input 1.
- * - roomSize The reverb's room size.  Values between 0 and 1.  Linked to input
- * 2.
- * - damping The amount of high-frequency damping.  Values between 0 and 1.
- * Linked to input 3.
- *
- * @constructor
- * @extends AudioletGroup
- * @param {Audiolet} audiolet The audiolet object.
- * @param {Number} [mix=0.33] The initial wet/dry mix.
- * @param {Number} [roomSize=0.5] The initial room size.
- * @param {Number} [damping=0.5] The initial damping amount.
- */
-var ReverbB = function(audiolet, mix, roomSize, damping) {
-    AudioletGroup.call(this, audiolet, 4, 1);
-
-    // Constants
-    this.initialMix = 0.33;
-    this.fixedGain = 0.015;
-    this.initialDamping = 0.5;
-    this.scaleDamping = 0.4;
-    this.initialRoomSize = 0.5;
-    this.scaleRoom = 0.28;
-    this.offsetRoom = 0.7;
-
-    // Parameters: for 44.1k or 48k
-    this.combTuning = [1116, 1188, 1277, 1356, 1422, 1491, 1557, 1617];
-    this.allPassTuning = [556, 441, 341, 225];
-
-    // Controls
-    // Room size control
-    var roomSize = roomSize || this.initialRoomSize;
-    this.roomSizeNode = new ParameterNode(audiolet, roomSize);
-    this.roomSizeMulAdd = new MulAdd(audiolet, this.scaleRoom,
-                                     this.offsetRoom);
-
-    // Damping control
-    var damping = damping || this.initialDamping;
-    this.dampingNode = new ParameterNode(audiolet, damping);
-    this.dampingMulAdd = new MulAdd(audiolet, this.scaleDamping);
-
-    // Access the controls as if this is an AudioletNode, and they are it's
-    // parameters.
-    this.roomSize = this.roomSizeNode.parameter;
-    this.damping = this.dampingNode.parameter;
-
-    // Initial gain control
-    this.gain = new Gain(audiolet, this.fixedGain);
-
-    // Eight comb filters and feedback gain converters
-    this.combFilters = [];
-    this.fgConverters = [];
-    for (var i = 0; i < this.combTuning.length; i++) {
-        var delayTime = this.combTuning[i] /
-                        this.audiolet.device.sampleRate;
-        this.combFilters[i] = new DampedCombFilter(audiolet, delayTime,
-                                                   delayTime);
-
-        this.fgConverters[i] = new FeedbackGainToDecayTime(audiolet,
-                                                           delayTime);
-    }
-
-    // Four allpass filters
-    this.allPassFilters = [];
-    for (var i = 0; i < this.allPassTuning.length; i++) {
-        this.allPassFilters[i] = new AllPassFilter(audiolet,
-                                                   this.allPassTuning[i]);
-    }
-
-    // Mixer
-    var mix = mix || this.initialMix;
-    this.mixer = new LinearCrossFade(audiolet, mix);
-
-    this.mix = this.mixer.position;
-
-    // Connect up the controls
-    this.inputs[1].connect(this.mixer, 0, 2);
-
-    this.inputs[2].connect(this.roomSizeNode);
-    this.roomSizeNode.connect(this.roomSizeMulAdd);
-
-    this.inputs[3].connect(this.dampingNode);
-    this.dampingNode.connect(this.dampingMulAdd);
-
-    // Connect up the gain
-    this.inputs[0].connect(this.gain);
-
-    // Connect up the comb filters
-    for (var i = 0; i < this.combFilters.length; i++) {
-        this.gain.connect(this.combFilters[i]);
-        this.combFilters[i].connect(this.allPassFilters[0]);
-
-        // Controls
-        this.roomSizeMulAdd.connect(this.fgConverters[i]);
-        this.fgConverters[i].connect(this.combFilters[i], 0, 2);
-
-        this.dampingMulAdd.connect(this.combFilters[i], 0, 3);
-    }
-
-    // Connect up the all pass filters
-    var numberOfAllPassFilters = this.allPassFilters.length;
-    for (var i = 0; i < numberOfAllPassFilters - 1; i++) {
-        this.allPassFilters[i].connect(this.allPassFilters[i + 1]);
-    }
-
-    this.inputs[0].connect(this.mixer);
-    var lastAllPassIndex = numberOfAllPassFilters - 1;
-    this.allPassFilters[lastAllPassIndex].connect(this.mixer, 0, 1);
-
-    this.mixer.connect(this.outputs[0]);
-};
-extend(ReverbB, AudioletGroup);
-
-/**
- * toString
- *
- * @return {String} String representation.
- */
-ReverbB.prototype.toString = function() {
-    return 'Reverb B';
-};
-
-/**
- * Helper node to convert a feedback gain multiplier to a 60db decay time.
- *
- * **Inputs**
- *
- * - Feedback gain
- *
- * **Outputs**
- *
- * - Decay time
- *
- * @constructor
- * @extends AudioletNode
- * @param {Audiolet} audiolet The audiolet object.
- * @param {Number} delayTime The delay time in seconds.
- */
-var FeedbackGainToDecayTime = function(audiolet, delayTime) {
-    AudioletNode.call(this, audiolet, 1, 1);
-    this.delayTime = delayTime;
-    this.lastFeedbackGain = null;
-    this.decayTime = null;
-};
-extend(FeedbackGainToDecayTime, AudioletNode);
-
-/**
- * Process a block of samples
- *
- * @param {AudioletBuffer[]} inputBuffers Samples received from the inputs.
- * @param {AudioletBuffer[]} outputBuffers Samples to be sent to the outputs.
- */
-FeedbackGainToDecayTime.prototype.generate = function(inputBuffers,
-                                                      outputBuffers) {
-    var inputBuffer = inputBuffers[0];
-    var outputBuffer = outputBuffers[0];
-    var inputChannel = inputBuffer.channels[0];
-    var outputChannel = outputBuffer.channels[0];
-
-    var delayTime = this.lastDelayTime;
-    var decayTime = this.decayTime;
-    var lastFeedbackGain = this.lastFeedbackGain;
-
-    var bufferLength = outputBuffer.length;
-    for (var i = 0; i < bufferLength; i++) {
-        var feedbackGain = inputChannel[i];
-        if (feedbackGain != lastFeedbackGain) {
-            decayTime = - 3 * delayTime / Math.log(feedbackGain);
-            lastFeedbackGain = feedbackGain;
-        }
-        outputChannel[i] = feedbackGain;
-    }
-
-    this.decayTime = decayTime;
-    this.lastFeedbackGain = lastFeedbackGain;
-};
 
 /*!
  * @depends ../core/AudioletNode.js
@@ -4206,7 +3996,7 @@ var Reverb = function(audiolet, mix, roomSize, damping) {
 extend(Reverb, AudioletNode);
 
 /**
- * Process a block of samples
+ * Process samples
  */
 Reverb.prototype.generate = function() {
     var mix = this.mix.getValue();
@@ -4360,7 +4150,7 @@ var SoftClip = function(audiolet) {
 extend(SoftClip, AudioletNode);
 
 /**
- * Process a block of samples
+ * Process samples
  */
 SoftClip.prototype.generate = function() {
     var input = this.inputs[0];
@@ -4509,8 +4299,8 @@ Triangle.prototype.toString = function() {
  */
 
 /**
- * Simple trigger which allows you to set a single sample to be 1 at the start
- * of a processing block
+ * Simple trigger which allows you to set a single sample to be 1 and then
+ * resets itself.
  *
  * **Outputs**
  *
@@ -4532,12 +4322,9 @@ var TriggerControl = function(audiolet, trigger) {
 extend(TriggerControl, AudioletNode);
 
 /**
- * Process a block of samples
- *
- * @param {AudioletBuffer[]} inputBuffers Samples received from the inputs.
- * @param {AudioletBuffer[]} outputBuffers Samples to be sent to the outputs.
+ * Process samples
  */
-TriggerControl.prototype.generate = function(inputBuffers, outputBuffers) {
+TriggerControl.prototype.generate = function() {
     if (this.trigger.getValue() > 0) {
         this.outputs[0].samples[0] = 1;
         this.trigger.setValue(0);
@@ -4583,7 +4370,7 @@ var UpMixer = function(audiolet, outputChannels) {
 extend(UpMixer, AudioletNode);
 
 /**
- * Process a block of samples
+ * Process samples
  */
 UpMixer.prototype.generate = function() {
     var input = this.inputs[0];
@@ -4764,7 +4551,7 @@ var WhiteNoise = function(audiolet) {
 extend(WhiteNoise, AudioletNode);
 
 /**
- * Process a block of samples
+ * Process samples
  */
 WhiteNoise.prototype.generate = function() {
     this.outputs[0].samples[0] = Math.random() * 2 - 1;
@@ -4813,7 +4600,7 @@ var Add = function(audiolet, value) {
 extend(Add, AudioletNode);
 
 /**
- * Process a block of samples
+ * Process samples
  */
 Add.prototype.generate = function() {
     var input = this.inputs[0];
@@ -4870,7 +4657,7 @@ var Divide = function(audiolet, value) {
 extend(Divide, AudioletNode);
 
 /**
- * Process a block of samples
+ * Process samples
  */
 Divide.prototype.generate = function() {
     var input = this.inputs[0];
@@ -4927,7 +4714,7 @@ var Modulo = function(audiolet, value) {
 extend(Modulo, AudioletNode);
 
 /**
- * Process a block of samples
+ * Process samples
  */
 Modulo.prototype.generate = function() {
     var input = this.inputs[0];
@@ -4988,12 +4775,9 @@ var MulAdd = function(audiolet, mul, add) {
 extend(MulAdd, AudioletNode);
 
 /**
- * Process a block of samples
- *
- * @param {AudioletBuffer[]} inputBuffers Samples received from the inputs.
- * @param {AudioletBuffer[]} outputBuffers Samples to be sent to the outputs.
+ * Process samples
  */
-MulAdd.prototype.generate = function(inputBuffers, outputBuffers) {
+MulAdd.prototype.generate = function() {
     var input = this.inputs[0];
     var output = this.outputs[0];
 
@@ -5042,7 +4826,7 @@ var Reciprocal = function(audiolet) {
 extend(Reciprocal, AudioletNode);
 
 /**
- * Process a block of samples
+ * Process samples
  */
 Reciprocal.prototype.generate = function() {
     var input = this.inputs[0];
@@ -5097,12 +4881,9 @@ var Subtract = function(audiolet, value) {
 extend(Subtract, AudioletNode);
 
 /**
- * Process a block of samples
- *
- * @param {AudioletBuffer[]} inputBuffers Samples received from the inputs.
- * @param {AudioletBuffer[]} outputBuffers Samples to be sent to the outputs.
+ * Process samples
  */
-Subtract.prototype.generate = function(inputBuffers, outputBuffers) {
+Subtract.prototype.generate = function() {
     var input = this.inputs[0];
     var output = this.outputs[0];
 
@@ -5151,9 +4932,9 @@ var Tanh = function(audiolet) {
 extend(Tanh, AudioletNode);
 
 /**
- * Process a block of samples
+ * Process samples
  */
-Tanh.prototype.generate = function(inputBuffers, outputBuffers) {
+Tanh.prototype.generate = function() {
     var input = this.inputs[0];
     var output = this.outputs[0];
 
