@@ -5634,7 +5634,7 @@ var EqualTemperamentTuning = function(pitchesPerOctave) {
 };
 extend(EqualTemperamentTuning, Tuning);
 
-var Sink = this.Sink = (function(global){
+var Sink = this.Sink = function (global) {
 
 /**
  * Creates a Sink according to specified parameters, if possible.
@@ -5658,12 +5658,12 @@ var Sink = this.Sink = (function(global){
  * @param {Number} default=0 ringOffset The current position of the ring buffer.
 */
 function Sink (readFn, channelCount, bufferSize, sampleRate) {
-	var	sinks	= Sink.sinks,
-		dev;
-	for (dev in sinks){
-		if (sinks.hasOwnProperty(dev) && sinks[dev].enabled){
-			try{
-				return new sinks[dev](readFn, channelCount, bufferSize, sampleRate);
+	var	sinks	= Sink.sinks.list,
+		i;
+	for (i=0; i<sinks.length; i++) {
+		if (sinks[i].enabled) {
+			try {
+				return new sinks[i](readFn, channelCount, bufferSize, sampleRate);
 			} catch(e1){}
 		}
 	}
@@ -5686,6 +5686,7 @@ SinkClass.prototype = Sink.prototype = {
 	ringOffset: 0,
 
 	channelMode: 'interleaved',
+	isReady: false,
 
 /**
  * Does the initialization of the sink.
@@ -5697,7 +5698,7 @@ SinkClass.prototype = Sink.prototype = {
 		this.sampleRate		= isNaN(sampleRate) || sampleRate === null ? this.sampleRate : sampleRate;
 		this.readFn		= readFn;
 		this.activeRecordings	= [];
-		this.previousHit	= +new Date;
+		this.previousHit	= +new Date();
 		Sink.EventEmitter.call(this);
 		Sink.emit('init', [this].concat([].slice.call(arguments)));
 	},
@@ -5707,19 +5708,30 @@ SinkClass.prototype = Sink.prototype = {
 */
 	process: function (soundData, channelCount) {
 		this.emit('preprocess', arguments);
-		this.ringBuffer && (this.channelMode === 'interleaved' ? this.ringSpin : this.ringSpinInterleaved).apply(this, arguments);
+
+		if (this.ringBuffer) {
+			(this.channelMode === 'interleaved' ? this.ringSpin : this.ringSpinInterleaved).apply(this, arguments);
+		}
+
 		if (this.channelMode === 'interleaved') {
 			this.emit('audioprocess', arguments);
-			this.readFn && this.readFn.apply(this, arguments);
+
+			if (this.readFn) {
+				this.readFn.apply(this, arguments);
+			}
 		} else {
 			var	soundDataSplit	= Sink.deinterleave(soundData, this.channelCount),
 				args		= [soundDataSplit].concat([].slice.call(arguments, 1));
 			this.emit('audioprocess', args);
-			this.readFn && this.readFn.apply(this, args);
+
+			if (this.readFn) {
+				this.readFn.apply(this, args);
+			}
+
 			Sink.interleave(soundDataSplit, this.channelCount, soundData);
 		}
 		this.emit('postprocess', arguments);
-		this.previousHit = +new Date;
+		this.previousHit = +new Date();
 		this.writePosition += soundData.length / channelCount;
 	},
 /**
@@ -5732,6 +5744,16 @@ SinkClass.prototype = Sink.prototype = {
 	getPlaybackTime: function () {
 		return this.writePosition - this.bufferSize;
 	},
+/**
+ * Internal method to send the ready signal if not ready yet.
+ * @method Sink
+*/
+	ready: function () {
+		if (this.isReady) return;
+
+		this.isReady = true;
+		this.emit('ready', []);
+	}
 };
 
 /**
@@ -5746,20 +5768,25 @@ SinkClass.prototype = Sink.prototype = {
  * @arg {Boolean} disabled Whether the Sink should be disabled at first.
 */
 
-function sinks (type, constructor, prototype, disabled) {
+function sinks (type, constructor, prototype, disabled, priority) {
 	prototype = prototype || constructor.prototype;
 	constructor.prototype = new Sink.SinkClass();
 	constructor.prototype.type = type;
 	constructor.enabled = !disabled;
-	for (disabled in prototype) {
-		if (prototype.hasOwnProperty(disabled)) {
-			constructor.prototype[disabled] = prototype[disabled];
+
+	var k;
+	for (k in prototype) {
+		if (prototype.hasOwnProperty(k)) {
+			constructor.prototype[k] = prototype[k];
 		}
 	}
+
 	sinks[type] = constructor;
+	sinks.list[priority ? 'unshift' : 'push'](constructor);
 }
 
 Sink.sinks = Sink.devices = sinks;
+Sink.sinks.list = [];
 
 Sink.singleton = function () {
 	var sink = Sink.apply(null, arguments);
@@ -5775,8 +5802,8 @@ global.Sink = Sink;
 
 return Sink;
 
-}(function (){ return this; }()));
-(function (Sink) {
+}(function (){ return this; }());
+void function (Sink) {
 
 /**
  * A light event emitter.
@@ -5792,7 +5819,7 @@ function EventEmitter () {
 		}
 	}
 	this._listeners = {};
-};
+}
 
 EventEmitter.prototype = {
 	_listeners: null,
@@ -5839,23 +5866,27 @@ EventEmitter.prototype = {
 				delete this._listeners[name];
 				return this;
 			}
+
 			for (var i=0; i<this._listeners[name].length; i++) {
 				if (this._listeners[name][i] === listener) {
 					this._listeners[name].splice(i--, 1);
 				}
 			}
-			this._listeners[name].length || delete this._listeners[name];
+
+			if (!this._listeners[name].length) {
+				delete this._listeners[name];
+			}
 		}
 		return this;
-	},
+	}
 };
 
 Sink.EventEmitter = EventEmitter;
 
 EventEmitter.call(Sink);
 
-}(this.Sink));
-(function (Sink) {
+}(this.Sink);
+void function (Sink) {
 
 /**
  * Creates a timer with consistent (ie. not clamped) intervals even in background tabs.
@@ -5890,23 +5921,101 @@ Sink.doInterval = function (callback, timeout) {
 		}
 	}
 
-	Sink.inlineWorker.ready ? create() : Sink.inlineWorker.on('ready', function () {
+	if (Sink.inlineWorker.ready) {
 		create();
-	});
+	} else {
+		Sink.inlineWorker.on('ready', function () {
+			create();
+		});
+	}
 
 	return function () {
 		if (!kill) {
-			Sink.inlineWorker.ready || Sink.inlineWorker.on('ready', function () {
-				kill && kill();
-			});
+			if (!Sink.inlineWorker.ready) {
+				Sink.inlineWorker.on('ready', function () {
+					if (kill) kill();
+				});
+			}
 		} else {
 			kill();
 		}
 	};
 };
 
-}(this.Sink));
-(function (Sink) {
+}(this.Sink);
+void function (Sink) {
+
+var _Blob, _BlobBuilder, _URL, _btoa;
+
+void function (prefixes, urlPrefixes) {
+	function find (name, prefixes) {
+		var b, a = prefixes.slice();
+
+		for (b=a.shift(); typeof b !== 'undefined'; b=a.shift()) {
+			b = Function('return typeof ' + b + name + 
+				'=== "undefined" ? undefined : ' +
+				b + name)();
+
+			if (b) return b;
+		}
+	}
+
+	_Blob = find('Blob', prefixes);
+	_BlobBuilder = find('BlobBuilder', prefixes);
+	_URL = find('URL', urlPrefixes);
+	_btoa = find('btoa', ['']);
+}([
+	'',
+	'Moz',
+	'WebKit',
+	'MS'
+], [
+	'',
+	'webkit'
+]);
+
+var createBlob = _Blob && _URL && function (content, type) {
+	return _URL.createObjectURL(new _Blob([content], { type: type }));
+};
+
+var createBlobBuilder = _BlobBuilder && _URL && function (content, type) {
+	var bb = new _BlobBuilder();
+	bb.append(content);
+
+	return _URL.createObjectURL(bb.getBlob(type));
+};
+
+var createData = _btoa && function (content, type) {
+	return 'data:' + type + ';base64,' + _btoa(content);
+};
+
+var createDynURL =
+	createBlob ||
+	createBlobBuilder ||
+	createData;
+
+if (!createDynURL) return;
+
+if (createBlob) createDynURL.createBlob = createBlob;
+if (createBlobBuilder) createDynURL.createBlobBuilder = createBlobBuilder;
+if (createData) createDynURL.createData = createData;
+
+if (_Blob) createDynURL.Blob = _Blob;
+if (_BlobBuilder) createDynURL.BlobBuilder = _BlobBuilder;
+if (_URL) createDynURL.URL = _URL;
+
+Sink.createDynURL = createDynURL;
+
+Sink.revokeDynURL = function (url) {
+	if (typeof url === 'string' && url.indexOf('data:') === 0) {
+		return false;
+	} else {
+		return _URL.revokeObjectURL(url);
+	}
+};
+
+}(this.Sink);
+void function (Sink) {
 
 /*
  * A Sink-specific error class.
@@ -5944,34 +6053,30 @@ SinkError.prototype.toString = function () {
 
 SinkError[0x01] = {
 	message: 'No such error code.',
-	explanation: 'The error code does not exist.',
+	explanation: 'The error code does not exist.'
 };
 SinkError[0x02] = {
 	message: 'No audio sink available.',
-	explanation: 'The audio device may be busy, or no supported output API is available for this browser.',
+	explanation: 'The audio device may be busy, or no supported output API is available for this browser.'
 };
 
 SinkError[0x10] = {
 	message: 'Buffer underflow.',
-	explanation: 'Trying to recover...',
+	explanation: 'Trying to recover...'
 };
 SinkError[0x11] = {
 	message: 'Critical recovery fail.',
-	explanation: 'The buffer underflow has reached a critical point, trying to recover, but will probably fail anyway.',
+	explanation: 'The buffer underflow has reached a critical point, trying to recover, but will probably fail anyway.'
 };
 SinkError[0x12] = {
 	message: 'Buffer size too large.',
-	explanation: 'Unable to allocate the buffer due to excessive length, please try a smaller buffer. Buffer size should probably be smaller than the sample rate.',
+	explanation: 'Unable to allocate the buffer due to excessive length, please try a smaller buffer. Buffer size should probably be smaller than the sample rate.'
 };
 
 Sink.Error = SinkError;
 
-}(this.Sink));
-(function (Sink) {
-
-var	BlobBuilder	= typeof window === 'undefined' ? undefined :
-	window.MozBlobBuilder || window.WebKitBlobBuilder || window.MSBlobBuilder || window.OBlobBuilder || window.BlobBuilder,
-	URL		= typeof window === 'undefined' ? undefined : (window.MozURL || window.webkitURL || window.MSURL || window.OURL || window.URL);
+}(this.Sink);
+void function (Sink) {
 
 /**
  * Creates an inline worker using a data/blob URL, if possible.
@@ -5983,67 +6088,101 @@ var	BlobBuilder	= typeof window === 'undefined' ? undefined :
  * @return {Worker} A web worker, or null if impossible to create.
 */
 
+var define = Object.defineProperty ? function (obj, name, value) {
+	Object.defineProperty(obj, name, {
+		value: value,
+		configurable: true,
+		writable: true
+	});
+} : function (obj, name, value) {
+	obj[name] = value;
+};
+
+function terminate () {
+	define(this, 'terminate', this._terminate);
+
+	Sink.revokeDynURL(this._url);
+
+	delete this._url;
+	delete this._terminate;
+	return this.terminate();
+}
+
 function inlineWorker (script) {
-	var	worker	= null,
-		url, bb;
-	try {
-		bb	= new BlobBuilder();
-		bb.append(script);
-		url	= URL.createObjectURL(bb.getBlob());
-		worker	= new Worker(url);
+	function wrap (type, content, typeName) {
+		try {
+			var url = type(content, 'text/javascript');
+			var worker = new Worker(url);
 
-		worker._terminate	= worker.terminate;
-		worker._url		= url;
-		bb			= null;
+			define(worker, '_url', url);
+			define(worker, '_terminate', worker.terminate);
+			define(worker, 'terminate', terminate);
 
-		worker.terminate = function () {
-			this._terminate;
-			URL.revokeObjectURL(this._url);
-		};
+			if (inlineWorker.type) return worker;
 
-		inlineWorker.type = 'blob';
+			inlineWorker.type = typeName;
+			inlineWorker.createURL = type;
 
-		return worker;
+			return worker;
+		} catch (e) {
+			return null;
+		}
+	}
 
-	} catch (e) {}
+	var createDynURL = Sink.createDynURL;
+	var worker;
 
-	try {
-		worker			= new Worker('data:text/javascript;base64,' + btoa(script));
-		inlineWorker.type	= 'data';
+	if (inlineWorker.createURL) {
+		return wrap(inlineWorker.createURL, script, inlineWorker.type);
+	}
 
-		return worker;
+	worker = wrap(createDynURL.createBlob, script, 'blob');
+	if (worker) return worker;
 
-	} catch (e) {}
+	worker = wrap(createDynURL.createBlobBuilder, script, 'blobbuilder');
+	if (worker) return worker;
+
+	worker = wrap(createDynURL.createData, script, 'data');
 
 	return worker;
 }
 
-inlineWorker.ready = inlineWorker.working = false;
-
 Sink.EventEmitter.call(inlineWorker);
 
 inlineWorker.test = function () {
-	var	worker	= inlineWorker('this.onmessage=function (e){postMessage(e.data)}'),
-		data	= 'inlineWorker';
 	inlineWorker.ready = inlineWorker.working = false;
+	inlineWorker.type = '';
+	inlineWorker.createURL = null;
+
+	var worker = inlineWorker('this.onmessage=function(e){postMessage(e.data)}');
+	var data = 'inlineWorker';
 
 	function ready (success) {
 		if (inlineWorker.ready) return;
-		inlineWorker.ready	= true;
-		inlineWorker.working	= success;
+
+		inlineWorker.ready = true;
+		inlineWorker.working = success;
 		inlineWorker.emit('ready', [success]);
 		inlineWorker.off('ready');
-		success && worker && worker.terminate();
+
+		if (success && worker) {
+			worker.terminate();
+		}
+
 		worker = null;
 	}
 
 	if (!worker) {
-		ready(false);
+		setTimeout(function () {
+			ready(false);
+		}, 0);
 	} else {
 		worker.onmessage = function (e) {
 			ready(e.data === data);
 		};
+
 		worker.postMessage(data);
+
 		setTimeout(function () {
 			ready(false);
 		}, 1000);
@@ -6054,8 +6193,8 @@ Sink.inlineWorker = inlineWorker;
 
 inlineWorker.test();
 
-}(this.Sink));
-(function (Sink) {
+}(this.Sink);
+void function (Sink) {
 
 /**
  * A Sink class for the Mozilla Audio Data API.
@@ -6072,7 +6211,7 @@ Sink.sinks('audiodata', function () {
 	self.preBufferSize = isNaN(arguments[4]) || arguments[4] === null ? this.preBufferSize : arguments[4];
 
 	function bufferFill() {
-		if (tail){
+		if (tail) {
 			written = audioDevice.mozWriteAudio(tail);
 			currentWritePosition += written;
 			if (written < tail.length){
@@ -6084,8 +6223,14 @@ Sink.sinks('audiodata', function () {
 
 		currentPosition = audioDevice.mozCurrentSampleOffset();
 		available = Number(currentPosition + (prevPos !== currentPosition ? self.bufferSize : self.preBufferSize) * self.channelCount - currentWritePosition);
-		currentPosition === prevPos && self.emit('error', [Sink.Error(0x10)]);
+
+		if (currentPosition === prevPos) {
+			self.emit('error', [Sink.Error(0x10)]);
+		}
+
 		if (available > 0 || prevPos === currentPosition){
+			self.ready();
+
 			try {
 				soundData = new Float32Array(prevPos === currentPosition ? self.preBufferSize * self.channelCount :
 					self.forceBufferSize ? available < self.bufferSize * 2 ? self.bufferSize * 2 : available : available);
@@ -6110,7 +6255,7 @@ Sink.sinks('audiodata', function () {
 
 	this._timers.push(Sink.doInterval(function () {
 		// Check for complete death of the output
-		if (+new Date - self.previousHit > 2000) {
+		if (+new Date() - self.previousHit > 2000) {
 			self._audio = audioDevice = new Audio();
 			audioDevice.mozSetup(self.channelCount, self.sampleRate);
 			currentWritePosition = 0;
@@ -6127,30 +6272,32 @@ Sink.sinks('audiodata', function () {
 	bufferSize: 24576,
 	preBufferSize: 24576,
 	forceBufferSize: false,
-	interval: 20,
+	interval: 100,
+
 	kill: function () {
-		while(this._timers.length){
-			this._timers[0]();
-			this._timers.splice(0, 1);
+		while (this._timers.length) {
+			this._timers.shift()();
 		}
+
 		this.emit('kill');
 	},
+
 	getPlaybackTime: function () {
 		return this._audio.mozCurrentSampleOffset() / this.channelCount;
-	},
-});
+	}
+}, false, true);
 
 Sink.sinks.moz = Sink.sinks.audiodata;
 
-}(this.Sink));
-(function (Sink) {
+}(this.Sink);
+void function (Sink) {
 
 /**
  * A dummy Sink. (No output)
 */
 
 Sink.sinks('dummy', function () {
-	var 	self		= this;
+	var	self = this;
 	self.start.apply(self, arguments);
 	
 	function bufferFill () {
@@ -6165,13 +6312,13 @@ Sink.sinks('dummy', function () {
 	kill: function () {
 		this._kill();
 		this.emit('kill');
-	},
+	}
 }, true);
 
-}(this.Sink));
+}(this.Sink);
 (function (Sink, sinks) {
 
-var sinks = Sink.sinks;
+sinks = Sink.sinks;
 
 function newAudio (src) {
 	var audio = document.createElement('audio');
@@ -6181,7 +6328,7 @@ function newAudio (src) {
 	return audio;
 }
 
-/* TODO: Implement a <BGSOUND> hack for IE8.
+/* TODO: Implement a <BGSOUND> hack for IE8. */
 
 /**
  * A sink class for WAV data URLs
@@ -6190,7 +6337,7 @@ function newAudio (src) {
 */
 sinks('wav', function () {
 	var	self			= this,
-		audio			= new sinks.wav.wavAudio,
+		audio			= new sinks.wav.wavAudio(),
 		PCMData			= typeof PCMData === 'undefined' ? audioLib.PCMData : PCMData;
 	self.start.apply(self, arguments);
 	var	soundData		= new Float32Array(self.bufferSize * self.channelCount),
@@ -6200,6 +6347,9 @@ sinks('wav', function () {
 	
 	function bufferFill () {
 		if (self._audio.hasNextFrame) return;
+
+		self.ready();
+
 		Sink.memcpy(zeroData, 0, soundData, 0);
 		self.process(soundData, self.channelCount);
 
@@ -6208,7 +6358,7 @@ sinks('wav', function () {
 				data:		soundData,
 				sampleRate:	self.sampleRate,
 				channelCount:	self.channelCount,
-				bytesPerSample:	self.quality,
+				bytesPerSample:	self.quality
 			})
 		));
 
@@ -6225,7 +6375,7 @@ sinks('wav', function () {
 	getPlaybackTime: function () {
 		var audio = this._audio;
 		return (audio.currentFrame ? audio.currentFrame.currentTime * this.sampleRate : 0) + audio.samples;
-	},
+	}
 });
 
 function wavAudio () {
@@ -6260,13 +6410,15 @@ wavAudio.prototype = {
 		this.nextFrame.addEventListener('ended', this._onended, true);
 
 		this.hasNextFrame = true;
-	},
+	}
 };
 
 sinks.wav.wavAudio = wavAudio;
 
 }(this.Sink));
-(function (sinks, fixChrome82795) {
+ (function (sinks, fixChrome82795) {
+
+var AudioContext = typeof window === 'undefined' ? null : window.webkitAudioContext || window.AudioContext;
 
 /**
  * A sink class for the Web Audio API
@@ -6275,10 +6427,11 @@ sinks.wav.wavAudio = wavAudio;
 sinks('webaudio', function (readFn, channelCount, bufferSize, sampleRate) {
 	var	self		= this,
 		context		= sinks.webaudio.getContext(),
-		node		= context.createJavaScriptNode(bufferSize, 0, channelCount),
+		node		= null,
 		soundData	= null,
 		zeroBuffer	= null;
 	self.start.apply(self, arguments);
+	node = context.createJavaScriptNode(self.bufferSize, 0, self.channelCount);
 
 	function bufferFill(e) {
 		var	outputBuffer	= e.outputBuffer,
@@ -6287,6 +6440,8 @@ sinks('webaudio', function (readFn, channelCount, bufferSize, sampleRate) {
 			size		= outputBuffer.size,
 			channels	= new Array(channelCount),
 			tail;
+
+		self.ready();
 		
 		soundData	= soundData && soundData.length === l * channelCount ? soundData : new Float32Array(l * channelCount);
 		zeroBuffer	= zeroBuffer && zeroBuffer.length === soundData.length ? zeroBuffer : new Float32Array(l * channelCount);
@@ -6319,16 +6474,21 @@ sinks('webaudio', function (readFn, channelCount, bufferSize, sampleRate) {
 }, {
 	kill: function () {
 		this._node.disconnect(0);
+
 		for (var i=0; i<fixChrome82795.length; i++) {
-			fixChrome82795[i] === this._node && fixChrome82795.splice(i--, 1);
+			if (fixChrome82795[i] === this._node) {
+				fixChrome82795.splice(i--, 1);
+			}
 		}
+
 		this._node = this._context = null;
 		this.emit('kill');
 	},
+
 	getPlaybackTime: function () {
 		return this._context.currentTime * this.sampleRate;
-	},
-});
+	}
+}, false, true);
 
 sinks.webkit = sinks.webaudio;
 
@@ -6336,7 +6496,7 @@ sinks.webaudio.fix82795 = fixChrome82795;
 
 sinks.webaudio.getContext = function () {
 	// For now, we have to accept that the AudioContext is at 48000Hz, or whatever it decides.
-	var context = new (window.AudioContext || webkitAudioContext)(/*sampleRate*/);
+	var context = new AudioContext(/*sampleRate*/);
 
 	sinks.webaudio.getContext = function () {
 		return context;
@@ -6365,7 +6525,11 @@ Sink.sinks('worker', function () {
 	importScripts();
 
 	function mspBufferFill (e) {
-		self.ready || self.initMSP(e);
+		if (!self.isReady) {
+			self.initMSP(e);
+		}
+
+		self.ready();
 
 		var	channelCount	= self.channelCount,
 			l		= e.audioLength,
@@ -6390,7 +6554,11 @@ Sink.sinks('worker', function () {
 	}
 
 	function waBufferFill(e) {
-		self.ready || self.initWA(e);
+		if (!self.isReady) {
+			self.initWA(e);
+		}
+
+		self.ready();
 
 		var	outputBuffer	= e.outputBuffer,
 			channelCount	= outputBuffer.numberOfChannels,
@@ -6440,7 +6608,7 @@ Sink.sinks('worker', function () {
 		this.bufferSize		= b.length * this.channelCount;
 		this.ready		= true;
 		this.emit('ready', []);
-	},
+	}
 });
 
 }(this.Sink));
@@ -6669,10 +6837,15 @@ Proxy.prototype = {
 	},
 
 	process: function (buffer, channelCount) {
-		this.offset === null && this.loadBuffer();
+		if (this.offset === null) {
+			this.loadBuffer();
+		}
 
 		for (var i=0; i<buffer.length; i++) {
-			this.offset >= this.buffer.length && this.loadBuffer();
+			if (this.offset >= this.buffer.length) {
+				this.loadBuffer();
+			}
+
 			buffer[i] = this.buffer[this.offset++];
 		}
 	},
@@ -6681,7 +6854,7 @@ Proxy.prototype = {
 		this.offset = 0;
 		Sink.memcpy(this.zeroBuffer, 0, this.buffer, 0);
 		this.emit('audioprocess', [this.buffer, this.channelCount]);
-	},
+	}
 };
 
 Sink.Proxy = Proxy;
@@ -6788,7 +6961,7 @@ Sink.resample	= function (buffer, fromRate /* or speed */, fromFrequency /* or t
 };
 
 }(this.Sink));
-(function (Sink) {
+void function (Sink) {
 
 Sink.on('init', function (sink) {
 	sink.activeRecordings = [];
@@ -6896,16 +7069,18 @@ Recording.prototype = {
 			bufPos += buffers[i].length;
 		}
 		return newArray;
-	},
+	}
 };
 
 Sink.Recording = Recording;
 
-}(this.Sink));
-(function (Sink) {
+}(this.Sink);
+void function (Sink) {
 
 function processRingBuffer () {
-	this.ringBuffer && (this.channelMode === 'interleaved' ? this.ringSpin : this.ringSpinInterleaved).apply(this, arguments);
+	if (this.ringBuffer) {
+		(this.channelMode === 'interleaved' ? this.ringSpin : this.ringSpinInterleaved).apply(this, arguments);
+	}
 }
 
 Sink.on('init', function (sink) {
@@ -6960,8 +7135,8 @@ Sink.prototype.ringSpinDeinterleaved = function (buffer) {
 	this.ringOffset = n;
 };
 
-}(this.Sink));
-(function (Sink, proto) {
+}(this.Sink);
+void function (Sink, proto) {
 
 proto = Sink.prototype;
 
@@ -7000,7 +7175,9 @@ proto.writeBuffersAsync = function (buffer) {
 				buffer[n + offset] += buf.b[n];
 			}
 			buf.b = buf.b.subarray(n + offset);
-			i >= bufLength && buffers.splice(i--, 1);
+			if (i >= bufLength) {
+				buffers.splice(i--, 1);
+			}
 		}
 	}
 };
@@ -7047,7 +7224,7 @@ proto.writeBufferAsync = function (buffer, delay) {
 	var	buffers		= this.asyncBuffers;
 	buffers.push({
 		b: buffer,
-		d: isNaN(delay) ? ~~((+new Date - this.previousHit) / 1000 * this.sampleRate) : delay
+		d: isNaN(delay) ? ~~((+new Date() - this.previousHit) / 1000 * this.sampleRate) : delay
 	});
 	return buffers.length;
 };
@@ -7100,5 +7277,5 @@ proto.getSyncWriteOffset = function () {
 	return offset;
 };
 
-} (this.Sink));
+} (this.Sink);
 
