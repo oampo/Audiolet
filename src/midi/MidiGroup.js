@@ -1,16 +1,20 @@
 /**
- * A container for collections of connected AudioletNodes.  Groups make it
- * possible to create multiple copies of predefined networks of nodes,
- * without having to manually create and connect up each individual node.
+ * A MidiGroup is almost identical to an AudioletGroup, except it
+ * let's you define which input and output index represent MidiInputs
+ * and MidIOutputs. It additionally provides a `midi` method which
+ * maps midi messages to instance methods. `.midi(144, 44, 255)` for instance,
+ * will trigger .noteOn(44, 255);.
  *
- * From the outside groups look and behave exactly the same as nodes.
- * Internally you can connect nodes directly to the group's inputs and
- * outputs, allowing connection to nodes outside of the group.
+ * The MidiInput, MidiOutput, and MidiGroup nodes all behave the same as Audiolet
+ * objects for routing purposes- but `MidiOutput` has a unique method; `send`.
+ * `send` will send a midi message to the node that output is connected to. 
  *
  * @constructor
  * @param {Audiolet} audiolet The audiolet object.
  * @param {Number} numberOfInputs The number of inputs.
  * @param {Number} numberOfOutputs The number of outputs.
+ * @param {Number} midiIn The input index to use for midi in.
+ * @param {Number} midiOut The output index to use for midi out.
  */
 var MidiGroup = function(audiolet, numberOfInputs, numberOfOutputs, midiIn, midiOut) {
     this.audiolet = audiolet;

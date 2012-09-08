@@ -1,5 +1,5 @@
 /**
- * Class representing a single output of an AudioletNode
+ * Class representing a midi output of a MidiGroup
  *
  * @constructor
  * @param {AudioletNode} node The node which the input belongs to.

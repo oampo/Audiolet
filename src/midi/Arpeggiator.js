@@ -1,4 +1,11 @@
-var Arpeggiator = function(audiolet) {
+/**
+ * An Arpeggiator is a MidiGroup which modifies the MIDI messages on
+ * input 0, and forwards the newly generated messages on output 0.
+ *
+ * @constructor
+ * @param {Audiolet} audiolet The audiolet object.
+ */
+ var Arpeggiator = function(audiolet) {
     MidiGroup.call(this, audiolet, 1, 1, 0, 0);
     this.key_cancel_map = {};
 };

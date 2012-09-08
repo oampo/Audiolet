@@ -1,4 +1,11 @@
-var MidiKeyboard = function(audiolet) {
+/**
+ * A MidiKeyboard simply broadcasts MIDI messages on a single MIDI output,
+ * based on events fired from keyboard input.
+ *
+ * @constructor
+ * @param {Audiolet} audiolet The audiolet object.
+ */
+ var MidiKeyboard = function(audiolet) {
     MidiGroup.call(this, audiolet, 0, 1, null, 0);
     this._pressed = {};
     document.addEventListener('keydown', this.tryNoteOn.bind(this));

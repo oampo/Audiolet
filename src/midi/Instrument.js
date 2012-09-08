@@ -1,4 +1,11 @@
-var Instrument = function(audiolet) {
+/**
+ * An Instrument is a MidiGroup which controls a set of generators (voices)
+ * based on noteOn and noteOff messages.
+ *
+ * @constructor
+ * @param {Audiolet} audiolet The audiolet object.
+ */
+ var Instrument = function(audiolet) {
     MidiGroup.call(this, audiolet, 1, 1, 0, null);
     this.createVoice = function(frequency) { return new Sine(audiolet, frequency); };
     this._voices = {};
