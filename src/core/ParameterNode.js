@@ -20,30 +20,35 @@
  * **Parameters**
  *
  * - parameter The contained parameter.  Linked to input 0.
- *
- * @constructor
- * @extends AudioletNode
- * @param {Audiolet} audiolet The audiolet object.
- * @param {Number} value The initial static value of the parameter.
  */
-var ParameterNode = function(audiolet, value) {
-    AudioletNode.call(this, audiolet, 1, 1);
-    this.parameter = new AudioletParameter(this, 0, value);
-};
-extend(ParameterNode, AudioletNode);
+var ParameterNode = AudioletNode.extend({
 
-/**
- * Process samples
- */
-ParameterNode.prototype.generate = function() {
-    this.outputs[0].samples[0] = this.parameter.getValue();
-};
+  /**
+   * Constructor
+   *
+   * @extends AudioletNode
+   * @param {Audiolet} audiolet The audiolet object.
+   * @param {Number} value The initial static value of the parameter.
+   */
+  constructor: function(audiolet, value) {
+      AudioletNode.call(this, audiolet, 1, 1);
+      this.parameter = new AudioletParameter(this, 0, value);
+  },
 
-/**
- * toString
- *
- * @return {String} String representation.
- */
-ParameterNode.prototype.toString = function() {
-    return 'Parameter Node';
-};
+  /**
+   * Process samples
+   */
+  generate: function() {
+      this.outputs[0].samples[0] = this.parameter.getValue();
+  },
+
+  /**
+   * toString
+   *
+   * @return {String} String representation.
+   */
+  toString:function() {
+      return 'Parameter Node';
+  }
+
+});
