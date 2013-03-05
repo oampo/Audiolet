@@ -3,12 +3,17 @@
  */
 
 /**
- * Major scale.
- *
- * @constructor
- * @extends Scale
+ * Minor scale.
  */
-var MajorScale = function() {
-    Scale.call(this, [0, 2, 4, 5, 7, 9, 11]);
-};
-extend(MajorScale, Scale);
+var MajorScale = Scale.extend({
+
+    /*
+     * Constructor
+     *
+     * @extends Scale
+     */
+    constructor: function() {
+        Scale.call(this, [0, 2, 4, 5, 7, 9, 11]);
+    }
+
+});
