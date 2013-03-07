@@ -1,11 +1,20 @@
+/*!
+ * @depends ../core/AudioletInput.js
+ */
+
 /**
  * Class representing a midi input of a MidiGroup
- *
- * @constructor
- * @param {AudioletNode} node The node which the input belongs to.
- * @param {Number} index The index of the input.
  */
-var MidiInput = function(node, index) {
-    AudioletInput.apply(this, arguments);
-};
-extend(MidiInput, AudioletInput);
+var MidiInput = AudioletInput.extend({
+
+    /*
+     * Constructor
+     *
+     * @param {AudioletNode} node The node which the input belongs to.
+     * @param {Number} index The index of the input.
+     */
+    constructor: function(node, index) {
+        AudioletInput.apply(this, arguments);
+    }
+
+});
