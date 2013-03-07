@@ -12,7 +12,6 @@
  */
 var AudioletNode = AudioletClass.extend({
 
-
     /**
      * Constructor
      *
@@ -22,7 +21,7 @@ var AudioletNode = AudioletClass.extend({
      * @param {Function} [generate] A replacement for the generate function.
      */
     constructor: function(audiolet, numberOfInputs, numberOfOutputs,
-                            generate) {
+                            parameters) {
         AudioletClass.call(this);
         this.audiolet = audiolet;
 
@@ -36,8 +35,15 @@ var AudioletNode = AudioletClass.extend({
             this.outputs.push(new AudioletOutput(this, i));
         }
 
-        if (generate) {
-            this.generate = generate;
+        var defaults = this.parameters;
+        parameters = parameters || {};
+        for (var name in defaults) {
+            // create input as a property of current node.
+            // merges defaults / arguments for input index and value
+            var default_input = defaults[name][0],
+                val = parameters[name] || defaults[name][1];
+            this[name] = new AudioletParameter(this, default_input,
+                val);
         }
     },
 
