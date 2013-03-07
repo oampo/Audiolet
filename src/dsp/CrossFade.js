@@ -23,6 +23,10 @@
  */
 var CrossFade = AudioletNode.extend({
 
+    parameters: {
+        position: [2, 0.5]
+    },
+
     /**
      * Constructor
      *
@@ -31,9 +35,10 @@ var CrossFade = AudioletNode.extend({
      * @param {Number} [position=0.5] The initial fade position.
      */
     constructor: function(audiolet, position) {
-        AudioletNode.call(this, audiolet, 3, 1);
+        AudioletNode.call(this, audiolet, 3, 1, {
+            position: position
+        });
         this.linkNumberOfOutputChannels(0, 0);
-        this.position = new AudioletParameter(this, 2, position || 0.5);
     },
 
     /**

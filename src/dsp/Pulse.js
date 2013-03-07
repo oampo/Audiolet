@@ -21,6 +21,11 @@
  */
 var Pulse = AudioletNode.extend({
 
+    parameters: {
+        frequency: [0, 440],
+        pulseWidth: [1, 0.5]
+    },
+
     /**
      * Constructor
      *
@@ -30,9 +35,10 @@ var Pulse = AudioletNode.extend({
      * @param {Number} [pulseWidth=0.5] The initial pulse width.
      */
     constructor: function(audiolet, frequency, pulseWidth) {
-        AudioletNode.call(this, audiolet, 2, 1);
-        this.frequency = new AudioletParameter(this, 0, frequency || 440);
-        this.pulseWidth = new AudioletParameter(this, 1, pulseWidth || 0.5);
+        AudioletNode.call(this, audiolet, 2, 1, {
+            frequency: frequency,
+            pulseWidth: pulseWidth
+        });
         this.phase = 0;
     },
 

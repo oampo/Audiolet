@@ -29,6 +29,12 @@
  */
 var Reverb = AudioletNode.extend({
 
+    parameters: {
+        mix: [1, null],
+        roomSize: [2, null],
+        damping: [3, null]
+    },
+
     /**
      * Constructor
      *
@@ -39,7 +45,6 @@ var Reverb = AudioletNode.extend({
      * @param {Number} [damping=0.5] The initial damping amount.
      */
     constructor: function(audiolet, mix, roomSize, damping) {
-        AudioletNode.call(this, audiolet, 4, 1);
 
         // Constants
         this.initialMix = 0.33;
@@ -55,17 +60,15 @@ var Reverb = AudioletNode.extend({
         this.allPassTuning = [556, 441, 341, 225];
 
         // Controls
-        // Mix control
-        var mix = mix || this.initialMix;
-        this.mix = new AudioletParameter(this, 1, mix);
+        mix = mix || this.initialMixl
+        roomSize = roomSize || this.initialRoomSize;
+        damping = damping || this.initialDamping;
 
-        // Room size control
-        var roomSize = roomSize || this.initialRoomSize;
-        this.roomSize = new AudioletParameter(this, 2, roomSize);
-
-        // Damping control
-        var damping = damping || this.initialDamping;
-        this.damping = new AudioletParameter(this, 3, damping);
+        AudioletNode.call(this, audiolet, 4, 1, {
+            mix: mix,
+            roomSize: roomSize,
+            damping: damping
+        });
 
         // Damped comb filters
         this.combBuffers = [];

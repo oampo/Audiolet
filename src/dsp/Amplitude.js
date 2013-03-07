@@ -22,6 +22,11 @@
  */
 var Amplitude  = AudioletNode.extend({
 
+    parameters: {
+        attack: [1, 0.01],
+        release: [2, 0.01]
+    },
+
     /**
      * Constructor
      *
@@ -31,13 +36,13 @@ var Amplitude  = AudioletNode.extend({
      * @param {Number} [release=0.01] The initial release time in seconds.
      */
     constructor: function(audiolet, attack, release) {
-        AudioletNode.call(this, audiolet, 3, 1);
+        AudioletNode.call(this, audiolet, 3, 1, {
+            attack: attack,
+            release: release
+        });
         this.linkNumberOfOutputChannels(0, 0);
 
         this.followers = [];
-
-        this.attack = new AudioletParameter(this, 1, attack || 0.01);
-        this.release = new AudioletParameter(this, 2, release || 0.01);
     },
 
     /**

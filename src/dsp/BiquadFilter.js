@@ -22,6 +22,10 @@
  */
 var BiquadFilter = AudioletNode.extend({
 
+    parameters: {
+        frequency: [1, 22100]
+    },
+
     /**
      * Constructor
      *
@@ -30,12 +34,13 @@ var BiquadFilter = AudioletNode.extend({
      * @param {Number} frequency The initial frequency.
      */
     constructor: function(audiolet, frequency) {
-        AudioletNode.call(this, audiolet, 2, 1);
+        AudioletNode.call(this, audiolet, 2, 1, {
+            frequency: frequency
+        });
 
         // Same number of output channels as input channels
         this.linkNumberOfOutputChannels(0, 0);
 
-        this.frequency = new AudioletParameter(this, 1, frequency || 22100);
         this.lastFrequency = null; // See if we need to recalculate coefficients
 
         // Delayed values

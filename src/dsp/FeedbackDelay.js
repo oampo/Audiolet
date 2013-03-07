@@ -24,6 +24,12 @@
  */
 var FeedbackDelay = AudioletNode.extend({
 
+    parameters: {
+        delayTime: [1, 1],
+        feedback: [2, 0.5],
+        mix: [3, 1]
+    },
+
     /**
      * Constructor
      *
@@ -36,12 +42,13 @@ var FeedbackDelay = AudioletNode.extend({
      */
     constructor: function(audiolet, maximumDelayTime, delayTime, feedback,
                              mix) {
-        AudioletNode.call(this, audiolet, 4, 1);
+        AudioletNode.call(this, audiolet, 4, 1, {
+            delayTime: delayTime,
+            feedback: feedback,
+            mix: mix
+        });
         this.linkNumberOfOutputChannels(0, 0);
         this.maximumDelayTime = maximumDelayTime;
-        this.delayTime = new AudioletParameter(this, 1, delayTime || 1);
-        this.feedback = new AudioletParameter(this, 2, feedback || 0.5);
-        this.mix = new AudioletParameter(this, 3, mix || 1);
         var bufferSize = maximumDelayTime * this.audiolet.device.sampleRate;
         this.buffers = [];
         this.readWriteIndex = 0;

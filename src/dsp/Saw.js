@@ -19,6 +19,10 @@
  */
 var Saw = AudioletNode.extend({
 
+    parameters: {
+        frequency: [0, 440]
+    },
+
     /**
      * Constructor
      *
@@ -27,8 +31,9 @@ var Saw = AudioletNode.extend({
      * @param {Number} [frequency=440] Initial frequency.
      */
     constructor: function(audiolet, frequency) {
-        AudioletNode.call(this, audiolet, 1, 1);
-        this.frequency = new AudioletParameter(this, 0, frequency || 440);
+        AudioletNode.call(this, audiolet, 1, 1, {
+            frequency: frequency
+        });
         this.phase = 0;
     },
 

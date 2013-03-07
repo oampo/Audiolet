@@ -24,6 +24,12 @@
  */
 var DampedCombFilter = AudioletNode.extend({
 
+    parameters: {
+        delayTime: [1, 1],
+        decayTime: [2, null],
+        damping: [3, null]
+    },
+
     /**
      * Constructor
      *
@@ -36,12 +42,13 @@ var DampedCombFilter = AudioletNode.extend({
      */
     constructor: function(audiolet, maximumDelayTime, delayTime,
                                 decayTime, damping) {
-        AudioletNode.call(this, audiolet, 4, 1);
+        AudioletNode.call(this, audiolet, 4, 1, {
+            delayTime: delayTime,
+            decayTime: decayTime,
+            damping: damping
+        });
         this.linkNumberOfOutputChannels(0, 0);
         this.maximumDelayTime = maximumDelayTime;
-        this.delayTime = new AudioletParameter(this, 1, delayTime || 1);
-        this.decayTime = new AudioletParameter(this, 2, decayTime);
-        this.damping = new AudioletParameter(this, 3, damping);
         var bufferSize = maximumDelayTime * this.audiolet.device.sampleRate;
         this.buffers = [];
         this.readWriteIndex = 0;

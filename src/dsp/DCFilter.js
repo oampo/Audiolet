@@ -21,6 +21,10 @@
  */
 var DCFilter = AudioletNode.extend({
 
+    parameters: {
+        coefficient: [1, 0.995]
+    },
+
     /**
      * Constructor
      *
@@ -29,12 +33,12 @@ var DCFilter = AudioletNode.extend({
      * @param {Number} [coefficient=0.995] The initial coefficient.
      */
     constructor: function(audiolet, coefficient) {
-        AudioletNode.call(this, audiolet, 2, 1);
+        AudioletNode.call(this, audiolet, 2, 1, {
+            coefficient: coefficient
+        });
 
         // Same number of output channels as input channels
         this.linkNumberOfOutputChannels(0, 0);
-
-        this.coefficient = new AudioletParameter(this, 1, coefficient || 0.995);
 
         // Delayed values
         this.xValues = [];

@@ -20,6 +20,10 @@
  */
 var Add = AudioletNode.extend({
 
+    parameters: {
+        value: [1, 0]
+    },
+
     /**
      * Constructor
      *
@@ -28,9 +32,10 @@ var Add = AudioletNode.extend({
      * @param {Number} [value=0] The initial value to add.
      */
     constructor: function(audiolet, value) {
-        AudioletNode.call(this, audiolet, 2, 1);
+        AudioletNode.call(this, audiolet, 2, 1, {
+            value: value
+        });
         this.linkNumberOfOutputChannels(0, 0);
-        this.value = new AudioletParameter(this, 1, value || 0);
     },
 
     /**
