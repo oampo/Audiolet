@@ -31,48 +31,51 @@
         <pre><h2>js/synth.js</h2>
           <code>
 function playExample() {
-    var Synth = function(audiolet) {
-        AudioletGroup.apply(this, [audiolet, 0, 1]);
-        // Basic wave
-        this.saw = new Saw(audiolet, 100);
+    var Synth = AudioletGroup.extend({
 
-        // Frequency LFO
-        this.frequencyLFO = new Sine(audiolet, 2);
-        this.frequencyMA = new MulAdd(audiolet, 10, 100);
+        constructor: function(audiolet) {
+            AudioletGroup.apply(this, [audiolet, 0, 1]);
+            // Basic wave
+            this.saw = new Saw(audiolet, 100);
 
-        // Filter
-        this.filter = new LowPassFilter(audiolet, 1000);
+            // Frequency LFO
+            this.frequencyLFO = new Sine(audiolet, 2);
+            this.frequencyMA = new MulAdd(audiolet, 10, 100);
 
-        // Filter LFO
-        this.filterLFO = new Sine(audiolet, 8);
-        this.filterMA = new MulAdd(audiolet, 900, 1000);
+            // Filter
+            this.filter = new LowPassFilter(audiolet, 1000);
 
-        // Gain envelope
-        this.gain = new Gain(audiolet);
-        this.env = new ADSREnvelope(audiolet,
-                                    1, // Gate
-                                    1.5, // Attack
-                                    0.2, // Decay
-                                    0.9, // Sustain
-                                    2); // Release
+            // Filter LFO
+            this.filterLFO = new Sine(audiolet, 8);
+            this.filterMA = new MulAdd(audiolet, 900, 1000);
 
-        // Main signal path
-        this.saw.connect(this.filter);
-        this.filter.connect(this.gain);
-        this.gain.connect(this.outputs[0]);
+            // Gain envelope
+            this.gain = new Gain(audiolet);
+            this.env = new ADSREnvelope(audiolet,
+                                        1, // Gate
+                                        1.5, // Attack
+                                        0.2, // Decay
+                                        0.9, // Sustain
+                                        2); // Release
 
-        // Frequency LFO
-        this.frequencyLFO.connect(this.frequencyMA);
-        this.frequencyMA.connect(this.saw);
+            // Main signal path
+            this.saw.connect(this.filter);
+            this.filter.connect(this.gain);
+            this.gain.connect(this.outputs[0]);
 
-        // Filter LFO
-        this.filterLFO.connect(this.filterMA);
-        this.filterMA.connect(this.filter, 0, 1);
+            // Frequency LFO
+            this.frequencyLFO.connect(this.frequencyMA);
+            this.frequencyMA.connect(this.saw);
 
-        // Envelope
-        this.env.connect(this.gain, 0, 1);
-    };
-    extend(Synth, AudioletGroup);
+            // Filter LFO
+            this.filterLFO.connect(this.filterMA);
+            this.filterMA.connect(this.filter, 0, 1);
+
+            // Envelope
+            this.env.connect(this.gain, 0, 1);
+        }
+
+    });
 
     var audiolet = new Audiolet();
     var synth = new Synth(audiolet);

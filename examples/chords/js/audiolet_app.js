@@ -1,27 +1,30 @@
 function playExample() {
-    var Synth = function(audiolet, frequency) {
-        AudioletGroup.call(this, audiolet, 0, 1);
-        // Basic wave
-        this.saw = new Saw(audiolet, frequency);
+    var Synth = AudioletGroup.extend({
 
-        // Gain envelope
-        this.gain = new Gain(audiolet);
-        this.env = new PercussiveEnvelope(audiolet, 1, 0.1, 0.1,
-            function() {
-                this.audiolet.scheduler.addRelative(0, this.remove.bind(this));
-            }.bind(this)
-        );
-        this.envMulAdd = new MulAdd(audiolet, 0.3, 0);
+        constructor: function(audiolet, frequency) {
+            AudioletGroup.call(this, audiolet, 0, 1);
+            // Basic wave
+            this.saw = new Saw(audiolet, frequency);
 
-        // Main signal path
-        this.saw.connect(this.gain);
-        this.gain.connect(this.outputs[0]);
+            // Gain envelope
+            this.gain = new Gain(audiolet);
+            this.env = new PercussiveEnvelope(audiolet, 1, 0.1, 0.1,
+                function() {
+                    this.audiolet.scheduler.addRelative(0, this.remove.bind(this));
+                }.bind(this)
+            );
+            this.envMulAdd = new MulAdd(audiolet, 0.3, 0);
 
-        // Envelope
-        this.env.connect(this.envMulAdd);
-        this.envMulAdd.connect(this.gain, 0, 1);
-    };
-    extend(Synth, AudioletGroup);
+            // Main signal path
+            this.saw.connect(this.gain);
+            this.gain.connect(this.outputs[0]);
+
+            // Envelope
+            this.env.connect(this.envMulAdd);
+            this.envMulAdd.connect(this.gain, 0, 1);
+        }
+
+    });
 
     var SchedulerApp = function() {
         this.audiolet = new Audiolet();
