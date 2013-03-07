@@ -17,59 +17,64 @@
  * **Parameters**
  *
  * - delayTime The delay time in seconds.  Linked to input 1.
- *
- * @constructor
- * @extends AudioletNode
- * @param {Audiolet} audiolet The audiolet object.
- * @param {Number} maximumDelayTime The largest allowable delay time.
- * @param {Number} delayTime The initial delay time.
  */
-var Delay = function(audiolet, maximumDelayTime, delayTime) {
-    AudioletNode.call(this, audiolet, 2, 1);
-    this.linkNumberOfOutputChannels(0, 0);
-    this.maximumDelayTime = maximumDelayTime;
-    this.delayTime = new AudioletParameter(this, 1, delayTime || 1);
-    var bufferSize = maximumDelayTime * this.audiolet.device.sampleRate;
-    this.buffers = [];
-    this.readWriteIndex = 0;
-};
-extend(Delay, AudioletNode);
+var Delay = AudioletNode.extend({
 
-/**
- * Process samples
- */
-Delay.prototype.generate = function() {
-    var input = this.inputs[0];
-    var output = this.outputs[0];
+    /**
+     * Constructor
+     *
+     * @extends AudioletNode
+     * @param {Audiolet} audiolet The audiolet object.
+     * @param {Number} maximumDelayTime The largest allowable delay time.
+     * @param {Number} delayTime The initial delay time.
+     */
+    constructor: function(audiolet, maximumDelayTime, delayTime) {
+        AudioletNode.call(this, audiolet, 2, 1);
+        this.linkNumberOfOutputChannels(0, 0);
+        this.maximumDelayTime = maximumDelayTime;
+        this.delayTime = new AudioletParameter(this, 1, delayTime || 1);
+        var bufferSize = maximumDelayTime * this.audiolet.device.sampleRate;
+        this.buffers = [];
+        this.readWriteIndex = 0;
+    },
 
-    var sampleRate = this.audiolet.device.sampleRate;
+    /**
+     * Process samples
+     */
+    generate: function() {
+        var input = this.inputs[0];
+        var output = this.outputs[0];
 
-    var delayTime = this.delayTime.getValue() * sampleRate;
+        var sampleRate = this.audiolet.device.sampleRate;
 
-    var numberOfChannels = input.samples.length;
+        var delayTime = this.delayTime.getValue() * sampleRate;
 
-    for (var i = 0; i < numberOfChannels; i++) {
-        if (i >= this.buffers.length) {
-            var bufferSize = this.maximumDelayTime * sampleRate;
-            this.buffers.push(new Float32Array(bufferSize));
+        var numberOfChannels = input.samples.length;
+
+        for (var i = 0; i < numberOfChannels; i++) {
+            if (i >= this.buffers.length) {
+                var bufferSize = this.maximumDelayTime * sampleRate;
+                this.buffers.push(new Float32Array(bufferSize));
+            }
+
+            var buffer = this.buffers[i];
+            output.samples[i] = buffer[this.readWriteIndex];
+            buffer[this.readWriteIndex] = input.samples[i];
         }
 
-        var buffer = this.buffers[i];
-        output.samples[i] = buffer[this.readWriteIndex];
-        buffer[this.readWriteIndex] = input.samples[i];
+        this.readWriteIndex += 1;
+        if (this.readWriteIndex >= delayTime) {
+            this.readWriteIndex = 0;
+        }
+    },
+
+    /**
+     * toString
+     *
+     * @return {String} String representation.
+     */
+    toString: function() {
+        return 'Delay';
     }
 
-    this.readWriteIndex += 1;
-    if (this.readWriteIndex >= delayTime) {
-        this.readWriteIndex = 0;
-    }
-};
-
-/**
- * toString
- *
- * @return {String} String representation.
- */
-Delay.prototype.toString = function() {
-    return 'Delay';
-};
+});
