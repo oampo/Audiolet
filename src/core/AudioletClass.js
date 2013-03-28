@@ -72,9 +72,6 @@ AudioletClass.extend = (function() {
     // Correctly set child's `prototype.constructor`.
     child.prototype.constructor = child;
 
-    // Set a convenience property in case the parent's prototype is needed later.
-    child.__super__ = parent.prototype;
-
     return child;
   };
 
