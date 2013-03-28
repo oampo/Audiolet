@@ -28,98 +28,103 @@
  * input 2.
  * - loop Whether the buffer should loop when it reaches the end.  Linked to
  * input 3
- *
- * @constructor
- * @extends AudioletNode
- * @param {Audiolet} audiolet The audiolet object.
- * @param {AudioletBuffer} buffer The buffer to play.
- * @param {Number} [playbackRate=1] The initial playback rate.
- * @param {Number} [startPosition=0] The initial start position.
- * @param {Number} [loop=0] Initial value for whether to loop.
- * @param {Function} [onComplete] Called when the buffer has finished playing.
  */
-var BufferPlayer = function(audiolet, buffer, playbackRate, startPosition,
+var BufferPlayer = AudioletNode.extend({
+
+    /**
+     * Constructor
+     *
+     * @extends AudioletNode
+     * @param {Audiolet} audiolet The audiolet object.
+     * @param {AudioletBuffer} buffer The buffer to play.
+     * @param {Number} [playbackRate=1] The initial playback rate.
+     * @param {Number} [startPosition=0] The initial start position.
+     * @param {Number} [loop=0] Initial value for whether to loop.
+     * @param {Function} [onComplete] Called when the buffer has finished playing.
+     */
+    constructor: function(audiolet, buffer, playbackRate, startPosition,
                             loop, onComplete) {
-    AudioletNode.call(this, audiolet, 3, 1);
-    this.buffer = buffer;
-    this.setNumberOfOutputChannels(0, this.buffer.numberOfChannels);
-    this.position = startPosition || 0;
-    this.playbackRate = new AudioletParameter(this, 0, playbackRate || 1);
-    this.restartTrigger = new AudioletParameter(this, 1, 0);
-    this.startPosition = new AudioletParameter(this, 2, startPosition || 0);
-    this.loop = new AudioletParameter(this, 3, loop || 0);
-    this.onComplete = onComplete;
+        AudioletNode.call(this, audiolet, 3, 1);
+        this.buffer = buffer;
+        this.setNumberOfOutputChannels(0, this.buffer.numberOfChannels);
+        this.position = startPosition || 0;
+        this.playbackRate = new AudioletParameter(this, 0, playbackRate || 1);
+        this.restartTrigger = new AudioletParameter(this, 1, 0);
+        this.startPosition = new AudioletParameter(this, 2, startPosition || 0);
+        this.loop = new AudioletParameter(this, 3, loop || 0);
+        this.onComplete = onComplete;
 
-    this.restartTriggerOn = false;
-    this.playing = true;
-};
-extend(BufferPlayer, AudioletNode);
-
-/**
- * Process samples
- */
-BufferPlayer.prototype.generate = function() {
-    var output = this.outputs[0];
-
-    // Cache local variables
-    var numberOfChannels = output.samples.length;
-
-    if (this.buffer.length == 0 || !this.playing) {
-        // No buffer data, or not playing, so output zeros and return
-        for (var i=0; i<numberOfChannels; i++) {
-            output.samples[i] = 0;
-        }
-        return;
-    }
-
-    // Crap load of parameters
-    var playbackRate = this.playbackRate.getValue();
-    var restartTrigger = this.restartTrigger.getValue();
-    var startPosition = this.startPosition.getValue();
-    var loop = this.loop.getValue();
-
-    if (restartTrigger > 0 && !this.restartTriggerOn) {
-        // Trigger moved from <=0 to >0, so we restart playback from
-        // startPosition
-        this.position = startPosition;
-        this.restartTriggerOn = true;
-        this.playing = true;
-    }
-
-    if (restartTrigger <= 0 && this.restartTriggerOn) {
-        // Trigger moved back to <= 0
         this.restartTriggerOn = false;
-    }
+        this.playing = true;
+    },
 
-    var numberOfChannels = this.buffer.channels.length;
+    /**
+     * Process samples
+     */
+    generate: function() {
+        var output = this.outputs[0];
 
-    for (var i = 0; i < numberOfChannels; i++) {
-        var inputChannel = this.buffer.getChannelData(i);
-        output.samples[i] = inputChannel[Math.floor(this.position)];
-    }
-    
-    this.position += playbackRate;
+        // Cache local variables
+        var numberOfChannels = output.samples.length;
 
-    if (this.position >= this.buffer.length) {
-        if (loop) {
-            // Back to the start
-            this.position %= this.buffer.length;
+        if (this.buffer.length == 0 || !this.playing) {
+            // No buffer data, or not playing, so output zeros and return
+            for (var i=0; i<numberOfChannels; i++) {
+                output.samples[i] = 0;
+            }
+            return;
         }
-        else {
-            // Finish playing until a new restart trigger
-            this.playing = false;
-            if (this.onComplete) {
-               this.onComplete();
+
+        // Crap load of parameters
+        var playbackRate = this.playbackRate.getValue();
+        var restartTrigger = this.restartTrigger.getValue();
+        var startPosition = this.startPosition.getValue();
+        var loop = this.loop.getValue();
+
+        if (restartTrigger > 0 && !this.restartTriggerOn) {
+            // Trigger moved from <=0 to >0, so we restart playback from
+            // startPosition
+            this.position = startPosition;
+            this.restartTriggerOn = true;
+            this.playing = true;
+        }
+
+        if (restartTrigger <= 0 && this.restartTriggerOn) {
+            // Trigger moved back to <= 0
+            this.restartTriggerOn = false;
+        }
+
+        var numberOfChannels = this.buffer.channels.length;
+
+        for (var i = 0; i < numberOfChannels; i++) {
+            var inputChannel = this.buffer.getChannelData(i);
+            output.samples[i] = inputChannel[Math.floor(this.position)];
+        }
+        
+        this.position += playbackRate;
+
+        if (this.position >= this.buffer.length) {
+            if (loop) {
+                // Back to the start
+                this.position %= this.buffer.length;
+            }
+            else {
+                // Finish playing until a new restart trigger
+                this.playing = false;
+                if (this.onComplete) {
+                   this.onComplete();
+                }
             }
         }
-    }
-};
+    },
 
-/**
- * toString
- *
- * @return {String} String representation.
- */
-BufferPlayer.prototype.toString = function() {
-    return ('Buffer player');
-};
+    /**
+     * toString
+     *
+     * @return {String} String representation.
+     */
+    toString: function() {
+        return ('Buffer player');
+    }
+
+});

@@ -16,41 +16,45 @@
  * **Parameters**
  *
  * - frequency The frequency of the oscillator.  Linked to input 0.
- *
- * @constructor
- * @extends AudioletNode
- * @param {Audiolet} audiolet The audiolet object.
- * @param {Number} [frequency=440] Initial frequency.
  */
-var Saw = function(audiolet, frequency) {
-    AudioletNode.call(this, audiolet, 1, 1);
-    this.frequency = new AudioletParameter(this, 0, frequency || 440);
-    this.phase = 0;
-};
-extend(Saw, AudioletNode);
+var Saw = AudioletNode.extend({
 
-/**
- * Process samples
- */
-Saw.prototype.generate = function() {
-    var output = this.outputs[0];
-    var frequency = this.frequency.getValue();
-    var sampleRate = this.audiolet.device.sampleRate;
+    /**
+     * Constructor
+     *
+     * @extends AudioletNode
+     * @param {Audiolet} audiolet The audiolet object.
+     * @param {Number} [frequency=440] Initial frequency.
+     */
+    constructor: function(audiolet, frequency) {
+        AudioletNode.call(this, audiolet, 1, 1);
+        this.frequency = new AudioletParameter(this, 0, frequency || 440);
+        this.phase = 0;
+    },
 
-    output.samples[0] = ((this.phase / 2 + 0.25) % 0.5 - 0.25) * 4;
-    this.phase += frequency / sampleRate;
+    /**
+     * Process samples
+     */
+    generate: function() {
+        var output = this.outputs[0];
+        var frequency = this.frequency.getValue();
+        var sampleRate = this.audiolet.device.sampleRate;
 
-    if (this.phase > 1) {
-        this.phase %= 1;
+        output.samples[0] = ((this.phase / 2 + 0.25) % 0.5 - 0.25) * 4;
+        this.phase += frequency / sampleRate;
+
+        if (this.phase > 1) {
+            this.phase %= 1;
+        }
+    },
+
+    /**
+     * toString
+     *
+     * @return {String} String representation.
+     */
+    toString: function() {
+        return 'Saw';
     }
-};
 
-/**
- * toString
- *
- * @return {String} String representation.
- */
-Saw.prototype.toString = function() {
-    return 'Saw';
-};
-
+});
