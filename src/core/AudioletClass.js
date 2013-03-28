@@ -48,7 +48,7 @@ AudioletClass.extend = (function() {
   // Helper function to correctly set up the prototype chain, for subclasses.
   // Similar to `goog.inherits`, but uses a hash of prototype properties and
   // class properties to be extended.
-  var inherits = function(parent, protoProps, staticProps) {
+  var inherits = function(parent, protoProps) {
     var child;
 
     // The constructor function for the new subclass is either defined by you
@@ -60,9 +60,6 @@ AudioletClass.extend = (function() {
       child = function(){ parent.apply(this, arguments); };
     }
 
-    // Inherit class (static) properties from parent.
-    _extend(child, parent);
-
     // Set the prototype chain to inherit from `parent`, without calling
     // `parent`'s constructor function.
     ctor.prototype = parent.prototype;
@@ -71,9 +68,6 @@ AudioletClass.extend = (function() {
     // Add prototype properties (instance properties) to the subclass,
     // if supplied.
     if (protoProps) _extend(child.prototype, protoProps);
-
-    // Add static properties to the constructor function, if supplied.
-    if (staticProps) _extend(child, staticProps);
 
     // Correctly set child's `prototype.constructor`.
     child.prototype.constructor = child;
