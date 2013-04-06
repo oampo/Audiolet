@@ -60,8 +60,8 @@ function playExample() {
 
     audiolet.scheduler.play([freqPattern, gatePattern], 1,
         function(frequency, gate) {
-            this.env.gate.setValue(gate);
-            this.sin.frequency.setValue(frequency);
+            this.env.set('gate', gate);
+            this.sin.set('frequency', frequency);
         }.bind(synth)
     );
 }

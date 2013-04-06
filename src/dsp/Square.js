@@ -43,7 +43,7 @@ var Square = AudioletNode.extend({
     generate: function() {
         var output = this.outputs[0];
 
-        var frequency = this.frequency.getValue();
+        var frequency = this.get('frequency');
         var sampleRate = this.audiolet.device.sampleRate;
 
         output.samples[0] = this.phase > 0.5 ? 1 : -1;

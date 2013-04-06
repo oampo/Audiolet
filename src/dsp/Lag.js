@@ -53,8 +53,8 @@ var Lag = AudioletNode.extend({
 
         var sampleRate = this.audiolet.device.sampleRate;
 
-        var value = this.value.getValue();
-        var lag = this.lag.getValue();
+        var value = this.get('value');
+        var lag = this.get('lag');
         var coefficient = Math.exp(this.log001 / (lag * sampleRate));
 
         var outputValue = ((1 - coefficient) * value) +

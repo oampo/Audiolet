@@ -37,9 +37,9 @@ var TriggerControl = AudioletNode.extend({
      * Process samples
      */
     generate: function() {
-        if (this.trigger.getValue() > 0) {
+        if (this.get('trigger') > 0) {
             this.outputs[0].samples[0] = 1;
-            this.trigger.setValue(0);
+            this.set('trigger', 0);
         }
         else {
             this.outputs[0].samples[0] = 0;

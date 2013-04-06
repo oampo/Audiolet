@@ -56,9 +56,9 @@ function playExample() {
     var patterns = [frequencyPattern, filterLFOPattern, gatePattern];
     audiolet.scheduler.play(patterns, 2,
         function(frequency, filterLFOFrequency, gate) {
-            this.frequencyMA.add.setValue(frequency);
-            this.filterLFO.frequency.setValue(filterLFOFrequency);
-            this.env.gate.setValue(gate);
+            this.frequencyMA.set('add', frequency);
+            this.filterLFO.set('frequency', filterLFOFrequency);
+            this.env.set('gate', gate);
         }.bind(synth)
     );
 

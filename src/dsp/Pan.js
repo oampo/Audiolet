@@ -47,7 +47,7 @@ var Pan = AudioletNode.extend({
         var input = this.inputs[0];
         var output = this.outputs[0];
 
-        var pan = this.pan.getValue();
+        var pan = this.get('pan');
 
         var value = input.samples[0] || 0;
         var scaledPan = pan * Math.PI / 2;

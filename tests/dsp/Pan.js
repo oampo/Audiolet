@@ -11,7 +11,7 @@ function testPan() {
     square.connect(pan);
 
     // Check position 0, should be all left channel
-    pan.pan.setValue(0);
+    pan.set('pan', 0);
     square.tick();
     pan.tick();
 
@@ -19,7 +19,7 @@ function testPan() {
     Assert.assertEquals(pan.outputs[0].samples[1], 0);
 
     // Check position 1, should be all right channel
-    pan.pan.setValue(1);
+    pan.set('pan', 1);
     square.tick();
     pan.tick();
 
@@ -27,7 +27,7 @@ function testPan() {
     Assert.assertEquals(pan.outputs[0].samples[1], 1);
 
     // Check position 0.5, should be centrally panned using equal power law
-    pan.pan.setValue(0.5);
+    pan.set('pan', 0.5);
     square.tick();
     pan.tick();  
 

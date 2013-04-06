@@ -46,10 +46,10 @@ var Pulse = AudioletNode.extend({
      * Process samples
      */
     generate: function() {
-        var pulseWidth = this.pulseWidth.getValue();
+        var pulseWidth = this.get('pulseWidth');
         this.outputs[0].samples[0] = (this.phase < pulseWidth) ? 1 : -1;
 
-        var frequency = this.frequency.getValue();
+        var frequency = this.get('frequency');
         var sampleRate = this.audiolet.device.sampleRate;
         this.phase += frequency / sampleRate;
         if (this.phase > 1) {

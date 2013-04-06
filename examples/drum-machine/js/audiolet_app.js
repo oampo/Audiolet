@@ -97,18 +97,18 @@ function playExample() {
 
         // apply amplitude
         if (bdPattern == 2)
-          this.gainBd.gain.setValue(1.00);
+          this.gainBd.set('gain', 1.00);
         else if (bdPattern == 1)
-          this.gainBd.gain.setValue(0.70);
+          this.gainBd.set('gain', 0.70);
         else
-          this.gainBd.gain.setValue(0.00);
+          this.gainBd.set('gain', 0.00);
 
         // draw animation of drum machine.
         // to make up for latency, the animate function will be called
         // after latency milliseconds.
         setTimeout("animate()", latency);
         // re-trigger the sample
-        this.triggerBd.trigger.setValue(1);
+        this.triggerBd.set('trigger', 1);
 
       }.bind(this)
     );
@@ -117,13 +117,13 @@ function playExample() {
       function(hhPattern) {
         // apply amplitude
         if (hhPattern == 2)
-          this.gainHh.gain.setValue(0.70);
+          this.gainHh.set('gain', 0.70);
         else if (hhPattern == 1)
-          this.gainHh.gain.setValue(0.30);
+          this.gainHh.set('gain', 0.30);
         else
-          this.gainHh.gain.setValue(0.00);
+          this.gainHh.set('gain', 0.00);
         // re-trigger the sample
-        this.triggerHh.trigger.setValue(1);
+        this.triggerHh.set('trigger', 1);
       }.bind(this)
     );
 
@@ -131,13 +131,13 @@ function playExample() {
       function(snPattern) {
         // apply amplitude
         if (snPattern != 0)
-          this.gainSn.gain.setValue(0.70);
+          this.gainSn.set('gain', 0.70);
         else if (snPattern == 1)
-          this.gainSn.gain.setValue(0.20);
+          this.gainSn.set('gain', 0.20);
         else
-          this.gainSn.gain.setValue(0.00);
+          this.gainSn.set('gain', 0.00);
         // re-trigger the sample
-        this.triggerSn.trigger.setValue(1);
+        this.triggerSn.set('trigger', 1);
       }.bind(this)
     );
   }

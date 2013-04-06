@@ -60,12 +60,12 @@ var Limiter = AudioletNode.extend({
         var sampleRate = this.audiolet.device.sampleRate;
 
         // Local processing variables
-        var attack = Math.pow(0.01, 1 / (this.attack.getValue() *
+        var attack = Math.pow(0.01, 1 / (this.get('attack') *
                                          sampleRate));
-        var release = Math.pow(0.01, 1 / (this.release.getValue() *
+        var release = Math.pow(0.01, 1 / (this.get('release') *
                                           sampleRate));
 
-        var threshold = this.threshold.getValue();
+        var threshold = this.get('threshold');
 
         var numberOfChannels = input.samples.length;
         for (var i = 0; i < numberOfChannels; i++) {

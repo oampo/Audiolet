@@ -42,7 +42,7 @@ var Multiply = AudioletNode.extend({
      * Process samples
      */
     generate: function() {
-        var value = this.value.getValue();
+        var value = this.get('value');
         var input = this.inputs[0];
         var numberOfChannels = input.samples.length;
         for (var i = 0; i < numberOfChannels; i++) {

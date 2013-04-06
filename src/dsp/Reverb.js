@@ -97,9 +97,9 @@ var Reverb = AudioletNode.extend({
      * Process samples
      */
     generate: function() {
-        var mix = this.mix.getValue();
-        var roomSize = this.roomSize.getValue();
-        var damping = this.damping.getValue();
+        var mix = this.get('mix');
+        var roomSize = this.get('roomSize');
+        var damping = this.get('damping');
 
         var numberOfCombs = this.combTuning.length;
         var numberOfFilters = this.allPassTuning.length;

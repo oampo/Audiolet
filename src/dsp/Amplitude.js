@@ -58,9 +58,9 @@ var Amplitude  = AudioletNode.extend({
         var sampleRate = this.audiolet.device.sampleRate;
 
         // Local processing variables
-        var attack = this.attack.getValue();
+        var attack = this.get('attack');
         attack = Math.pow(0.01, 1 / (attack * sampleRate));
-        var release = this.release.getValue();
+        var release = this.get('release');
         release = Math.pow(0.01, 1 / (release * sampleRate));
 
         var numberOfChannels = input.samples.length;

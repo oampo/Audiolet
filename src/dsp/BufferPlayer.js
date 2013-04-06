@@ -83,10 +83,10 @@ var BufferPlayer = AudioletNode.extend({
         }
 
         // Crap load of parameters
-        var playbackRate = this.playbackRate.getValue();
-        var restartTrigger = this.restartTrigger.getValue();
-        var startPosition = this.startPosition.getValue();
-        var loop = this.loop.getValue();
+        var playbackRate = this.get('playbackRate');
+        var restartTrigger = this.get('restartTrigger');
+        var startPosition = this.get('startPosition');
+        var loop = this.get('loop');
 
         if (restartTrigger > 0 && !this.restartTriggerOn) {
             // Trigger moved from <=0 to >0, so we restart playback from

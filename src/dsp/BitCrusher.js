@@ -44,7 +44,7 @@ var BitCrusher = AudioletNode.extend({
     generate: function() {
         var input = this.inputs[0];
 
-        var maxValue = Math.pow(2, this.bits.getValue()) - 1;
+        var maxValue = Math.pow(2, this.get('bits')) - 1;
 
         var numberOfChannels = input.samples.length;
         for (var i = 0; i < numberOfChannels; i++) {

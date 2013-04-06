@@ -52,7 +52,7 @@ var Delay = AudioletNode.extend({
 
         var sampleRate = this.audiolet.device.sampleRate;
 
-        var delayTime = this.delayTime.getValue() * sampleRate;
+        var delayTime = this.get('delayTime') * sampleRate;
 
         var numberOfChannels = input.samples.length;
 

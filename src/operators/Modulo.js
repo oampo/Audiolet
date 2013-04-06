@@ -45,7 +45,7 @@ var Modulo = AudioletNode.extend({
         var input = this.inputs[0];
         var output = this.outputs[0];
 
-        var value = this.value.getValue();
+        var value = this.get('value');
 
         var numberOfChannels = input.samples.length;
         for (var i = 0; i < numberOfChannels; i++) {

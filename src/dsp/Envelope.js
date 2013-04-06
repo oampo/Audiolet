@@ -68,7 +68,7 @@ var Envelope = AudioletNode.extend({
      * Process samples
      */
     generate: function() {
-        var gate = this.gate.getValue();
+        var gate = this.get('gate');
 
         var stageChanged = false;
 

@@ -240,13 +240,13 @@ function playExample() {
                                      durationPattern,
             function(degree) {
                 // Set the gate
-                this.highSynth.trigger.trigger.setValue(1);
+                this.highSynth.trigger.set('trigger', 1);
                 // Calculate the frequency from the scale
                 var frequency = this.scale.getFrequency(degree,
                                                         this.c2Frequency,
                                                         3);
                 // Set the frequency
-                this.highSynth.triangle.frequency.setValue(frequency);
+                this.highSynth.triangle.set('frequency', frequency);
             }.bind(this)
         );
     }
@@ -271,13 +271,13 @@ function playExample() {
                                      durationPattern,
             function(degree) {
                 // Set the gate
-                this.midSynth.trigger.trigger.setValue(1);
+                this.midSynth.trigger.set('trigger', 1);
                 // Calculate the frequency from the scale
                 var frequency = this.scale.getFrequency(degree,
                                                         this.c2Frequency,
                                                         1);
                 // Set the frequency
-                this.midSynth.triangle.frequency.setValue(frequency);
+                this.midSynth.triangle.set('frequency', frequency);
             }.bind(this)
         );
     }
@@ -305,15 +305,15 @@ function playExample() {
         this.audiolet.scheduler.play(patterns, durationPattern,
             function(degree, gate) {
                 // Set the gates
-                this.bassSynth.gainEnv.gate.setValue(gate);
-                this.bassSynth.fmEnv.gate.setValue(gate);
+                this.bassSynth.gainEnv.set('gate', gate);
+                this.bassSynth.fmEnv.set('gate', gate);
                 // Calculate the frequency from the scale
                 var frequency = this.scale.getFrequency(degree,
                                                         this.c2Frequency,
                                                         1);
                 // Set the frequency
-                this.bassSynth.frequencyMulAdd.add.setValue(frequency);
-                this.bassSynth.frequencyModulator.frequency.setValue(frequency * 4);
+                this.bassSynth.frequencyMulAdd.set('add', frequency);
+                this.bassSynth.frequencyModulator.set('frequency', frequency * 4);
             }.bind(this)
         );
     }

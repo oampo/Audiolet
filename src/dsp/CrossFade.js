@@ -50,7 +50,7 @@ var CrossFade = AudioletNode.extend({
         var output = this.outputs[0];
 
         // Local processing variables
-        var position = this.position.getValue();
+        var position = this.get('position');
 
         var scaledPosition = position * Math.PI / 2;
         var gainA = Math.cos(scaledPosition);

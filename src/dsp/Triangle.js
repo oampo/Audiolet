@@ -43,7 +43,7 @@ var Triangle = AudioletNode.extend({
     generate: function() {
         var output = this.outputs[0];
 
-        var frequency = this.frequency.getValue();
+        var frequency = this.get('frequency');
         var sampleRate = this.audiolet.device.sampleRate;
 
         output.samples[0] = 1 - 4 * Math.abs((this.phase + 0.25) % 1 - 0.5);

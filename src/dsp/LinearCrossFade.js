@@ -48,7 +48,7 @@ var LinearCrossFade = AudioletNode.extend({
         var inputB = this.inputs[1];
         var output = this.outputs[0];
 
-        var position = this.position.getValue();
+        var position = this.get('position');
 
         var gainA = 1 - position;
         var gainB = position;

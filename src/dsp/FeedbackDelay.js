@@ -63,9 +63,9 @@ var FeedbackDelay = AudioletNode.extend({
 
         var sampleRate = this.audiolet.output.device.sampleRate;
 
-        var delayTime = this.delayTime.getValue() * sampleRate;
-        var feedback = this.feedback.getValue();
-        var mix = this.mix.getValue();
+        var delayTime = this.get('delayTime') * sampleRate;
+        var feedback = this.get('feedback');
+        var mix = this.get('mix');
 
         var numberOfChannels = input.samples.length;
         var numberOfBuffers = this.buffers.length;

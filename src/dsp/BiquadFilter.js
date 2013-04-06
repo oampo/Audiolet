@@ -73,7 +73,7 @@ var BiquadFilter = AudioletNode.extend({
         var xValueArray = this.xValues;
         var yValueArray = this.yValues;
 
-        var frequency = this.frequency.getValue();
+        var frequency = this.get('frequency');
 
         if (frequency != this.lastFrequency) {
             // Recalculate the coefficients

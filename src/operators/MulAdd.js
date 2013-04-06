@@ -50,8 +50,8 @@ var MulAdd = AudioletNode.extend({
         var input = this.inputs[0];
         var output = this.outputs[0];
 
-        var mul = this.mul.getValue();
-        var add = this.add.getValue();
+        var mul = this.get('mul');
+        var add = this.get('add');
 
         var numberOfChannels = input.samples.length;
         for (var i = 0; i < numberOfChannels; i++) {

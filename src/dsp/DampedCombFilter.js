@@ -64,9 +64,9 @@ var DampedCombFilter = AudioletNode.extend({
 
         var sampleRate = this.audiolet.device.sampleRate;
 
-        var delayTime = this.delayTime.getValue() * sampleRate;
-        var decayTime = this.decayTime.getValue() * sampleRate;
-        var damping = this.damping.getValue();
+        var delayTime = this.get('delayTime') * sampleRate;
+        var decayTime = this.get('decayTime') * sampleRate;
+        var damping = this.get('damping');
         var feedback = Math.exp(-3 * delayTime / decayTime);
 
         var numberOfChannels = input.samples.length;

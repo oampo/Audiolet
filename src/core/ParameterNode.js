@@ -44,7 +44,7 @@ var ParameterNode = AudioletNode.extend({
      * Process samples
      */
     generate: function() {
-        this.outputs[0].samples[0] = this.parameter.getValue();
+        this.outputs[0].samples[0] = this.get('parameter');
     },
 
     /**

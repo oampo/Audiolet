@@ -49,7 +49,7 @@ var DCFilter = AudioletNode.extend({
      * Process samples
      */
     generate: function() {
-        var coefficient = this.coefficient.getValue();
+        var coefficient = this.get('coefficient');
         var input = this.inputs[0];
         var numberOfChannels = input.samples.length;
         for (var i = 0; i < numberOfChannels; i++) {
