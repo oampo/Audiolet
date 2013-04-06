@@ -628,7 +628,6 @@ var AudioletNode = AudioletClass.extend({
                 val = parameters[name] || defaults[name][1];
             this.parameters[name][2] = new AudioletParameter(this, default_input,
                 val);
-            console.log(this.parameters[name][2])
             this[name] = this.parameters[name][2];
         }
     },
