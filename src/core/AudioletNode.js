@@ -18,7 +18,7 @@ var AudioletNode = AudioletClass.extend({
      * @param {Audiolet} audiolet The audiolet object.
      * @param {Number} numberOfInputs The number of inputs.
      * @param {Number} numberOfOutputs The number of outputs.
-     * @param {Function} [generate] A replacement for the generate function.
+     * @param {Object} parameters Overridden parameter values.
      */
     constructor: function(audiolet, numberOfInputs, numberOfOutputs,
                             parameters) {
@@ -35,11 +35,11 @@ var AudioletNode = AudioletClass.extend({
             this.outputs.push(new AudioletOutput(this, i));
         }
 
-        var defaults = this.parameters;
-        parameters = parameters || {};
+        // for each parameter defined in `parameters`, create a
+        // new `AudioletParameter` and assign it as a property of the node.
+        // typically, `get and `set` should be used to access these parameters.
+        var defaults = this.parameters || {};
         for (var name in defaults) {
-            // create input as a property of current node.
-            // merges defaults / arguments for input index and value
             var default_input = defaults[name][0],
                 val = parameters[name] || defaults[name][1];
             this[name] = new AudioletParameter(this, default_input,
