@@ -42,18 +42,30 @@ var AudioletNode = AudioletClass.extend({
             // merges defaults / arguments for input index and value
             var default_input = defaults[name][0],
                 val = parameters[name] || defaults[name][1];
-            this.parameters[name][2] = new AudioletParameter(this, default_input,
+            this[name] = new AudioletParameter(this, default_input,
                 val);
-            this[name] = this.parameters[name][2];
         }
     },
 
+    /**
+     * Get a node parameter value by key.
+     */
     get: function(key) {
         return this[key].getValue();
     },
 
+    /**
+     * Set a node parameter value by key(s).
+     */
     set: function(key, val) {
-        return this[key].setValue(val);
+        var params = key;
+        if (typeof key == 'string') {
+            params = {};
+            params[key] = val;
+        }
+        for (var param in params) {
+            this[param].setValue(params[param]);
+        }
     },
 
     /**
