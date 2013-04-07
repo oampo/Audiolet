@@ -587,6 +587,59 @@ var AudioletDestination = AudioletGroup.extend({
  */
 
 /**
+ * An event emitter.
+ */
+
+ var EventEmitter = AudioletClass.extend({
+
+    /**
+     * Bind a function to some event.
+     *
+     * @param {String} e The event to bind to.
+     * @param {Function} fn A function to execute.
+     */
+    on: function(e, fn) {
+        this._events = this._events || {};
+        this._events[e] = this._events[e] || [];
+        this._events[e].push(fn);
+    },
+
+    /**
+     * Unind some event handler.
+     *
+     * @param {String} e The event to release handlers from.
+     * @param {Function} fn A specific function to release.
+     */
+    off: function(e, fn) {
+        this._events = this._events || {};
+        if(e in this._events === false) {
+            return;
+        }
+        this._events[e].splice(this._events[e].indexOf(fn), 1);
+    },
+
+    /**
+     * Execute some event handler(s).
+     *
+     * @param {String} e The event to trigger.
+     * @param {arguments} arguments Arguments to pass to the handlers.
+     */
+    trigger: function(e) {
+        this._events = this._events || {};
+        if (e in this._events === false) {
+            return;
+        }
+        for(var i = 0; i < this._events[e].length; i++){
+            this._events[e][i].apply(this, Array.prototype.slice.call(arguments, 1));
+        }
+    }
+
+});
+/*!
+ * @depends EventEmitter.js
+ */
+
+/**
  * The basic building block of Audiolet applications.  Nodes are connected
  * together to create a processing graph which governs the flow of audio data.
  * AudioletNodes can contain any number of inputs and outputs which send and
@@ -594,7 +647,7 @@ var AudioletDestination = AudioletGroup.extend({
  * processed using the generate function, which is called whenever new data is
  * needed.
  */
-var AudioletNode = AudioletClass.extend({
+var AudioletNode = EventEmitter.extend({
 
     /**
      * Constructor
@@ -606,7 +659,7 @@ var AudioletNode = AudioletClass.extend({
      */
     constructor: function(audiolet, numberOfInputs, numberOfOutputs,
                             parameters) {
-        AudioletClass.call(this);
+        EventEmitter.call(this);
         this.audiolet = audiolet;
 
         this.inputs = [];
@@ -624,11 +677,25 @@ var AudioletNode = AudioletClass.extend({
         // typically, `get and `set` should be used to access these parameters.
         var defaults = this.parameters || {};
         for (var name in defaults) {
-            var default_input = defaults[name][0],
+            var inputIndex = defaults[name][0],
                 val = parameters[name] || defaults[name][1];
-            this[name] = new AudioletParameter(this, default_input,
-                val);
+            this.addParameter(inputIndex, name, val);
         }
+    },
+
+    /**
+     * Sets up a new AudioletParameter for the node.
+     */
+    addParameter: function(inputIndex, name, value) {
+        var parameter = new AudioletParameter(this, inputIndex, value);
+
+        // rebroadcast parameter changes to the node
+        parameter.on('change', function(val) {
+            this.trigger('change:' + name, val);
+        }.bind(this));
+
+        // expose the parameter on the node
+        this[name] = parameter;
     },
 
     /**
@@ -1116,7 +1183,7 @@ var AudioletOutput = AudioletClass.extend({
 
 });
 /*!
- * @depends AudioletClass.js
+ * @depends EventEmitter.js
  */
 
 /**
@@ -1127,7 +1194,7 @@ var AudioletOutput = AudioletClass.extend({
  * prioritised over the stored static value.  If no node is connected then the
  * static value should be used.
  */
-var AudioletParameter = AudioletClass.extend({
+var AudioletParameter = EventEmitter.extend({
 
     /**
      * Constructor
@@ -1137,7 +1204,7 @@ var AudioletParameter = AudioletClass.extend({
      * @param {Number} [value=0] The initial static value to store.
      */
     constructor: function(node, inputIndex, value) {
-        AudioletClass.call(this);
+        EventEmitter.call(this);
         this.node = node;
         if (typeof inputIndex != 'undefined' && inputIndex != null) {
             this.input = node.inputs[inputIndex];
@@ -1173,6 +1240,7 @@ var AudioletParameter = AudioletClass.extend({
      */
     setValue: function(value) {
         this.value = value;
+        this.trigger('change', value);
     },
 
     /**
