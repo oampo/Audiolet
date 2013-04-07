@@ -1,5 +1,5 @@
 /*!
- * @depends AudioletClass.js
+ * @depends EventEmitter.js
  */
 
 /**
@@ -10,7 +10,7 @@
  * processed using the generate function, which is called whenever new data is
  * needed.
  */
-var AudioletNode = AudioletClass.extend({
+var AudioletNode = EventEmitter.extend({
 
     /**
      * Constructor
@@ -22,7 +22,7 @@ var AudioletNode = AudioletClass.extend({
      */
     constructor: function(audiolet, numberOfInputs, numberOfOutputs,
                             parameters) {
-        AudioletClass.call(this);
+        EventEmitter.call(this);
         this.audiolet = audiolet;
 
         this.inputs = [];
@@ -40,11 +40,25 @@ var AudioletNode = AudioletClass.extend({
         // typically, `get and `set` should be used to access these parameters.
         var defaults = this.parameters || {};
         for (var name in defaults) {
-            var default_input = defaults[name][0],
+            var inputIndex = defaults[name][0],
                 val = parameters[name] || defaults[name][1];
-            this[name] = new AudioletParameter(this, default_input,
-                val);
+            this.addParameter(inputIndex, name, val);
         }
+    },
+
+    /**
+     * Sets up a new AudioletParameter for the node.
+     */
+    addParameter: function(inputIndex, name, value) {
+        var parameter = new AudioletParameter(this, inputIndex, value);
+
+        // rebroadcast parameter changes to the node
+        parameter.on('change', function(val) {
+            this.trigger('change:' + name, val);
+        }.bind(this));
+
+        // expose the parameter on the node
+        this[name] = parameter;
     },
 
     /**
