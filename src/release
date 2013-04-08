@@ -19,10 +19,6 @@ mkdir releases/$RELEASE_NAME
 # Copy audiolet to root directory
 cp audiolet/* releases/$RELEASE_NAME
 
-# Copy libraries in folders
-cp -r mootools releases/$RELEASE_NAME
-cp -r firebugx releases/$RELEASE_NAME
-
 # Copy license
 cp LICENSE releases/$RELEASE_NAME
 
