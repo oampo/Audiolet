@@ -1,3 +1,7 @@
+/*
+ * @depends ../audiofile/audiofile.js
+ */
+
 /**
  * A variable size multi-channel audio buffer.
  *
