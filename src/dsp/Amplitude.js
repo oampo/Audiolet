@@ -22,7 +22,7 @@
  */
 var Amplitude  = AudioletNode.extend({
 
-    parameters: {
+    defaults: {
         attack: [1, 0.01],
         release: [2, 0.01]
     },

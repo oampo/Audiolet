@@ -20,7 +20,7 @@
  */
 var Modulo = AudioletNode.extend({
 
-    parameters: {
+    defaults: {
         value: [1, 1]
     },
 

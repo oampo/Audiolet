@@ -31,7 +31,7 @@
  */
 var BufferPlayer = AudioletNode.extend({
 
-    parameters: {
+    defaults: {
         playbackRate: [0, 1],
         restartTrigger: [1, 0],
         startPosition: [2, 0],

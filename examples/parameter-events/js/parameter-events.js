@@ -18,7 +18,7 @@ function playExample() {
 
     alternatively, you could do something like this:
 
-    sine.frequency.on('change', function(frequency) {
+    sine.parameters.frequency.on('change', function(frequency) {
       console.log('frequency changed', frequency);
     });
 

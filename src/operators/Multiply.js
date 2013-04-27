@@ -20,7 +20,7 @@
  */
 var Multiply = AudioletNode.extend({
 
-    parameters: {
+    defaults: {
         value: [1, 1]
     },
 

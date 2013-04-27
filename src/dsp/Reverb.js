@@ -29,7 +29,7 @@
  */
 var Reverb = AudioletNode.extend({
 
-    parameters: {
+    defaults: {
         mix: [1, null],
         roomSize: [2, null],
         damping: [3, null]
@@ -55,7 +55,7 @@ var Reverb = AudioletNode.extend({
         this.scaleRoom = 0.28;
         this.offsetRoom = 0.7;
 
-        // Parameters: for 44.1k or 48k
+        // defaults: for 44.1k or 48k
         this.combTuning = [1116, 1188, 1277, 1356, 1422, 1491, 1557, 1617];
         this.allPassTuning = [556, 441, 341, 225];
 

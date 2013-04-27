@@ -24,7 +24,7 @@
  */
 var Limiter = AudioletNode.extend({
 
-    parameters: {
+    defaults: {
         threshold: [1, 0.95],
         attack: [2, 0.01],
         release: [3, 0.4]

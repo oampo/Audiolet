@@ -20,7 +20,7 @@
  */
 var BitCrusher = AudioletNode.extend({
 
-    parameters: {
+    defaults: {
         bits: [1, null]
     },
 

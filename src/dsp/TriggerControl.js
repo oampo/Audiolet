@@ -16,7 +16,7 @@
  */
 var TriggerControl = AudioletNode.extend({
 
-    parameters: {
+    defaults: {
         trigger: [null, 0]
     },
 
