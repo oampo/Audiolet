@@ -24,7 +24,7 @@
  */
 var FeedbackDelay = AudioletNode.extend({
 
-    parameters: {
+    defaults: {
         delayTime: [1, 1],
         feedback: [2, 0.5],
         mix: [3, 1]

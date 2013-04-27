@@ -21,7 +21,7 @@
  */
 var Pulse = AudioletNode.extend({
 
-    parameters: {
+    defaults: {
         frequency: [0, 440],
         pulseWidth: [1, 0.5]
     },

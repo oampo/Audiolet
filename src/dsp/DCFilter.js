@@ -21,7 +21,7 @@
  */
 var DCFilter = AudioletNode.extend({
 
-    parameters: {
+    defaults: {
         coefficient: [1, 0.995]
     },
 

@@ -20,7 +20,7 @@
  */
 var Delay = AudioletNode.extend({
 
-    parameters: {
+    defaults: {
         delayTime: [1, 1]
     },
 

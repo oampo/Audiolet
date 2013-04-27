@@ -22,7 +22,7 @@
  */
 var CombFilter = AudioletNode.extend({
 
-    parameters: {
+    defaults: {
         delayTime: [1, 1],
         decayTime: [2, null]
     },

@@ -23,7 +23,7 @@
  */
 var CrossFade = AudioletNode.extend({
 
-    parameters: {
+    defaults: {
         position: [2, 0.5]
     },
 

@@ -21,7 +21,7 @@
  */
 var Envelope = AudioletNode.extend({
 
-    parameters: {
+    defaults: {
         gate: [0, 1]
     },
 

@@ -22,7 +22,7 @@
  */
 var LinearCrossFade = AudioletNode.extend({
 
-    parameters: {
+    defaults: {
         position: [2, 0.5]
     },
 

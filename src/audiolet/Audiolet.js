@@ -560,6 +560,7 @@ var AudioletNode = AudioletClass.extend({
      */
     constructor: function(audiolet, numberOfInputs, numberOfOutputs,
                             parameters) {
+        console.log(this);
         AudioletClass.call(this);
         this.audiolet = audiolet;
 
@@ -576,12 +577,13 @@ var AudioletNode = AudioletClass.extend({
         // for each parameter defined in `parameters`, create a
         // new `AudioletParameter` and assign it as a property of the node.
         // typically, `get and `set` should be used to access these parameters.
-        var defaults = this.parameters || {};
+        var defaults = this.defaults || {};
+        this.parameters = {};
         for (var name in defaults) {
             var default_input = defaults[name][0],
                 ctor_val = parameters[name],
                 val = (ctor_val || ctor_val === 0)? ctor_val: defaults[name][1];
-            this[name] = new AudioletParameter(this, default_input,
+            this.parameters[name] = new AudioletParameter(this, default_input,
                 val);
         }
     },
@@ -590,7 +592,7 @@ var AudioletNode = AudioletClass.extend({
      * Get a node parameter value by key.
      */
     get: function(key) {
-        return this[key].getValue();
+        return this.parameters[key].getValue();
     },
 
     /**
@@ -603,7 +605,7 @@ var AudioletNode = AudioletClass.extend({
             params[key] = val;
         }
         for (var param in params) {
-            this[param].setValue(params[param]);
+            this.parameters[param].setValue(params[param]);
         }
     },
 
@@ -1170,7 +1172,7 @@ var AudioletParameter = AudioletClass.extend({
  */
 var ParameterNode = AudioletNode.extend({
 
-    parameters: {
+    defaults: {
         parameter: [0, null]
     },
 
@@ -1716,7 +1718,7 @@ for (var i = 0; i < types.length; ++i) {
  */
 var Envelope = AudioletNode.extend({
 
-    parameters: {
+    defaults: {
         gate: [0, 1]
     },
 
@@ -1951,7 +1953,7 @@ var ADSREnvelope = Envelope.extend({
  */
 var BiquadFilter = AudioletNode.extend({
 
-    parameters: {
+    defaults: {
         frequency: [1, 22100]
     },
 
@@ -2146,7 +2148,7 @@ var AllPassFilter = BiquadFilter.extend({
  */
 var Amplitude  = AudioletNode.extend({
 
-    parameters: {
+    defaults: {
         attack: [1, 0.01],
         release: [2, 0.01]
     },
@@ -2439,7 +2441,7 @@ var BandRejectFilter = BiquadFilter.extend({
  */
 var BitCrusher = AudioletNode.extend({
 
-    parameters: {
+    defaults: {
         bits: [1, null]
     },
 
@@ -2515,7 +2517,7 @@ var BitCrusher = AudioletNode.extend({
  */
 var BufferPlayer = AudioletNode.extend({
 
-    parameters: {
+    defaults: {
         playbackRate: [0, 1],
         restartTrigger: [1, 0],
         startPosition: [2, 0],
@@ -2643,7 +2645,7 @@ var BufferPlayer = AudioletNode.extend({
  */
 var CombFilter = AudioletNode.extend({
 
-    parameters: {
+    defaults: {
         delayTime: [1, 1],
         decayTime: [2, null]
     },
@@ -2732,7 +2734,7 @@ var CombFilter = AudioletNode.extend({
  */
 var Sine = AudioletNode.extend({
 
-    parameters: {
+    defaults: {
         frequency: [0, 440]
     },
 
@@ -2802,7 +2804,7 @@ var Sine = AudioletNode.extend({
  */
 var CrossFade = AudioletNode.extend({
 
-    parameters: {
+    defaults: {
         position: [2, 0.5]
     },
 
@@ -2876,7 +2878,7 @@ var CrossFade = AudioletNode.extend({
  */
 var DCFilter = AudioletNode.extend({
 
-    parameters: {
+    defaults: {
         coefficient: [1, 0.995]
     },
 
@@ -2961,7 +2963,7 @@ var DCFilter = AudioletNode.extend({
  */
 var DampedCombFilter = AudioletNode.extend({
 
-    parameters: {
+    defaults: {
         delayTime: [1, 1],
         decayTime: [2, null],
         damping: [3, null]
@@ -3068,7 +3070,7 @@ var DampedCombFilter = AudioletNode.extend({
  */
 var Delay = AudioletNode.extend({
 
-    parameters: {
+    defaults: {
         delayTime: [1, 1]
     },
 
@@ -3379,7 +3381,7 @@ var FFT = AudioletNode.extend({
  */
 var FeedbackDelay = AudioletNode.extend({
 
-    parameters: {
+    defaults: {
         delayTime: [1, 1],
         feedback: [2, 0.5],
         mix: [3, 1]
@@ -3478,7 +3480,7 @@ var FeedbackDelay = AudioletNode.extend({
  */
 var Multiply = AudioletNode.extend({
 
-    parameters: {
+    defaults: {
         value: [1, 1]
     },
 
@@ -3805,7 +3807,7 @@ var IFFT = AudioletNode.extend({
  */
 var Lag = AudioletNode.extend({
 
-    parameters: {
+    defaults: {
         value: [0, 0],
         lag: [1, 1]
     },
@@ -3883,7 +3885,7 @@ var Lag = AudioletNode.extend({
  */
 var Limiter = AudioletNode.extend({
 
-    parameters: {
+    defaults: {
         threshold: [1, 0.95],
         attack: [2, 0.01],
         release: [3, 0.4]
@@ -3992,7 +3994,7 @@ var Limiter = AudioletNode.extend({
  */
 var LinearCrossFade = AudioletNode.extend({
 
-    parameters: {
+    defaults: {
         position: [2, 0.5]
     },
 
@@ -4128,7 +4130,7 @@ var LowPassFilter = BiquadFilter.extend({
  */
 var Pan = AudioletNode.extend({
 
-    parameters: {
+    defaults: {
         pan: [1, 0.5]
     },
 
@@ -4247,7 +4249,7 @@ var PercussiveEnvelope = Envelope.extend({
  */
 var Pulse = AudioletNode.extend({
 
-    parameters: {
+    defaults: {
         frequency: [0, 440],
         pulseWidth: [1, 0.5]
     },
@@ -4324,7 +4326,7 @@ var Pulse = AudioletNode.extend({
  */
 var Reverb = AudioletNode.extend({
 
-    parameters: {
+    defaults: {
         mix: [1, null],
         roomSize: [2, null],
         damping: [3, null]
@@ -4350,7 +4352,7 @@ var Reverb = AudioletNode.extend({
         this.scaleRoom = 0.28;
         this.offsetRoom = 0.7;
 
-        // Parameters: for 44.1k or 48k
+        // defaults: for 44.1k or 48k
         this.combTuning = [1116, 1188, 1277, 1356, 1422, 1491, 1557, 1617];
         this.allPassTuning = [556, 441, 341, 225];
 
@@ -4480,7 +4482,7 @@ var Reverb = AudioletNode.extend({
  */
 var Saw = AudioletNode.extend({
 
-    parameters: {
+    defaults: {
         frequency: [0, 440]
     },
 
@@ -4602,7 +4604,7 @@ var SoftClip = AudioletNode.extend({
  */
 var Square = AudioletNode.extend({
 
-    parameters: {
+    defaults: {
         frequency: [0, 440]
     },
 
@@ -4668,7 +4670,7 @@ var Square = AudioletNode.extend({
  */
 var Triangle = AudioletNode.extend({
 
-    parameters: {
+    defaults: {
         frequency: [0, 440]
     },
 
@@ -4731,7 +4733,7 @@ var Triangle = AudioletNode.extend({
  */
 var TriggerControl = AudioletNode.extend({
 
-    parameters: {
+    defaults: {
         trigger: [null, 0]
     },
 
@@ -5029,7 +5031,7 @@ var WhiteNoise = AudioletNode.extend({
  */
 var Add = AudioletNode.extend({
 
-    parameters: {
+    defaults: {
         value: [1, 0]
     },
 
@@ -5094,7 +5096,7 @@ var Add = AudioletNode.extend({
  */
 var Divide = AudioletNode.extend({
 
-    parameters: {
+    defaults: {
         value: [1, 1]
     },
 
@@ -5159,7 +5161,7 @@ var Divide = AudioletNode.extend({
  */
 var Modulo = AudioletNode.extend({
 
-    parameters: {
+    defaults: {
         value: [1, 1]
     },
 
@@ -5226,7 +5228,7 @@ var Modulo = AudioletNode.extend({
  */
 var MulAdd = AudioletNode.extend({
 
-    parameters: {
+    defaults: {
         mul: [1, 1],
         add: [2, 0]
     },
@@ -5346,7 +5348,7 @@ var Reciprocal = AudioletNode.extend({
  */
 var Subtract = AudioletNode.extend({
 
-    parameters: {
+    defaults: {
         value: [1, 0]
     },
 

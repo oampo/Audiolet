@@ -21,7 +21,7 @@
  */
 var Lag = AudioletNode.extend({
 
-    parameters: {
+    defaults: {
         value: [0, 0],
         lag: [1, 1]
     },

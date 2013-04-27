@@ -38,12 +38,13 @@ var AudioletNode = AudioletClass.extend({
         // for each parameter defined in `parameters`, create a
         // new `AudioletParameter` and assign it as a property of the node.
         // typically, `get and `set` should be used to access these parameters.
-        var defaults = this.parameters || {};
+        var defaults = this.defaults || {};
+        this.parameters = {};
         for (var name in defaults) {
             var default_input = defaults[name][0],
                 ctor_val = parameters[name],
                 val = (ctor_val || ctor_val === 0)? ctor_val: defaults[name][1];
-            this[name] = new AudioletParameter(this, default_input,
+            this.parameters[name] = new AudioletParameter(this, default_input,
                 val);
         }
     },
@@ -52,7 +53,7 @@ var AudioletNode = AudioletClass.extend({
      * Get a node parameter value by key.
      */
     get: function(key) {
-        return this[key].getValue();
+        return this.parameters[key].getValue();
     },
 
     /**
@@ -65,7 +66,7 @@ var AudioletNode = AudioletClass.extend({
             params[key] = val;
         }
         for (var param in params) {
-            this[param].setValue(params[param]);
+            this.parameters[param].setValue(params[param]);
         }
     },
 

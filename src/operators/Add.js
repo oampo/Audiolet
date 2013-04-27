@@ -20,7 +20,7 @@
  */
 var Add = AudioletNode.extend({
 
-    parameters: {
+    defaults: {
         value: [1, 0]
     },
 

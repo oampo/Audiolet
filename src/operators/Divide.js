@@ -20,7 +20,7 @@
  */
 var Divide = AudioletNode.extend({
 
-    parameters: {
+    defaults: {
         value: [1, 1]
     },
 

@@ -19,7 +19,7 @@
  */
 var Sine = AudioletNode.extend({
 
-    parameters: {
+    defaults: {
         frequency: [0, 440]
     },
 

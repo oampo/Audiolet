@@ -22,7 +22,7 @@
  */
 var BiquadFilter = AudioletNode.extend({
 
-    parameters: {
+    defaults: {
         frequency: [1, 22100]
     },
 

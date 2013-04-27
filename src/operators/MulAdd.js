@@ -22,7 +22,7 @@
  */
 var MulAdd = AudioletNode.extend({
 
-    parameters: {
+    defaults: {
         mul: [1, 1],
         add: [2, 0]
     },

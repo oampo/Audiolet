@@ -23,7 +23,7 @@
  */
 var ParameterNode = AudioletNode.extend({
 
-    parameters: {
+    defaults: {
         parameter: [0, null]
     },
 

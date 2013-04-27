@@ -21,7 +21,7 @@
  */
 var Pan = AudioletNode.extend({
 
-    parameters: {
+    defaults: {
         pan: [1, 0.5]
     },
 

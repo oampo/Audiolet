@@ -20,7 +20,7 @@
  */
 var Subtract = AudioletNode.extend({
 
-    parameters: {
+    defaults: {
         value: [1, 0]
     },
 
