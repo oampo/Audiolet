@@ -560,7 +560,6 @@ var AudioletNode = AudioletClass.extend({
      */
     constructor: function(audiolet, numberOfInputs, numberOfOutputs,
                             parameters) {
-        console.log(this);
         AudioletClass.call(this);
         this.audiolet = audiolet;
 
