@@ -20,6 +20,10 @@
  */
 var Multiply = AudioletNode.extend({
 
+    defaults: {
+        value: [1, 1]
+    },
+
     /**
      * Constructor
      *
@@ -28,16 +32,17 @@ var Multiply = AudioletNode.extend({
      * @param {Number} [value=1] The initial value to multiply by.
      */
     constructor: function(audiolet, value) {
-        AudioletNode.call(this, audiolet, 2, 1);
+        AudioletNode.call(this, audiolet, 2, 1, {
+            value: value
+        });
         this.linkNumberOfOutputChannels(0, 0);
-        this.value = new AudioletParameter(this, 1, value || 1);
     },
 
     /**
      * Process samples
      */
     generate: function() {
-        var value = this.value.getValue();
+        var value = this.get('value');
         var input = this.inputs[0];
         var numberOfChannels = input.samples.length;
         for (var i = 0; i < numberOfChannels; i++) {

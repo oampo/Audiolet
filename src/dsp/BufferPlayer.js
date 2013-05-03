@@ -31,6 +31,13 @@
  */
 var BufferPlayer = AudioletNode.extend({
 
+    defaults: {
+        playbackRate: [0, 1],
+        restartTrigger: [1, 0],
+        startPosition: [2, 0],
+        loop: [3, 0]
+    },
+
     /**
      * Constructor
      *
@@ -44,14 +51,14 @@ var BufferPlayer = AudioletNode.extend({
      */
     constructor: function(audiolet, buffer, playbackRate, startPosition,
                             loop, onComplete) {
-        AudioletNode.call(this, audiolet, 3, 1);
+        AudioletNode.call(this, audiolet, 3, 1, {
+            playbackRate: playbackRate,
+            startPosition: startPosition,
+            loop: loop
+        });
         this.buffer = buffer;
         this.setNumberOfOutputChannels(0, this.buffer.numberOfChannels);
         this.position = startPosition || 0;
-        this.playbackRate = new AudioletParameter(this, 0, playbackRate || 1);
-        this.restartTrigger = new AudioletParameter(this, 1, 0);
-        this.startPosition = new AudioletParameter(this, 2, startPosition || 0);
-        this.loop = new AudioletParameter(this, 3, loop || 0);
         this.onComplete = onComplete;
 
         this.restartTriggerOn = false;
@@ -76,10 +83,10 @@ var BufferPlayer = AudioletNode.extend({
         }
 
         // Crap load of parameters
-        var playbackRate = this.playbackRate.getValue();
-        var restartTrigger = this.restartTrigger.getValue();
-        var startPosition = this.startPosition.getValue();
-        var loop = this.loop.getValue();
+        var playbackRate = this.get('playbackRate');
+        var restartTrigger = this.get('restartTrigger');
+        var startPosition = this.get('startPosition');
+        var loop = this.get('loop');
 
         if (restartTrigger > 0 && !this.restartTriggerOn) {
             // Trigger moved from <=0 to >0, so we restart playback from

@@ -16,6 +16,10 @@
  */
 var TriggerControl = AudioletNode.extend({
 
+    defaults: {
+        trigger: [null, 0]
+    },
+
     /**
      * Constructor
      *
@@ -24,17 +28,18 @@ var TriggerControl = AudioletNode.extend({
      * @param {Number} [trigger=0] The initial trigger state.
      */
     constructor: function(audiolet, trigger) {
-        AudioletNode.call(this, audiolet, 0, 1);
-        this.trigger = new AudioletParameter(this, null, trigger || 0);
+        AudioletNode.call(this, audiolet, 0, 1, {
+            trigger: trigger
+        });
     },
 
     /**
      * Process samples
      */
     generate: function() {
-        if (this.trigger.getValue() > 0) {
+        if (this.get('trigger') > 0) {
             this.outputs[0].samples[0] = 1;
-            this.trigger.setValue(0);
+            this.set('trigger', 0);
         }
         else {
             this.outputs[0].samples[0] = 0;

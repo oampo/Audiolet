@@ -21,6 +21,11 @@
  */
 var Pulse = AudioletNode.extend({
 
+    defaults: {
+        frequency: [0, 440],
+        pulseWidth: [1, 0.5]
+    },
+
     /**
      * Constructor
      *
@@ -30,9 +35,10 @@ var Pulse = AudioletNode.extend({
      * @param {Number} [pulseWidth=0.5] The initial pulse width.
      */
     constructor: function(audiolet, frequency, pulseWidth) {
-        AudioletNode.call(this, audiolet, 2, 1);
-        this.frequency = new AudioletParameter(this, 0, frequency || 440);
-        this.pulseWidth = new AudioletParameter(this, 1, pulseWidth || 0.5);
+        AudioletNode.call(this, audiolet, 2, 1, {
+            frequency: frequency,
+            pulseWidth: pulseWidth
+        });
         this.phase = 0;
     },
 
@@ -40,10 +46,10 @@ var Pulse = AudioletNode.extend({
      * Process samples
      */
     generate: function() {
-        var pulseWidth = this.pulseWidth.getValue();
+        var pulseWidth = this.get('pulseWidth');
         this.outputs[0].samples[0] = (this.phase < pulseWidth) ? 1 : -1;
 
-        var frequency = this.frequency.getValue();
+        var frequency = this.get('frequency');
         var sampleRate = this.audiolet.device.sampleRate;
         this.phase += frequency / sampleRate;
         if (this.phase > 1) {

@@ -19,6 +19,10 @@
  */
 var Sine = AudioletNode.extend({
 
+    defaults: {
+        frequency: [0, 440]
+    },
+
     /**
      * Constructor
      *
@@ -27,8 +31,9 @@ var Sine = AudioletNode.extend({
      * @param {Number} [frequency=440] Initial frequency.
      */
     constructor: function(audiolet, frequency) {
-        AudioletNode.call(this, audiolet, 1, 1);
-        this.frequency = new AudioletParameter(this, 0, frequency || 440);
+        AudioletNode.call(this, audiolet, 1, 1, {
+            frequency: frequency
+        });
         this.phase = 0;
     },
 
@@ -38,7 +43,7 @@ var Sine = AudioletNode.extend({
     generate: function() {
         var output = this.outputs[0];
 
-        var frequency = this.frequency.getValue();
+        var frequency = this.get('frequency');
         var sampleRate = this.audiolet.device.sampleRate;
 
         output.samples[0] = Math.sin(this.phase);

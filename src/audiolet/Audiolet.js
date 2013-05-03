@@ -550,17 +550,16 @@ var AudioletDestination = AudioletGroup.extend({
  */
 var AudioletNode = AudioletClass.extend({
 
-
     /**
      * Constructor
      *
      * @param {Audiolet} audiolet The audiolet object.
      * @param {Number} numberOfInputs The number of inputs.
      * @param {Number} numberOfOutputs The number of outputs.
-     * @param {Function} [generate] A replacement for the generate function.
+     * @param {Object} parameters Overridden parameter values.
      */
     constructor: function(audiolet, numberOfInputs, numberOfOutputs,
-                            generate) {
+                            parameters) {
         AudioletClass.call(this);
         this.audiolet = audiolet;
 
@@ -574,8 +573,38 @@ var AudioletNode = AudioletClass.extend({
             this.outputs.push(new AudioletOutput(this, i));
         }
 
-        if (generate) {
-            this.generate = generate;
+        // for each parameter defined in `parameters`, create a
+        // new `AudioletParameter` and assign it as a property of the node.
+        // typically, `get and `set` should be used to access these parameters.
+        var defaults = this.defaults || {};
+        this.parameters = {};
+        for (var name in defaults) {
+            var default_input = defaults[name][0],
+                ctor_val = parameters[name],
+                val = (ctor_val || ctor_val === 0)? ctor_val: defaults[name][1];
+            this.parameters[name] = new AudioletParameter(this, default_input,
+                val);
+        }
+    },
+
+    /**
+     * Get a node parameter value by key.
+     */
+    get: function(key) {
+        return this.parameters[key].getValue();
+    },
+
+    /**
+     * Set a node parameter value by key(s).
+     */
+    set: function(key, val) {
+        var params = key;
+        if (typeof key == 'string') {
+            params = {};
+            params[key] = val;
+        }
+        for (var param in params) {
+            this.parameters[param].setValue(params[param]);
         }
     },
 
@@ -1142,33 +1171,38 @@ var AudioletParameter = AudioletClass.extend({
  */
 var ParameterNode = AudioletNode.extend({
 
-  /**
-   * Constructor
-   *
-   * @extends AudioletNode
-   * @param {Audiolet} audiolet The audiolet object.
-   * @param {Number} value The initial static value of the parameter.
-   */
-  constructor: function(audiolet, value) {
-      AudioletNode.call(this, audiolet, 1, 1);
-      this.parameter = new AudioletParameter(this, 0, value);
-  },
+    defaults: {
+        parameter: [0, null]
+    },
 
-  /**
-   * Process samples
-   */
-  generate: function() {
-      this.outputs[0].samples[0] = this.parameter.getValue();
-  },
+    /**
+     * Constructor
+     *
+     * @extends AudioletNode
+     * @param {Audiolet} audiolet The audiolet object.
+     * @param {Number} value The initial static value of the parameter.
+     */
+    constructor: function(audiolet, value) {
+        AudioletNode.call(this, audiolet, 1, 1, {
+            value: value
+        });
+    },
 
-  /**
-   * toString
-   *
-   * @return {String} String representation.
-   */
-  toString:function() {
-      return 'Parameter Node';
-  }
+    /**
+     * Process samples
+     */
+    generate: function() {
+        this.outputs[0].samples[0] = this.get('parameter');
+    },
+
+    /**
+     * toString
+     *
+     * @return {String} String representation.
+     */
+    toString:function() {
+        return 'Parameter Node';
+    }
 
 });
 /*!
@@ -1683,6 +1717,10 @@ for (var i = 0; i < types.length; ++i) {
  */
 var Envelope = AudioletNode.extend({
 
+    defaults: {
+        gate: [0, 1]
+    },
+
     /**
      * Constructor
      *
@@ -1696,8 +1734,9 @@ var Envelope = AudioletNode.extend({
      */
     constructor: function(audiolet, gate, levels, times, releaseStage,
                         onComplete) {
-        AudioletNode.call(this, audiolet, 1, 1);
-        this.gate = new AudioletParameter(this, 0, gate || 1);
+        AudioletNode.call(this, audiolet, 1, 1, {
+            gate: gate
+        });
 
         this.levels = [];
         for (var i=0; i<levels.length; i++) {
@@ -1725,7 +1764,7 @@ var Envelope = AudioletNode.extend({
      * Process samples
      */
     generate: function() {
-        var gate = this.gate.getValue();
+        var gate = this.get('gate');
 
         var stageChanged = false;
 
@@ -1913,6 +1952,10 @@ var ADSREnvelope = Envelope.extend({
  */
 var BiquadFilter = AudioletNode.extend({
 
+    defaults: {
+        frequency: [1, 22100]
+    },
+
     /**
      * Constructor
      *
@@ -1921,12 +1964,13 @@ var BiquadFilter = AudioletNode.extend({
      * @param {Number} frequency The initial frequency.
      */
     constructor: function(audiolet, frequency) {
-        AudioletNode.call(this, audiolet, 2, 1);
+        AudioletNode.call(this, audiolet, 2, 1, {
+            frequency: frequency
+        });
 
         // Same number of output channels as input channels
         this.linkNumberOfOutputChannels(0, 0);
 
-        this.frequency = new AudioletParameter(this, 1, frequency || 22100);
         this.lastFrequency = null; // See if we need to recalculate coefficients
 
         // Delayed values
@@ -1959,7 +2003,7 @@ var BiquadFilter = AudioletNode.extend({
         var xValueArray = this.xValues;
         var yValueArray = this.yValues;
 
-        var frequency = this.frequency.getValue();
+        var frequency = this.get('frequency');
 
         if (frequency != this.lastFrequency) {
             // Recalculate the coefficients
@@ -2103,6 +2147,11 @@ var AllPassFilter = BiquadFilter.extend({
  */
 var Amplitude  = AudioletNode.extend({
 
+    defaults: {
+        attack: [1, 0.01],
+        release: [2, 0.01]
+    },
+
     /**
      * Constructor
      *
@@ -2112,13 +2161,13 @@ var Amplitude  = AudioletNode.extend({
      * @param {Number} [release=0.01] The initial release time in seconds.
      */
     constructor: function(audiolet, attack, release) {
-        AudioletNode.call(this, audiolet, 3, 1);
+        AudioletNode.call(this, audiolet, 3, 1, {
+            attack: attack,
+            release: release
+        });
         this.linkNumberOfOutputChannels(0, 0);
 
         this.followers = [];
-
-        this.attack = new AudioletParameter(this, 1, attack || 0.01);
-        this.release = new AudioletParameter(this, 2, release || 0.01);
     },
 
     /**
@@ -2134,9 +2183,9 @@ var Amplitude  = AudioletNode.extend({
         var sampleRate = this.audiolet.device.sampleRate;
 
         // Local processing variables
-        var attack = this.attack.getValue();
+        var attack = this.get('attack');
         attack = Math.pow(0.01, 1 / (attack * sampleRate));
-        var release = this.release.getValue();
+        var release = this.get('release');
         release = Math.pow(0.01, 1 / (release * sampleRate));
 
         var numberOfChannels = input.samples.length;
@@ -2391,6 +2440,10 @@ var BandRejectFilter = BiquadFilter.extend({
  */
 var BitCrusher = AudioletNode.extend({
 
+    defaults: {
+        bits: [1, null]
+    },
+
     /**
      * Constructor
      *
@@ -2399,9 +2452,10 @@ var BitCrusher = AudioletNode.extend({
      * @param {Number} bits The initial number of bits.
      */
     constructor: function(audiolet, bits) {
-        AudioletNode.call(this, audiolet, 2, 1);
+        AudioletNode.call(this, audiolet, 2, 1, {
+            bits: bits
+        });
         this.linkNumberOfOutputChannels(0, 0);
-        this.bits = new AudioletParameter(this, 1, bits);
     },
 
     /**
@@ -2410,7 +2464,7 @@ var BitCrusher = AudioletNode.extend({
     generate: function() {
         var input = this.inputs[0];
 
-        var maxValue = Math.pow(2, this.bits.getValue()) - 1;
+        var maxValue = Math.pow(2, this.get('bits')) - 1;
 
         var numberOfChannels = input.samples.length;
         for (var i = 0; i < numberOfChannels; i++) {
@@ -2462,6 +2516,13 @@ var BitCrusher = AudioletNode.extend({
  */
 var BufferPlayer = AudioletNode.extend({
 
+    defaults: {
+        playbackRate: [0, 1],
+        restartTrigger: [1, 0],
+        startPosition: [2, 0],
+        loop: [3, 0]
+    },
+
     /**
      * Constructor
      *
@@ -2475,14 +2536,14 @@ var BufferPlayer = AudioletNode.extend({
      */
     constructor: function(audiolet, buffer, playbackRate, startPosition,
                             loop, onComplete) {
-        AudioletNode.call(this, audiolet, 3, 1);
+        AudioletNode.call(this, audiolet, 3, 1, {
+            playbackRate: playbackRate,
+            startPosition: startPosition,
+            loop: loop
+        });
         this.buffer = buffer;
         this.setNumberOfOutputChannels(0, this.buffer.numberOfChannels);
         this.position = startPosition || 0;
-        this.playbackRate = new AudioletParameter(this, 0, playbackRate || 1);
-        this.restartTrigger = new AudioletParameter(this, 1, 0);
-        this.startPosition = new AudioletParameter(this, 2, startPosition || 0);
-        this.loop = new AudioletParameter(this, 3, loop || 0);
         this.onComplete = onComplete;
 
         this.restartTriggerOn = false;
@@ -2507,10 +2568,10 @@ var BufferPlayer = AudioletNode.extend({
         }
 
         // Crap load of parameters
-        var playbackRate = this.playbackRate.getValue();
-        var restartTrigger = this.restartTrigger.getValue();
-        var startPosition = this.startPosition.getValue();
-        var loop = this.loop.getValue();
+        var playbackRate = this.get('playbackRate');
+        var restartTrigger = this.get('restartTrigger');
+        var startPosition = this.get('startPosition');
+        var loop = this.get('loop');
 
         if (restartTrigger > 0 && !this.restartTriggerOn) {
             // Trigger moved from <=0 to >0, so we restart playback from
@@ -2583,6 +2644,11 @@ var BufferPlayer = AudioletNode.extend({
  */
 var CombFilter = AudioletNode.extend({
 
+    defaults: {
+        delayTime: [1, 1],
+        decayTime: [2, null]
+    },
+
     /**
      * Constructor
      *
@@ -2593,11 +2659,12 @@ var CombFilter = AudioletNode.extend({
      * @param {Number} decayTime The initial decay time.
      */
     constructor: function(audiolet, maximumDelayTime, delayTime, decayTime) {
-        AudioletNode.call(this, audiolet, 3, 1);
+        AudioletNode.call(this, audiolet, 3, 1, {
+            delayTime: delayTime,
+            decayTime: decayTime
+        });
         this.linkNumberOfOutputChannels(0, 0);
         this.maximumDelayTime = maximumDelayTime;
-        this.delayTime = new AudioletParameter(this, 1, delayTime || 1);
-        this.decayTime = new AudioletParameter(this, 2, decayTime);
         this.buffers = [];
         this.readWriteIndex = 0;
     },
@@ -2611,8 +2678,8 @@ var CombFilter = AudioletNode.extend({
 
         var sampleRate = this.audiolet.device.sampleRate;
 
-        var delayTime = this.delayTime.getValue() * sampleRate;
-        var decayTime = this.decayTime.getValue() * sampleRate;
+        var delayTime = this.get('delayTime') * sampleRate;
+        var decayTime = this.get('decayTime') * sampleRate;
         var feedback = Math.exp(-3 * delayTime / decayTime);
 
         var numberOfChannels = input.samples.length;
@@ -2666,6 +2733,10 @@ var CombFilter = AudioletNode.extend({
  */
 var Sine = AudioletNode.extend({
 
+    defaults: {
+        frequency: [0, 440]
+    },
+
     /**
      * Constructor
      *
@@ -2674,8 +2745,9 @@ var Sine = AudioletNode.extend({
      * @param {Number} [frequency=440] Initial frequency.
      */
     constructor: function(audiolet, frequency) {
-        AudioletNode.call(this, audiolet, 1, 1);
-        this.frequency = new AudioletParameter(this, 0, frequency || 440);
+        AudioletNode.call(this, audiolet, 1, 1, {
+            frequency: frequency
+        });
         this.phase = 0;
     },
 
@@ -2685,7 +2757,7 @@ var Sine = AudioletNode.extend({
     generate: function() {
         var output = this.outputs[0];
 
-        var frequency = this.frequency.getValue();
+        var frequency = this.get('frequency');
         var sampleRate = this.audiolet.device.sampleRate;
 
         output.samples[0] = Math.sin(this.phase);
@@ -2731,6 +2803,10 @@ var Sine = AudioletNode.extend({
  */
 var CrossFade = AudioletNode.extend({
 
+    defaults: {
+        position: [2, 0.5]
+    },
+
     /**
      * Constructor
      *
@@ -2739,9 +2815,10 @@ var CrossFade = AudioletNode.extend({
      * @param {Number} [position=0.5] The initial fade position.
      */
     constructor: function(audiolet, position) {
-        AudioletNode.call(this, audiolet, 3, 1);
+        AudioletNode.call(this, audiolet, 3, 1, {
+            position: position
+        });
         this.linkNumberOfOutputChannels(0, 0);
-        this.position = new AudioletParameter(this, 2, position || 0.5);
     },
 
     /**
@@ -2753,7 +2830,7 @@ var CrossFade = AudioletNode.extend({
         var output = this.outputs[0];
 
         // Local processing variables
-        var position = this.position.getValue();
+        var position = this.get('position');
 
         var scaledPosition = position * Math.PI / 2;
         var gainA = Math.cos(scaledPosition);
@@ -2800,6 +2877,10 @@ var CrossFade = AudioletNode.extend({
  */
 var DCFilter = AudioletNode.extend({
 
+    defaults: {
+        coefficient: [1, 0.995]
+    },
+
     /**
      * Constructor
      *
@@ -2808,12 +2889,12 @@ var DCFilter = AudioletNode.extend({
      * @param {Number} [coefficient=0.995] The initial coefficient.
      */
     constructor: function(audiolet, coefficient) {
-        AudioletNode.call(this, audiolet, 2, 1);
+        AudioletNode.call(this, audiolet, 2, 1, {
+            coefficient: coefficient
+        });
 
         // Same number of output channels as input channels
         this.linkNumberOfOutputChannels(0, 0);
-
-        this.coefficient = new AudioletParameter(this, 1, coefficient || 0.995);
 
         // Delayed values
         this.xValues = [];
@@ -2824,7 +2905,7 @@ var DCFilter = AudioletNode.extend({
      * Process samples
      */
     generate: function() {
-        var coefficient = this.coefficient.getValue();
+        var coefficient = this.get('coefficient');
         var input = this.inputs[0];
         var numberOfChannels = input.samples.length;
         for (var i = 0; i < numberOfChannels; i++) {
@@ -2881,6 +2962,12 @@ var DCFilter = AudioletNode.extend({
  */
 var DampedCombFilter = AudioletNode.extend({
 
+    defaults: {
+        delayTime: [1, 1],
+        decayTime: [2, null],
+        damping: [3, null]
+    },
+
     /**
      * Constructor
      *
@@ -2893,12 +2980,13 @@ var DampedCombFilter = AudioletNode.extend({
      */
     constructor: function(audiolet, maximumDelayTime, delayTime,
                                 decayTime, damping) {
-        AudioletNode.call(this, audiolet, 4, 1);
+        AudioletNode.call(this, audiolet, 4, 1, {
+            delayTime: delayTime,
+            decayTime: decayTime,
+            damping: damping
+        });
         this.linkNumberOfOutputChannels(0, 0);
         this.maximumDelayTime = maximumDelayTime;
-        this.delayTime = new AudioletParameter(this, 1, delayTime || 1);
-        this.decayTime = new AudioletParameter(this, 2, decayTime);
-        this.damping = new AudioletParameter(this, 3, damping);
         var bufferSize = maximumDelayTime * this.audiolet.device.sampleRate;
         this.buffers = [];
         this.readWriteIndex = 0;
@@ -2914,9 +3002,9 @@ var DampedCombFilter = AudioletNode.extend({
 
         var sampleRate = this.audiolet.device.sampleRate;
 
-        var delayTime = this.delayTime.getValue() * sampleRate;
-        var decayTime = this.decayTime.getValue() * sampleRate;
-        var damping = this.damping.getValue();
+        var delayTime = this.get('delayTime') * sampleRate;
+        var decayTime = this.get('decayTime') * sampleRate;
+        var damping = this.get('damping');
         var feedback = Math.exp(-3 * delayTime / decayTime);
 
         var numberOfChannels = input.samples.length;
@@ -2981,6 +3069,10 @@ var DampedCombFilter = AudioletNode.extend({
  */
 var Delay = AudioletNode.extend({
 
+    defaults: {
+        delayTime: [1, 1]
+    },
+
     /**
      * Constructor
      *
@@ -2990,10 +3082,11 @@ var Delay = AudioletNode.extend({
      * @param {Number} delayTime The initial delay time.
      */
     constructor: function(audiolet, maximumDelayTime, delayTime) {
-        AudioletNode.call(this, audiolet, 2, 1);
+        AudioletNode.call(this, audiolet, 2, 1, {
+            delayTime: delayTime
+        });
         this.linkNumberOfOutputChannels(0, 0);
         this.maximumDelayTime = maximumDelayTime;
-        this.delayTime = new AudioletParameter(this, 1, delayTime || 1);
         var bufferSize = maximumDelayTime * this.audiolet.device.sampleRate;
         this.buffers = [];
         this.readWriteIndex = 0;
@@ -3008,7 +3101,7 @@ var Delay = AudioletNode.extend({
 
         var sampleRate = this.audiolet.device.sampleRate;
 
-        var delayTime = this.delayTime.getValue() * sampleRate;
+        var delayTime = this.get('delayTime') * sampleRate;
 
         var numberOfChannels = input.samples.length;
 
@@ -3287,6 +3380,12 @@ var FFT = AudioletNode.extend({
  */
 var FeedbackDelay = AudioletNode.extend({
 
+    defaults: {
+        delayTime: [1, 1],
+        feedback: [2, 0.5],
+        mix: [3, 1]
+    },
+
     /**
      * Constructor
      *
@@ -3299,12 +3398,13 @@ var FeedbackDelay = AudioletNode.extend({
      */
     constructor: function(audiolet, maximumDelayTime, delayTime, feedback,
                              mix) {
-        AudioletNode.call(this, audiolet, 4, 1);
+        AudioletNode.call(this, audiolet, 4, 1, {
+            delayTime: delayTime,
+            feedback: feedback,
+            mix: mix
+        });
         this.linkNumberOfOutputChannels(0, 0);
         this.maximumDelayTime = maximumDelayTime;
-        this.delayTime = new AudioletParameter(this, 1, delayTime || 1);
-        this.feedback = new AudioletParameter(this, 2, feedback || 0.5);
-        this.mix = new AudioletParameter(this, 3, mix || 1);
         var bufferSize = maximumDelayTime * this.audiolet.device.sampleRate;
         this.buffers = [];
         this.readWriteIndex = 0;
@@ -3319,9 +3419,9 @@ var FeedbackDelay = AudioletNode.extend({
 
         var sampleRate = this.audiolet.output.device.sampleRate;
 
-        var delayTime = this.delayTime.getValue() * sampleRate;
-        var feedback = this.feedback.getValue();
-        var mix = this.mix.getValue();
+        var delayTime = this.get('delayTime') * sampleRate;
+        var feedback = this.get('feedback');
+        var mix = this.get('mix');
 
         var numberOfChannels = input.samples.length;
         var numberOfBuffers = this.buffers.length;
@@ -3379,6 +3479,10 @@ var FeedbackDelay = AudioletNode.extend({
  */
 var Multiply = AudioletNode.extend({
 
+    defaults: {
+        value: [1, 1]
+    },
+
     /**
      * Constructor
      *
@@ -3387,16 +3491,17 @@ var Multiply = AudioletNode.extend({
      * @param {Number} [value=1] The initial value to multiply by.
      */
     constructor: function(audiolet, value) {
-        AudioletNode.call(this, audiolet, 2, 1);
+        AudioletNode.call(this, audiolet, 2, 1, {
+            value: value
+        });
         this.linkNumberOfOutputChannels(0, 0);
-        this.value = new AudioletParameter(this, 1, value || 1);
     },
 
     /**
      * Process samples
      */
     generate: function() {
-        var value = this.value.getValue();
+        var value = this.get('value');
         var input = this.inputs[0];
         var numberOfChannels = input.samples.length;
         for (var i = 0; i < numberOfChannels; i++) {
@@ -3701,18 +3806,24 @@ var IFFT = AudioletNode.extend({
  */
 var Lag = AudioletNode.extend({
 
-  /**
-   * Constructor
-   *
-   * @extends AudioletNode
-   * @param {Audiolet} audiolet The audiolet object.
-   * @param {Number} [value=0] The initial value.
-   * @param {Number} [lagTime=1] The initial lag time.
-   */
-    constructor: function(audiolet, value, lagTime) {
-        AudioletNode.call(this, audiolet, 2, 1);
-        this.value = new AudioletParameter(this, 0, value || 0);
-        this.lag = new AudioletParameter(this, 1, lagTime || 1);
+    defaults: {
+        value: [0, 0],
+        lag: [1, 1]
+    },
+
+    /**
+     * Constructor
+     *
+     * @extends AudioletNode
+     * @param {Audiolet} audiolet The audiolet object.
+      * @param {Number} [value=0] The initial value.
+     * @param {Number} [lag=1] The initial lag time.
+     */
+    constructor: function(audiolet, value, lag) {
+        AudioletNode.call(this, audiolet, 2, 1, {
+            value: value,
+            lag: lag
+        });
         this.lastValue = 0;
 
         this.log001 = Math.log(0.001);
@@ -3727,8 +3838,8 @@ var Lag = AudioletNode.extend({
 
         var sampleRate = this.audiolet.device.sampleRate;
 
-        var value = this.value.getValue();
-        var lag = this.lag.getValue();
+        var value = this.get('value');
+        var lag = this.get('lag');
         var coefficient = Math.exp(this.log001 / (lag * sampleRate));
 
         var outputValue = ((1 - coefficient) * value) +
@@ -3773,6 +3884,12 @@ var Lag = AudioletNode.extend({
  */
 var Limiter = AudioletNode.extend({
 
+    defaults: {
+        threshold: [1, 0.95],
+        attack: [2, 0.01],
+        release: [3, 0.4]
+    },
+
     /**
      * Constructor
      *
@@ -3783,13 +3900,12 @@ var Limiter = AudioletNode.extend({
      * @param {Number} [release=0.4] The initial release time.
      */
     constructor: function(audiolet, threshold, attack, release) {
-        AudioletNode.call(this, audiolet, 4, 1);
+        AudioletNode.call(this, audiolet, 4, 1, {
+            threshold: threshold,
+            attack: attack,
+            release: release
+        });
         this.linkNumberOfOutputChannels(0, 0);
-
-        // Parameters
-        this.threshold = new AudioletParameter(this, 1, threshold || 0.95);
-        this.attack = new AudioletParameter(this, 2, attack || 0.01);
-        this.release = new AudioletParameter(this, 2, release || 0.4);
 
         this.followers = [];
     },
@@ -3804,12 +3920,12 @@ var Limiter = AudioletNode.extend({
         var sampleRate = this.audiolet.device.sampleRate;
 
         // Local processing variables
-        var attack = Math.pow(0.01, 1 / (this.attack.getValue() *
+        var attack = Math.pow(0.01, 1 / (this.get('attack') *
                                          sampleRate));
-        var release = Math.pow(0.01, 1 / (this.release.getValue() *
+        var release = Math.pow(0.01, 1 / (this.get('release') *
                                           sampleRate));
 
-        var threshold = this.threshold.getValue();
+        var threshold = this.get('threshold');
 
         var numberOfChannels = input.samples.length;
         for (var i = 0; i < numberOfChannels; i++) {
@@ -3877,6 +3993,10 @@ var Limiter = AudioletNode.extend({
  */
 var LinearCrossFade = AudioletNode.extend({
 
+    defaults: {
+        position: [2, 0.5]
+    },
+
     /**
      * Constructor
      *
@@ -3885,9 +4005,10 @@ var LinearCrossFade = AudioletNode.extend({
      * @param {Number} [position=0.5] The initial fade position.
      */
     constructor: function(audiolet, position) {
-        AudioletNode.call(this, audiolet, 3, 1);
+        AudioletNode.call(this, audiolet, 3, 1, {
+            position: position
+        });
         this.linkNumberOfOutputChannels(0, 0);
-        this.position = new AudioletParameter(this, 2, position || 0.5);
     },
 
     /**
@@ -3898,7 +4019,7 @@ var LinearCrossFade = AudioletNode.extend({
         var inputB = this.inputs[1];
         var output = this.outputs[0];
 
-        var position = this.position.getValue();
+        var position = this.get('position');
 
         var gainA = 1 - position;
         var gainB = position;
@@ -4008,6 +4129,10 @@ var LowPassFilter = BiquadFilter.extend({
  */
 var Pan = AudioletNode.extend({
 
+    defaults: {
+        pan: [1, 0.5]
+    },
+
     /**
      * Constructor
      *
@@ -4016,13 +4141,11 @@ var Pan = AudioletNode.extend({
      * @param {Number} [pan=0.5] The initial pan position.
      */
     constructor: function(audiolet, pan) {
-        AudioletNode.call(this, audiolet, 2, 1);
+        AudioletNode.call(this, audiolet, 2, 1, {
+            pan: pan
+        });
         // Hardcode two output channels
         this.setNumberOfOutputChannels(0, 2);
-        if (pan == null) {
-            var pan = 0.5;
-        }
-        this.pan = new AudioletParameter(this, 1, pan);
     },
 
     /**
@@ -4032,7 +4155,7 @@ var Pan = AudioletNode.extend({
         var input = this.inputs[0];
         var output = this.outputs[0];
 
-        var pan = this.pan.getValue();
+        var pan = this.get('pan');
 
         var value = input.samples[0] || 0;
         var scaledPan = pan * Math.PI / 2;
@@ -4125,6 +4248,11 @@ var PercussiveEnvelope = Envelope.extend({
  */
 var Pulse = AudioletNode.extend({
 
+    defaults: {
+        frequency: [0, 440],
+        pulseWidth: [1, 0.5]
+    },
+
     /**
      * Constructor
      *
@@ -4134,9 +4262,10 @@ var Pulse = AudioletNode.extend({
      * @param {Number} [pulseWidth=0.5] The initial pulse width.
      */
     constructor: function(audiolet, frequency, pulseWidth) {
-        AudioletNode.call(this, audiolet, 2, 1);
-        this.frequency = new AudioletParameter(this, 0, frequency || 440);
-        this.pulseWidth = new AudioletParameter(this, 1, pulseWidth || 0.5);
+        AudioletNode.call(this, audiolet, 2, 1, {
+            frequency: frequency,
+            pulseWidth: pulseWidth
+        });
         this.phase = 0;
     },
 
@@ -4144,10 +4273,10 @@ var Pulse = AudioletNode.extend({
      * Process samples
      */
     generate: function() {
-        var pulseWidth = this.pulseWidth.getValue();
+        var pulseWidth = this.get('pulseWidth');
         this.outputs[0].samples[0] = (this.phase < pulseWidth) ? 1 : -1;
 
-        var frequency = this.frequency.getValue();
+        var frequency = this.get('frequency');
         var sampleRate = this.audiolet.device.sampleRate;
         this.phase += frequency / sampleRate;
         if (this.phase > 1) {
@@ -4196,6 +4325,12 @@ var Pulse = AudioletNode.extend({
  */
 var Reverb = AudioletNode.extend({
 
+    defaults: {
+        mix: [1, null],
+        roomSize: [2, null],
+        damping: [3, null]
+    },
+
     /**
      * Constructor
      *
@@ -4206,7 +4341,6 @@ var Reverb = AudioletNode.extend({
      * @param {Number} [damping=0.5] The initial damping amount.
      */
     constructor: function(audiolet, mix, roomSize, damping) {
-        AudioletNode.call(this, audiolet, 4, 1);
 
         // Constants
         this.initialMix = 0.33;
@@ -4217,22 +4351,20 @@ var Reverb = AudioletNode.extend({
         this.scaleRoom = 0.28;
         this.offsetRoom = 0.7;
 
-        // Parameters: for 44.1k or 48k
+        // defaults: for 44.1k or 48k
         this.combTuning = [1116, 1188, 1277, 1356, 1422, 1491, 1557, 1617];
         this.allPassTuning = [556, 441, 341, 225];
 
         // Controls
-        // Mix control
-        var mix = mix || this.initialMix;
-        this.mix = new AudioletParameter(this, 1, mix);
+        mix = mix || this.initialMixl
+        roomSize = roomSize || this.initialRoomSize;
+        damping = damping || this.initialDamping;
 
-        // Room size control
-        var roomSize = roomSize || this.initialRoomSize;
-        this.roomSize = new AudioletParameter(this, 2, roomSize);
-
-        // Damping control
-        var damping = damping || this.initialDamping;
-        this.damping = new AudioletParameter(this, 3, damping);
+        AudioletNode.call(this, audiolet, 4, 1, {
+            mix: mix,
+            roomSize: roomSize,
+            damping: damping
+        });
 
         // Damped comb filters
         this.combBuffers = [];
@@ -4261,9 +4393,9 @@ var Reverb = AudioletNode.extend({
      * Process samples
      */
     generate: function() {
-        var mix = this.mix.getValue();
-        var roomSize = this.roomSize.getValue();
-        var damping = this.damping.getValue();
+        var mix = this.get('mix');
+        var roomSize = this.get('roomSize');
+        var damping = this.get('damping');
 
         var numberOfCombs = this.combTuning.length;
         var numberOfFilters = this.allPassTuning.length;
@@ -4349,6 +4481,10 @@ var Reverb = AudioletNode.extend({
  */
 var Saw = AudioletNode.extend({
 
+    defaults: {
+        frequency: [0, 440]
+    },
+
     /**
      * Constructor
      *
@@ -4357,8 +4493,9 @@ var Saw = AudioletNode.extend({
      * @param {Number} [frequency=440] Initial frequency.
      */
     constructor: function(audiolet, frequency) {
-        AudioletNode.call(this, audiolet, 1, 1);
-        this.frequency = new AudioletParameter(this, 0, frequency || 440);
+        AudioletNode.call(this, audiolet, 1, 1, {
+            frequency: frequency
+        });
         this.phase = 0;
     },
 
@@ -4367,7 +4504,7 @@ var Saw = AudioletNode.extend({
      */
     generate: function() {
         var output = this.outputs[0];
-        var frequency = this.frequency.getValue();
+        var frequency = this.get('frequency');
         var sampleRate = this.audiolet.device.sampleRate;
 
         output.samples[0] = ((this.phase / 2 + 0.25) % 0.5 - 0.25) * 4;
@@ -4466,6 +4603,10 @@ var SoftClip = AudioletNode.extend({
  */
 var Square = AudioletNode.extend({
 
+    defaults: {
+        frequency: [0, 440]
+    },
+
     /**
      * Constructor
      *
@@ -4474,8 +4615,9 @@ var Square = AudioletNode.extend({
      * @param {Number} [frequency=440] Initial frequency.
      */
     constructor: function(audiolet, frequency) {
-        AudioletNode.call(this, audiolet, 1, 1);
-        this.frequency = new AudioletParameter(this, 0, frequency || 440);
+        AudioletNode.call(this, audiolet, 1, 1, {
+            frequency: frequency
+        });
         this.phase = 0;
     },
 
@@ -4485,7 +4627,7 @@ var Square = AudioletNode.extend({
     generate: function() {
         var output = this.outputs[0];
 
-        var frequency = this.frequency.getValue();
+        var frequency = this.get('frequency');
         var sampleRate = this.audiolet.device.sampleRate;
 
         output.samples[0] = this.phase > 0.5 ? 1 : -1;
@@ -4527,6 +4669,10 @@ var Square = AudioletNode.extend({
  */
 var Triangle = AudioletNode.extend({
 
+    defaults: {
+        frequency: [0, 440]
+    },
+
     /**
      * Constructor
      *
@@ -4535,8 +4681,9 @@ var Triangle = AudioletNode.extend({
      * @param {Number} [frequency=440] Initial frequency.
      */
     constructor: function(audiolet, frequency) {
-        AudioletNode.call(this, audiolet, 1, 1);
-        this.frequency = new AudioletParameter(this, 0, frequency || 440);
+        AudioletNode.call(this, audiolet, 1, 1, {
+            frequency: frequency
+        });
         this.phase = 0;
     },
 
@@ -4546,7 +4693,7 @@ var Triangle = AudioletNode.extend({
     generate: function() {
         var output = this.outputs[0];
 
-        var frequency = this.frequency.getValue();
+        var frequency = this.get('frequency');
         var sampleRate = this.audiolet.device.sampleRate;
 
         output.samples[0] = 1 - 4 * Math.abs((this.phase + 0.25) % 1 - 0.5);
@@ -4585,6 +4732,10 @@ var Triangle = AudioletNode.extend({
  */
 var TriggerControl = AudioletNode.extend({
 
+    defaults: {
+        trigger: [null, 0]
+    },
+
     /**
      * Constructor
      *
@@ -4593,17 +4744,18 @@ var TriggerControl = AudioletNode.extend({
      * @param {Number} [trigger=0] The initial trigger state.
      */
     constructor: function(audiolet, trigger) {
-        AudioletNode.call(this, audiolet, 0, 1);
-        this.trigger = new AudioletParameter(this, null, trigger || 0);
+        AudioletNode.call(this, audiolet, 0, 1, {
+            trigger: trigger
+        });
     },
 
     /**
      * Process samples
      */
     generate: function() {
-        if (this.trigger.getValue() > 0) {
+        if (this.get('trigger') > 0) {
             this.outputs[0].samples[0] = 1;
-            this.trigger.setValue(0);
+            this.set('trigger', 0);
         }
         else {
             this.outputs[0].samples[0] = 0;
@@ -4878,6 +5030,10 @@ var WhiteNoise = AudioletNode.extend({
  */
 var Add = AudioletNode.extend({
 
+    defaults: {
+        value: [1, 0]
+    },
+
     /**
      * Constructor
      *
@@ -4886,9 +5042,10 @@ var Add = AudioletNode.extend({
      * @param {Number} [value=0] The initial value to add.
      */
     constructor: function(audiolet, value) {
-        AudioletNode.call(this, audiolet, 2, 1);
+        AudioletNode.call(this, audiolet, 2, 1, {
+            value: value
+        });
         this.linkNumberOfOutputChannels(0, 0);
-        this.value = new AudioletParameter(this, 1, value || 0);
     },
 
     /**
@@ -4898,7 +5055,7 @@ var Add = AudioletNode.extend({
         var input = this.inputs[0];
         var output = this.outputs[0];
 
-        var value = this.value.getValue();
+        var value = this.get('value');
 
         var numberOfChannels = input.samples.length;
         for (var i = 0; i < numberOfChannels; i++) {
@@ -4938,6 +5095,10 @@ var Add = AudioletNode.extend({
  */
 var Divide = AudioletNode.extend({
 
+    defaults: {
+        value: [1, 1]
+    },
+
     /**
      * Constructor
      *
@@ -4946,9 +5107,10 @@ var Divide = AudioletNode.extend({
      * @param {Number} [value=1] The initial value to divide by.
      */
     constructor: function(audiolet, value) {
-        AudioletNode.call(this, audiolet, 2, 1);
+        AudioletNode.call(this, audiolet, 2, 1, {
+            value: value
+        });
         this.linkNumberOfOutputChannels(0, 0);
-        this.value = new AudioletParameter(this, 1, value || 1);
     },
 
     /**
@@ -4958,7 +5120,7 @@ var Divide = AudioletNode.extend({
         var input = this.inputs[0];
         var output = this.outputs[0];
 
-        var value = this.value.getValue();
+        var value = this.get('value');
 
         var numberOfChannels = input.samples.length;
         for (var i = 0; i < numberOfChannels; i++) {
@@ -4998,6 +5160,10 @@ var Divide = AudioletNode.extend({
  */
 var Modulo = AudioletNode.extend({
 
+    defaults: {
+        value: [1, 1]
+    },
+
     /**
      * Constructor
      *
@@ -5006,9 +5172,10 @@ var Modulo = AudioletNode.extend({
      * @param {Number} [value=1] The initial value to modulo by.
      */
     constructor: function(audiolet, value) {
-        AudioletNode.call(this, audiolet, 2, 1);
+        AudioletNode.call(this, audiolet, 2, 1, {
+            value: value
+        });
         this.linkNumberOfOutputChannels(0, 0);
-        this.value = new AudioletParameter(this, 1, value || 1);
     },
 
     /**
@@ -5018,7 +5185,7 @@ var Modulo = AudioletNode.extend({
         var input = this.inputs[0];
         var output = this.outputs[0];
 
-        var value = this.value.getValue();
+        var value = this.get('value');
 
         var numberOfChannels = input.samples.length;
         for (var i = 0; i < numberOfChannels; i++) {
@@ -5059,6 +5226,11 @@ var Modulo = AudioletNode.extend({
  * - add The value to add.  Linked to input 2.
  */
 var MulAdd = AudioletNode.extend({
+
+    defaults: {
+        mul: [1, 1],
+        add: [2, 0]
+    },
     
     /**
      * Constructor
@@ -5069,10 +5241,11 @@ var MulAdd = AudioletNode.extend({
      * @param {Number} [add=0] The initial value to add.
      */
     constructor: function(audiolet, mul, add) {
-        AudioletNode.call(this, audiolet, 3, 1);
+        AudioletNode.call(this, audiolet, 3, 1, {
+            mul: mul,
+            add: add
+        });
         this.linkNumberOfOutputChannels(0, 0);
-        this.mul = new AudioletParameter(this, 1, mul || 1);
-        this.add = new AudioletParameter(this, 2, add || 0);
     },
 
     /**
@@ -5082,8 +5255,8 @@ var MulAdd = AudioletNode.extend({
         var input = this.inputs[0];
         var output = this.outputs[0];
 
-        var mul = this.mul.getValue();
-        var add = this.add.getValue();
+        var mul = this.get('mul');
+        var add = this.get('add');
 
         var numberOfChannels = input.samples.length;
         for (var i = 0; i < numberOfChannels; i++) {
@@ -5174,6 +5347,10 @@ var Reciprocal = AudioletNode.extend({
  */
 var Subtract = AudioletNode.extend({
 
+    defaults: {
+        value: [1, 0]
+    },
+
     /**
      * Constructor
      *
@@ -5182,9 +5359,10 @@ var Subtract = AudioletNode.extend({
      * @param {Number} [value=0] The initial value to subtract.
      */
     constructor: function(audiolet, value) {
-        AudioletNode.call(this, audiolet, 2, 1);
+        AudioletNode.call(this, audiolet, 2, 1, {
+            value: value
+        });
         this.linkNumberOfOutputChannels(0, 0);
-        this.value = new AudioletParameter(this, 1, value || 0);
     },
 
     /**
@@ -5194,7 +5372,7 @@ var Subtract = AudioletNode.extend({
         var input = this.inputs[0];
         var output = this.outputs[0];
 
-        var value = this.value.getValue();
+        var value = this.get('value');
 
         var numberOfChannels = input.samples.length;
         for (var i = 0; i < numberOfChannels; i++) {

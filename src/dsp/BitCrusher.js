@@ -20,6 +20,10 @@
  */
 var BitCrusher = AudioletNode.extend({
 
+    defaults: {
+        bits: [1, null]
+    },
+
     /**
      * Constructor
      *
@@ -28,9 +32,10 @@ var BitCrusher = AudioletNode.extend({
      * @param {Number} bits The initial number of bits.
      */
     constructor: function(audiolet, bits) {
-        AudioletNode.call(this, audiolet, 2, 1);
+        AudioletNode.call(this, audiolet, 2, 1, {
+            bits: bits
+        });
         this.linkNumberOfOutputChannels(0, 0);
-        this.bits = new AudioletParameter(this, 1, bits);
     },
 
     /**
@@ -39,7 +44,7 @@ var BitCrusher = AudioletNode.extend({
     generate: function() {
         var input = this.inputs[0];
 
-        var maxValue = Math.pow(2, this.bits.getValue()) - 1;
+        var maxValue = Math.pow(2, this.get('bits')) - 1;
 
         var numberOfChannels = input.samples.length;
         for (var i = 0; i < numberOfChannels; i++) {

@@ -22,6 +22,11 @@
  */
 var CombFilter = AudioletNode.extend({
 
+    defaults: {
+        delayTime: [1, 1],
+        decayTime: [2, null]
+    },
+
     /**
      * Constructor
      *
@@ -32,11 +37,12 @@ var CombFilter = AudioletNode.extend({
      * @param {Number} decayTime The initial decay time.
      */
     constructor: function(audiolet, maximumDelayTime, delayTime, decayTime) {
-        AudioletNode.call(this, audiolet, 3, 1);
+        AudioletNode.call(this, audiolet, 3, 1, {
+            delayTime: delayTime,
+            decayTime: decayTime
+        });
         this.linkNumberOfOutputChannels(0, 0);
         this.maximumDelayTime = maximumDelayTime;
-        this.delayTime = new AudioletParameter(this, 1, delayTime || 1);
-        this.decayTime = new AudioletParameter(this, 2, decayTime);
         this.buffers = [];
         this.readWriteIndex = 0;
     },
@@ -50,8 +56,8 @@ var CombFilter = AudioletNode.extend({
 
         var sampleRate = this.audiolet.device.sampleRate;
 
-        var delayTime = this.delayTime.getValue() * sampleRate;
-        var decayTime = this.decayTime.getValue() * sampleRate;
+        var delayTime = this.get('delayTime') * sampleRate;
+        var decayTime = this.get('decayTime') * sampleRate;
         var feedback = Math.exp(-3 * delayTime / decayTime);
 
         var numberOfChannels = input.samples.length;

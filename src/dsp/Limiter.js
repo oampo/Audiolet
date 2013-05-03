@@ -24,6 +24,12 @@
  */
 var Limiter = AudioletNode.extend({
 
+    defaults: {
+        threshold: [1, 0.95],
+        attack: [2, 0.01],
+        release: [3, 0.4]
+    },
+
     /**
      * Constructor
      *
@@ -34,13 +40,12 @@ var Limiter = AudioletNode.extend({
      * @param {Number} [release=0.4] The initial release time.
      */
     constructor: function(audiolet, threshold, attack, release) {
-        AudioletNode.call(this, audiolet, 4, 1);
+        AudioletNode.call(this, audiolet, 4, 1, {
+            threshold: threshold,
+            attack: attack,
+            release: release
+        });
         this.linkNumberOfOutputChannels(0, 0);
-
-        // Parameters
-        this.threshold = new AudioletParameter(this, 1, threshold || 0.95);
-        this.attack = new AudioletParameter(this, 2, attack || 0.01);
-        this.release = new AudioletParameter(this, 2, release || 0.4);
 
         this.followers = [];
     },
@@ -55,12 +60,12 @@ var Limiter = AudioletNode.extend({
         var sampleRate = this.audiolet.device.sampleRate;
 
         // Local processing variables
-        var attack = Math.pow(0.01, 1 / (this.attack.getValue() *
+        var attack = Math.pow(0.01, 1 / (this.get('attack') *
                                          sampleRate));
-        var release = Math.pow(0.01, 1 / (this.release.getValue() *
+        var release = Math.pow(0.01, 1 / (this.get('release') *
                                           sampleRate));
 
-        var threshold = this.threshold.getValue();
+        var threshold = this.get('threshold');
 
         var numberOfChannels = input.samples.length;
         for (var i = 0; i < numberOfChannels; i++) {

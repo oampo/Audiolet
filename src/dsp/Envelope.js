@@ -21,6 +21,10 @@
  */
 var Envelope = AudioletNode.extend({
 
+    defaults: {
+        gate: [0, 1]
+    },
+
     /**
      * Constructor
      *
@@ -34,8 +38,9 @@ var Envelope = AudioletNode.extend({
      */
     constructor: function(audiolet, gate, levels, times, releaseStage,
                         onComplete) {
-        AudioletNode.call(this, audiolet, 1, 1);
-        this.gate = new AudioletParameter(this, 0, gate || 1);
+        AudioletNode.call(this, audiolet, 1, 1, {
+            gate: gate
+        });
 
         this.levels = [];
         for (var i=0; i<levels.length; i++) {
@@ -63,7 +68,7 @@ var Envelope = AudioletNode.extend({
      * Process samples
      */
     generate: function() {
-        var gate = this.gate.getValue();
+        var gate = this.get('gate');
 
         var stageChanged = false;
 

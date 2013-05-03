@@ -11,7 +11,7 @@ function testLag() {
     lag.connect(recorder);
 
     // Check that we move continuously from 5 to 0
-    lag.value.setValue(0);
+    lag.set('value', 0);
     for (var i=0; i<audiolet.device.sampleRate; i++) {
         lag.tick();
         recorder.tick();

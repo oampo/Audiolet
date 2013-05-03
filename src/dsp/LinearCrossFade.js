@@ -22,6 +22,10 @@
  */
 var LinearCrossFade = AudioletNode.extend({
 
+    defaults: {
+        position: [2, 0.5]
+    },
+
     /**
      * Constructor
      *
@@ -30,9 +34,10 @@ var LinearCrossFade = AudioletNode.extend({
      * @param {Number} [position=0.5] The initial fade position.
      */
     constructor: function(audiolet, position) {
-        AudioletNode.call(this, audiolet, 3, 1);
+        AudioletNode.call(this, audiolet, 3, 1, {
+            position: position
+        });
         this.linkNumberOfOutputChannels(0, 0);
-        this.position = new AudioletParameter(this, 2, position || 0.5);
     },
 
     /**
@@ -43,7 +48,7 @@ var LinearCrossFade = AudioletNode.extend({
         var inputB = this.inputs[1];
         var output = this.outputs[0];
 
-        var position = this.position.getValue();
+        var position = this.get('position');
 
         var gainA = 1 - position;
         var gainB = position;

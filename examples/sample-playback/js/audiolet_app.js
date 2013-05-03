@@ -39,8 +39,8 @@ function playExample() {
                 var position = barStartPosition / 4 + positionInBar / 16;
                 // Scale position 0->length
                 position *= this.amen.length;
-                this.player.startPosition.setValue(position);
-                this.restartTrigger.trigger.setValue(1);
+                this.player.set('startPosition', position);
+                this.restartTrigger.set('trigger', 1);
             }.bind(this)
         );
     }

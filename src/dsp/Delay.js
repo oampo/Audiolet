@@ -20,6 +20,10 @@
  */
 var Delay = AudioletNode.extend({
 
+    defaults: {
+        delayTime: [1, 1]
+    },
+
     /**
      * Constructor
      *
@@ -29,10 +33,11 @@ var Delay = AudioletNode.extend({
      * @param {Number} delayTime The initial delay time.
      */
     constructor: function(audiolet, maximumDelayTime, delayTime) {
-        AudioletNode.call(this, audiolet, 2, 1);
+        AudioletNode.call(this, audiolet, 2, 1, {
+            delayTime: delayTime
+        });
         this.linkNumberOfOutputChannels(0, 0);
         this.maximumDelayTime = maximumDelayTime;
-        this.delayTime = new AudioletParameter(this, 1, delayTime || 1);
         var bufferSize = maximumDelayTime * this.audiolet.device.sampleRate;
         this.buffers = [];
         this.readWriteIndex = 0;
@@ -47,7 +52,7 @@ var Delay = AudioletNode.extend({
 
         var sampleRate = this.audiolet.device.sampleRate;
 
-        var delayTime = this.delayTime.getValue() * sampleRate;
+        var delayTime = this.get('delayTime') * sampleRate;
 
         var numberOfChannels = input.samples.length;
 

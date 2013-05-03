@@ -21,6 +21,11 @@
  * - add The value to add.  Linked to input 2.
  */
 var MulAdd = AudioletNode.extend({
+
+    defaults: {
+        mul: [1, 1],
+        add: [2, 0]
+    },
     
     /**
      * Constructor
@@ -31,10 +36,11 @@ var MulAdd = AudioletNode.extend({
      * @param {Number} [add=0] The initial value to add.
      */
     constructor: function(audiolet, mul, add) {
-        AudioletNode.call(this, audiolet, 3, 1);
+        AudioletNode.call(this, audiolet, 3, 1, {
+            mul: mul,
+            add: add
+        });
         this.linkNumberOfOutputChannels(0, 0);
-        this.mul = new AudioletParameter(this, 1, mul || 1);
-        this.add = new AudioletParameter(this, 2, add || 0);
     },
 
     /**
@@ -44,8 +50,8 @@ var MulAdd = AudioletNode.extend({
         var input = this.inputs[0];
         var output = this.outputs[0];
 
-        var mul = this.mul.getValue();
-        var add = this.add.getValue();
+        var mul = this.get('mul');
+        var add = this.get('add');
 
         var numberOfChannels = input.samples.length;
         for (var i = 0; i < numberOfChannels; i++) {

@@ -23,32 +23,37 @@
  */
 var ParameterNode = AudioletNode.extend({
 
-  /**
-   * Constructor
-   *
-   * @extends AudioletNode
-   * @param {Audiolet} audiolet The audiolet object.
-   * @param {Number} value The initial static value of the parameter.
-   */
-  constructor: function(audiolet, value) {
-      AudioletNode.call(this, audiolet, 1, 1);
-      this.parameter = new AudioletParameter(this, 0, value);
-  },
+    defaults: {
+        parameter: [0, null]
+    },
 
-  /**
-   * Process samples
-   */
-  generate: function() {
-      this.outputs[0].samples[0] = this.parameter.getValue();
-  },
+    /**
+     * Constructor
+     *
+     * @extends AudioletNode
+     * @param {Audiolet} audiolet The audiolet object.
+     * @param {Number} value The initial static value of the parameter.
+     */
+    constructor: function(audiolet, value) {
+        AudioletNode.call(this, audiolet, 1, 1, {
+            value: value
+        });
+    },
 
-  /**
-   * toString
-   *
-   * @return {String} String representation.
-   */
-  toString:function() {
-      return 'Parameter Node';
-  }
+    /**
+     * Process samples
+     */
+    generate: function() {
+        this.outputs[0].samples[0] = this.get('parameter');
+    },
+
+    /**
+     * toString
+     *
+     * @return {String} String representation.
+     */
+    toString:function() {
+        return 'Parameter Node';
+    }
 
 });

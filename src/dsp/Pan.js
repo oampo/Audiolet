@@ -21,6 +21,10 @@
  */
 var Pan = AudioletNode.extend({
 
+    defaults: {
+        pan: [1, 0.5]
+    },
+
     /**
      * Constructor
      *
@@ -29,13 +33,11 @@ var Pan = AudioletNode.extend({
      * @param {Number} [pan=0.5] The initial pan position.
      */
     constructor: function(audiolet, pan) {
-        AudioletNode.call(this, audiolet, 2, 1);
+        AudioletNode.call(this, audiolet, 2, 1, {
+            pan: pan
+        });
         // Hardcode two output channels
         this.setNumberOfOutputChannels(0, 2);
-        if (pan == null) {
-            var pan = 0.5;
-        }
-        this.pan = new AudioletParameter(this, 1, pan);
     },
 
     /**
@@ -45,7 +47,7 @@ var Pan = AudioletNode.extend({
         var input = this.inputs[0];
         var output = this.outputs[0];
 
-        var pan = this.pan.getValue();
+        var pan = this.get('pan');
 
         var value = input.samples[0] || 0;
         var scaledPan = pan * Math.PI / 2;

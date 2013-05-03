@@ -21,18 +21,24 @@
  */
 var Lag = AudioletNode.extend({
 
-  /**
-   * Constructor
-   *
-   * @extends AudioletNode
-   * @param {Audiolet} audiolet The audiolet object.
-   * @param {Number} [value=0] The initial value.
-   * @param {Number} [lagTime=1] The initial lag time.
-   */
-    constructor: function(audiolet, value, lagTime) {
-        AudioletNode.call(this, audiolet, 2, 1);
-        this.value = new AudioletParameter(this, 0, value || 0);
-        this.lag = new AudioletParameter(this, 1, lagTime || 1);
+    defaults: {
+        value: [0, 0],
+        lag: [1, 1]
+    },
+
+    /**
+     * Constructor
+     *
+     * @extends AudioletNode
+     * @param {Audiolet} audiolet The audiolet object.
+      * @param {Number} [value=0] The initial value.
+     * @param {Number} [lag=1] The initial lag time.
+     */
+    constructor: function(audiolet, value, lag) {
+        AudioletNode.call(this, audiolet, 2, 1, {
+            value: value,
+            lag: lag
+        });
         this.lastValue = 0;
 
         this.log001 = Math.log(0.001);
@@ -47,8 +53,8 @@ var Lag = AudioletNode.extend({
 
         var sampleRate = this.audiolet.device.sampleRate;
 
-        var value = this.value.getValue();
-        var lag = this.lag.getValue();
+        var value = this.get('value');
+        var lag = this.get('lag');
         var coefficient = Math.exp(this.log001 / (lag * sampleRate));
 
         var outputValue = ((1 - coefficient) * value) +

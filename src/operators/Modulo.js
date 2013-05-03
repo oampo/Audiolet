@@ -20,6 +20,10 @@
  */
 var Modulo = AudioletNode.extend({
 
+    defaults: {
+        value: [1, 1]
+    },
+
     /**
      * Constructor
      *
@@ -28,9 +32,10 @@ var Modulo = AudioletNode.extend({
      * @param {Number} [value=1] The initial value to modulo by.
      */
     constructor: function(audiolet, value) {
-        AudioletNode.call(this, audiolet, 2, 1);
+        AudioletNode.call(this, audiolet, 2, 1, {
+            value: value
+        });
         this.linkNumberOfOutputChannels(0, 0);
-        this.value = new AudioletParameter(this, 1, value || 1);
     },
 
     /**
@@ -40,7 +45,7 @@ var Modulo = AudioletNode.extend({
         var input = this.inputs[0];
         var output = this.outputs[0];
 
-        var value = this.value.getValue();
+        var value = this.get('value');
 
         var numberOfChannels = input.samples.length;
         for (var i = 0; i < numberOfChannels; i++) {

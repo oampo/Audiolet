@@ -29,6 +29,12 @@
  */
 var Reverb = AudioletNode.extend({
 
+    defaults: {
+        mix: [1, null],
+        roomSize: [2, null],
+        damping: [3, null]
+    },
+
     /**
      * Constructor
      *
@@ -39,7 +45,6 @@ var Reverb = AudioletNode.extend({
      * @param {Number} [damping=0.5] The initial damping amount.
      */
     constructor: function(audiolet, mix, roomSize, damping) {
-        AudioletNode.call(this, audiolet, 4, 1);
 
         // Constants
         this.initialMix = 0.33;
@@ -50,22 +55,20 @@ var Reverb = AudioletNode.extend({
         this.scaleRoom = 0.28;
         this.offsetRoom = 0.7;
 
-        // Parameters: for 44.1k or 48k
+        // defaults: for 44.1k or 48k
         this.combTuning = [1116, 1188, 1277, 1356, 1422, 1491, 1557, 1617];
         this.allPassTuning = [556, 441, 341, 225];
 
         // Controls
-        // Mix control
-        var mix = mix || this.initialMix;
-        this.mix = new AudioletParameter(this, 1, mix);
+        mix = mix || this.initialMixl
+        roomSize = roomSize || this.initialRoomSize;
+        damping = damping || this.initialDamping;
 
-        // Room size control
-        var roomSize = roomSize || this.initialRoomSize;
-        this.roomSize = new AudioletParameter(this, 2, roomSize);
-
-        // Damping control
-        var damping = damping || this.initialDamping;
-        this.damping = new AudioletParameter(this, 3, damping);
+        AudioletNode.call(this, audiolet, 4, 1, {
+            mix: mix,
+            roomSize: roomSize,
+            damping: damping
+        });
 
         // Damped comb filters
         this.combBuffers = [];
@@ -94,9 +97,9 @@ var Reverb = AudioletNode.extend({
      * Process samples
      */
     generate: function() {
-        var mix = this.mix.getValue();
-        var roomSize = this.roomSize.getValue();
-        var damping = this.damping.getValue();
+        var mix = this.get('mix');
+        var roomSize = this.get('roomSize');
+        var damping = this.get('damping');
 
         var numberOfCombs = this.combTuning.length;
         var numberOfFilters = this.allPassTuning.length;

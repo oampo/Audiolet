@@ -12,17 +12,16 @@
  */
 var AudioletNode = AudioletClass.extend({
 
-
     /**
      * Constructor
      *
      * @param {Audiolet} audiolet The audiolet object.
      * @param {Number} numberOfInputs The number of inputs.
      * @param {Number} numberOfOutputs The number of outputs.
-     * @param {Function} [generate] A replacement for the generate function.
+     * @param {Object} parameters Overridden parameter values.
      */
     constructor: function(audiolet, numberOfInputs, numberOfOutputs,
-                            generate) {
+                            parameters) {
         AudioletClass.call(this);
         this.audiolet = audiolet;
 
@@ -36,8 +35,38 @@ var AudioletNode = AudioletClass.extend({
             this.outputs.push(new AudioletOutput(this, i));
         }
 
-        if (generate) {
-            this.generate = generate;
+        // for each parameter defined in `parameters`, create a
+        // new `AudioletParameter` and assign it as a property of the node.
+        // typically, `get and `set` should be used to access these parameters.
+        var defaults = this.defaults || {};
+        this.parameters = {};
+        for (var name in defaults) {
+            var default_input = defaults[name][0],
+                ctor_val = parameters[name],
+                val = (ctor_val || ctor_val === 0)? ctor_val: defaults[name][1];
+            this.parameters[name] = new AudioletParameter(this, default_input,
+                val);
+        }
+    },
+
+    /**
+     * Get a node parameter value by key.
+     */
+    get: function(key) {
+        return this.parameters[key].getValue();
+    },
+
+    /**
+     * Set a node parameter value by key(s).
+     */
+    set: function(key, val) {
+        var params = key;
+        if (typeof key == 'string') {
+            params = {};
+            params[key] = val;
+        }
+        for (var param in params) {
+            this.parameters[param].setValue(params[param]);
         }
     },
 
