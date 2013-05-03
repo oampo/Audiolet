@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Audiolet - Sine</title>
+    <!-- Production -->
+    <!--
+    <script src="../../src/audiolet/Audiolet.min.js"></script>
+    -->
+
+    <!-- Development -->
+    <script src="../../src/audiolet/Audiolet.js"></script>
+
+    <!-- Common -->
+    <script src="js/parameter-events.js"></script>
+    <link rel="stylesheet" href="../support/main.css" />
+    <link href='http://fonts.googleapis.com/css?family=Lato:400,700|Inconsolata' rel='stylesheet' type='text/css'>
+  </head>
+  <body>
+    <div id="wrap">
+      <header>
+        <h1>Audiolet - Parameter Events Example</h1>
+      </header>
+      <section id="abstract">
+        <p>A method for listening to changes to an AudioletParameter.</p>
+      </section>
+      <section id="play">
+        <button type="button" onclick="playExample()">&#9654; Play Example</button>
+      </section>
+      <section class="code-block">
+        <pre><h2>js/parameter-events.js</h2>
+          <code>
+function playExample() {
+
+    var audiolet = new Audiolet();
+    var sine = new Sine(audiolet);
+    var notePattern = new PSequence([440, 330, 220], Infinity);
+
+    sine.on('change:frequency', function(frequency) {
+      console.log('frequency changed', frequency);
+    });
+
+    audiolet.scheduler.play([notePattern], 1, function(note) {
+      sine.set('frequency', note);
+    }.bind(this));
+
+    sine.connect(audiolet.output);
+
+    /*
+
+    alternatively, you could do something like this:
+
+    sine.parameters.frequency.on('change', function(frequency) {
+      console.log('frequency changed', frequency);
+    });
+
+    */
+
+};</code></pre>
+      </section>
+    </div>
+    <footer>
+        &copy; 2011 <a href="http://oampo.github.com/Audiolet/" target="_blank">Audiolet</a> &mdash; Code Highlighting by <a href="https://github.com/cloudhead/hijs" target="_blank">hijs</a>
+      </footer>
+    <script src="../support/hijs.js" type="text/javascript" charset="utf-8"></script>
+  </body>
+</html>

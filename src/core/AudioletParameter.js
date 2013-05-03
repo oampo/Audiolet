@@ -1,5 +1,5 @@
 /*!
- * @depends AudioletClass.js
+ * @depends EventEmitter.js
  */
 
 /**
@@ -10,7 +10,7 @@
  * prioritised over the stored static value.  If no node is connected then the
  * static value should be used.
  */
-var AudioletParameter = AudioletClass.extend({
+var AudioletParameter = EventEmitter.extend({
 
     /**
      * Constructor
@@ -20,7 +20,7 @@ var AudioletParameter = AudioletClass.extend({
      * @param {Number} [value=0] The initial static value to store.
      */
     constructor: function(node, inputIndex, value) {
-        AudioletClass.call(this);
+        EventEmitter.call(this);
         this.node = node;
         if (typeof inputIndex != 'undefined' && inputIndex != null) {
             this.input = node.inputs[inputIndex];
@@ -56,6 +56,7 @@ var AudioletParameter = AudioletClass.extend({
      */
     setValue: function(value) {
         this.value = value;
+        this.trigger('change', value);
     },
 
     /**
