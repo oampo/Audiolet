@@ -1049,7 +1049,7 @@ AudioletDevice.prototype.tick = function(buffer, numberOfChannels) {
             for (var j = this.nodes.length - 1; j > 0; j--) {
                 this.nodes[j].tick();
             }
-            // Cut down tick to just sum the input samples 
+            // Cut down tick to just sum the input samples
             this.createInputSamples();
 
             for (var j = 0; j < numberOfChannels; j++) {
@@ -1091,7 +1091,7 @@ AudioletDevice.prototype.pause = function() {
  * Restart the output stream.
  */
 AudioletDevice.prototype.play = function() {
-   this.paused = false; 
+   this.paused = false;
 };
 
 /**
@@ -2685,7 +2685,7 @@ BufferPlayer.prototype.generate = function() {
         var inputChannel = this.buffer.getChannelData(i);
         output.samples[i] = inputChannel[Math.floor(this.position)];
     }
-    
+
     this.position += playbackRate;
 
     if (this.position >= this.buffer.length) {
@@ -3728,7 +3728,7 @@ IFFT.prototype.transform = function() {
         this.reverseReal[i] = this.realBuffer[this.reverseTable[i]];
         this.reverseImaginary[i] = this.imaginaryBuffer[this.reverseTable[i]];
     }
- 
+
     this.realBuffer.set(this.reverseReal);
     this.imaginaryBuffer.set(this.reverseImaginary);
 
@@ -3928,7 +3928,7 @@ Limiter.prototype.generate = function() {
         else {
             follower = release * (follower - absValue) + absValue;
         }
-        
+
         var diff = follower - threshold;
         if (diff > 0) {
             output.samples[i] = value / (1 + diff);
@@ -4745,7 +4745,7 @@ var WebKitBufferPlayer = function(audiolet, onComplete) {
 
     // Until we are loaded, output no channels.
     this.setNumberOfOutputChannels(0, 0);
-    
+
     if (!this.isWebKit) {
         return;
     }
@@ -4789,7 +4789,7 @@ WebKitBufferPlayer.prototype.stop = function() {
     this.endTime = null;
 
     this.setNumberOfOutputChannels(0);
-   
+
     this.disconnectWebKitNodes();
 };
 
@@ -5281,7 +5281,7 @@ Tanh.prototype.generate = function() {
         var value = input.samples[i];
         output.samples[i] = (Math.exp(value) - Math.exp(-value)) /
                             (Math.exp(value) + Math.exp(-value));
-    } 
+    }
 };
 
 /**
@@ -6272,7 +6272,7 @@ void function (prefixes, urlPrefixes) {
 		var b, a = prefixes.slice();
 
 		for (b=a.shift(); typeof b !== 'undefined'; b=a.shift()) {
-			b = Function('return typeof ' + b + name + 
+			b = Function('return typeof ' + b + name +
 				'=== "undefined" ? undefined : ' +
 				b + name)();
 
@@ -6619,7 +6619,7 @@ void function (Sink) {
 Sink.sinks('dummy', function () {
 	var	self = this;
 	self.start.apply(self, arguments);
-	
+
 	function bufferFill () {
 		var	soundData = new Float32Array(self.bufferSize * self.channelCount);
 		self.process(soundData, self.channelCount);
@@ -6664,7 +6664,7 @@ sinks('wav', function () {
 		zeroData		= new Float32Array(self.bufferSize * self.channelCount);
 
 	if (!newAudio().canPlayType('audio/wav; codecs=1') || !btoa) throw 0;
-	
+
 	function bufferFill () {
 		if (self._audio.hasNextFrame) return;
 
@@ -6684,7 +6684,7 @@ sinks('wav', function () {
 
 		if (!self._audio.currentFrame.src) self._audio.nextClip();
 	}
-	
+
 	self.kill		= Sink.doInterval(bufferFill, 40);
 	self._bufferFill	= bufferFill;
 	self._audio		= audio;
@@ -6751,7 +6751,7 @@ sinks('webaudio', function (readFn, channelCount, bufferSize, sampleRate) {
 		soundData	= null,
 		zeroBuffer	= null;
 	self.start.apply(self, arguments);
-	node = context.createJavaScriptNode(self.bufferSize, self.channelCount, self.channelCount);
+    node = context.createScriptProcessor(self.bufferSize, self.channelCount, self.channelCount);
 
 	function bufferFill(e) {
 		var	outputBuffer	= e.outputBuffer,
@@ -6762,7 +6762,7 @@ sinks('webaudio', function (readFn, channelCount, bufferSize, sampleRate) {
 			tail;
 
 		self.ready();
-		
+
 		soundData	= soundData && soundData.length === l * channelCount ? soundData : new Float32Array(l * channelCount);
 		zeroBuffer	= zeroBuffer && zeroBuffer.length === soundData.length ? zeroBuffer : new Float32Array(l * channelCount);
 		soundData.set(zeroBuffer);
@@ -6886,7 +6886,7 @@ Sink.sinks('worker', function () {
 			size		= outputBuffer.size,
 			channels	= new Array(channelCount),
 			tail;
-		
+
 		soundData	= soundData && soundData.length === l * channelCount ? soundData : new Float32Array(l * channelCount);
 		zeroBuffer	= zeroBuffer && zeroBuffer.length === soundData.length ? zeroBuffer : new Float32Array(l * channelCount);
 		soundData.set(zeroBuffer);
@@ -7490,7 +7490,7 @@ proto.writeBuffersAsync = function (buffer) {
 			bufLength	= buf.b.length;
 			offset		= buf.d;
 			buf.d		-= Math.min(offset, l);
-			
+
 			for (n=0; n + offset < l && n < bufLength; n++) {
 				buffer[n + offset] += buf.b[n];
 			}
