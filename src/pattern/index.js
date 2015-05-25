@@ -1,0 +1,9 @@
+exports.Arithmetic = require('./arithmetic');
+exports.Choose = require('./choose');
+exports.Geometric = require('./geometric');
+exports.Pattern = require('./pattern');
+exports.Proxy = require('./proxy');
+exports.Random = require('./random');
+exports.Sequence= require('./sequence');
+exports.Series = require('./series');
+exports.Shuffle = require('./shuffle');

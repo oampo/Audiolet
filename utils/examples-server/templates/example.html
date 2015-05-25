@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<script src="{{ audiolet }}"></script>
+<script src="{{ src }}"></script>
+<script>
+$(document).ready(function() {
+    $('code').load('{{ src }}', function() {
+        Prism.highlightElement($('code')[0]);
+    });
+});
+</script>
+{% endblock %}
+
+{% block content %}
+<pre><code class="language-javascript"></code></pre>
+{% endblock %}
+

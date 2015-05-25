@@ -1,8 +1,0 @@
-#! /bin/bash
-if [ ! -f sink.js/sink.js ];
-then
-    cd sink.js
-    make
-    cd ../
-fi
-juicer merge core/*.js operators/*.js dsp/*.js pattern/*.js scale/*.js tuning/*.js sink.js/*.js -f -s -o audiolet/Audiolet.min.js
